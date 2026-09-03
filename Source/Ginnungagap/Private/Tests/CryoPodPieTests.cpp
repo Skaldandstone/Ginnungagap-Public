@@ -11,6 +11,7 @@
 #include "Materials/MaterialInterface.h"
 
 #include "Ship/CryoPodSystem.h"
+#include "LevelSetup/QuickDemoOpeningSequence.h"
 
 /**
  * The cryo bay, which is the first thing anyone sees of this game.
@@ -183,6 +184,42 @@ bool FAssertCryoPods::Update()
 	return true;
 }
 
+/**
+ * The demo map now opens on the player asleep in a shut pod: the opening sequence strikes the ship,
+ * wakes them and climbs them out, and only then does the bay tell the story the assertions below
+ * expect (one lid open, the sleeper's). Waits for that sequence to report complete, or for a map
+ * without one, before asserting; gives up after a bounded time so a stalled opening fails here
+ * rather than hanging the runner.
+ */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForCryoOpening, FAutomationTestBase*, Test);
+
+bool FWaitForCryoOpening::Update()
+{
+	UWorld* World = CryoPie::FindPieWorld();
+	if (!World)
+	{
+		return false;
+	}
+	AQuickDemoOpeningSequence* Opening = nullptr;
+	for (TActorIterator<AQuickDemoOpeningSequence> It(World); It; ++It)
+	{
+		Opening = *It;
+		break;
+	}
+	const bool bDone = !Opening || Opening->IsComplete();
+	const bool bExpired = World->GetTimeSeconds() > 25.0f;
+	if (!bDone && !bExpired)
+	{
+		return false;
+	}
+	if (!bDone)
+	{
+		Test->AddError(FString::Printf(TEXT("The opening sequence did not complete in 25s (phase %d)"),
+			static_cast<int32>(Opening->GetPhase())));
+	}
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGinnungagapCryoPodPieTest,
 	"Ginnungagap.Smoke.CryoPods",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -191,7 +228,8 @@ bool FGinnungagapCryoPodPieTest::RunTest(const FString& Parameters)
 {
 	AutomationOpenMap(TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck"));
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
-	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.5f));
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitForCryoOpening(this));
+	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(0.5f));
 	ADD_LATENT_AUTOMATION_COMMAND(FAssertCryoPods(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 
