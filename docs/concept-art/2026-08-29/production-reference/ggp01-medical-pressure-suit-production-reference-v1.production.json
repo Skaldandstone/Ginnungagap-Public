@@ -1,0 +1,388 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.Medical.ReferenceV1",
+  "title": "GGP-01 Medical Pressure Suit",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "owners": [
+    "character-art",
+    "technical-art",
+    "animation",
+    "gameplay",
+    "vfx"
+  ],
+  "metadata": {
+    "canonical_enum": "EPressureSuitRole::Medical",
+    "display_name": "Medical",
+    "class_purpose": "Triage, treatment, stabilization, suit patching, and casualty extraction."
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-medical-pressure-suit-production-reference-v1.png",
+    "sha256": "b97909ff0f04fec5389e41d6d039161499f03ffdc6a9d8e3dd04f179219bedb3",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Medical kit modules remain removable and retain the shared V25 pressure envelope."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+      "role": "strict base suit authority",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/suits/player-suit-role-lineup.png",
+      "role": "medical palette and equipment density",
+      "required": true
+    },
+    {
+      "path": "Art/Characters/PlayerSuits/PrimaryOversuits/Previews_v23/PlayerOversuit_Medical_v23_Front.png",
+      "role": "legacy module placement evidence",
+      "required": true
+    },
+    {
+      "path": "docs/PlayerSuitAssets.md",
+      "role": "medical module contract",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "role",
+        "value": "Medical",
+        "source": "EPressureSuitRole"
+      },
+      {
+        "field": "modules",
+        "value": [
+          "telemetry_module",
+          "patient_monitor",
+          "injector_bank",
+          "sterile_pack",
+          "trauma_case_l",
+          "trauma_case_r",
+          "rescue_tether",
+          "medical_utility_pouch"
+        ],
+        "source": "source sheet and PlayerSuitAssets.md"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "medical_accent",
+        "value": "off-white modules with restrained red medical markings",
+        "source": "role lineup"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "parts": [
+      {
+        "id": "base_suit",
+        "type": "inherit",
+        "source": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2"
+      },
+      {
+        "id": "telemetry_module",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "patient_monitor",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "injector_bank",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "sterile_pack",
+        "type": "sealed_removable"
+      },
+      {
+        "id": "trauma_case_l",
+        "type": "one_hand_open"
+      },
+      {
+        "id": "trauma_case_r",
+        "type": "one_hand_open"
+      },
+      {
+        "id": "rescue_tether",
+        "type": "retractable_line"
+      },
+      {
+        "id": "medical_utility_pouch",
+        "type": "removable_tool_set"
+      }
+    ],
+    "materials": [
+      {
+        "id": "medical_modules",
+        "channels": [
+          "base_color",
+          "normal",
+          "ORM",
+          "medical_id",
+          "contamination"
+        ]
+      },
+      {
+        "id": "patient_display",
+        "channels": [
+          "emissive",
+          "vitals",
+          "alert"
+        ]
+      },
+      {
+        "id": "sterile_surfaces",
+        "channels": [
+          "cleanliness",
+          "bio_contamination",
+          "damage"
+        ]
+      }
+    ],
+    "sockets": [
+      {
+        "name": "SOCKET_TELEMETRY"
+      },
+      {
+        "name": "SOCKET_PATIENT_MONITOR"
+      },
+      {
+        "name": "SOCKET_INJECTOR_BANK"
+      },
+      {
+        "name": "SOCKET_STERILE_PACK"
+      },
+      {
+        "name": "SOCKET_TRAUMA_CASE_L"
+      },
+      {
+        "name": "SOCKET_TRAUMA_CASE_R"
+      },
+      {
+        "name": "SOCKET_RESCUE_TETHER"
+      },
+      {
+        "name": "SOCKET_MEDICAL_UTILITY"
+      },
+      {
+        "name": "ANCHOR_PATIENT_CONTACT"
+      }
+    ],
+    "states": [
+      {
+        "id": "stowed"
+      },
+      {
+        "id": "patient_scan"
+      },
+      {
+        "id": "inject"
+      },
+      {
+        "id": "airway_stabilize"
+      },
+      {
+        "id": "suit_patch"
+      },
+      {
+        "id": "casualty_carry"
+      },
+      {
+        "id": "casualty_drag"
+      },
+      {
+        "id": "zero_g_rescue"
+      }
+    ],
+    "blender": {
+      "root_collection": "PR_GGP01_Suit_Medical",
+      "module_collection": "KIT_Medical",
+      "shared_base_link": "PR_GGP01_SharedPressureSuit_V2"
+    },
+    "unreal": {
+      "asset_type": "Modular SkeletalMesh and StaticMesh kit",
+      "destination_root": "/Game/Characters/Player/Suit/Roles/Medical",
+      "role_enum": "Medical"
+    },
+    "rig": {
+      "requirements": [
+        {
+          "id": "MED-RIG-001",
+          "requirement": "Medical modules remain accessible and clear the shared suit on all nine body profiles."
+        },
+        {
+          "id": "MED-RIG-002",
+          "requirement": "One hand can maintain patient contact while the other uses a tool or glove anchor."
+        },
+        {
+          "id": "MED-RIG-003",
+          "requirement": "Casualty carry and drag use named patient and rescuer IK targets."
+        }
+      ]
+    },
+    "animation": {
+      "clips": [
+        "scan_patient",
+        "inject_treatment",
+        "stabilize_airway",
+        "patch_suit",
+        "casualty_carry",
+        "casualty_drag",
+        "zero_g_rescue_anchor",
+        "vent_crawl_medical_pack_secured"
+      ],
+      "requirements": [
+        {
+          "id": "MED-AN-001",
+          "requirement": "Patient actions support first and third person, network ownership, body-size offsets, and constrained-space cancellation."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "patient_vitals",
+          "attachment": "SOCKET_PATIENT_MONITOR"
+        },
+        {
+          "id": "injector_status",
+          "attachment": "SOCKET_INJECTOR_BANK"
+        },
+        {
+          "id": "sterility_contamination",
+          "attachment": "medical_modules"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "MED-VFX-001",
+          "requirement": "Triage colors identify patient state and must not conflict with role or Bloom-warning semantics."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {
+          "id": "hose_left",
+          "inherit": "SP_Hose_Left"
+        },
+        {
+          "id": "hose_right",
+          "inherit": "SP_Hose_Right"
+        },
+        {
+          "id": "rescue_tether",
+          "root_socket": "SOCKET_RESCUE_TETHER",
+          "end_socket": "runtime_patient_or_anchor",
+          "optional": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "MED-SP-001",
+          "requirement": "Rescue tether exposes slack, collision, reel, detach, and network authority controls independent of life-support hoses."
+        }
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "beauty"
+        },
+        {
+          "id": "base_suit_id"
+        },
+        {
+          "id": "medical_module_id"
+        },
+        {
+          "id": "patient_display"
+        },
+        {
+          "id": "sterility"
+        },
+        {
+          "id": "contamination"
+        },
+        {
+          "id": "velocity"
+        },
+        {
+          "id": "tether"
+        }
+      ],
+      "channels": [
+        {
+          "name": "vertex_r",
+          "usage": "wear"
+        },
+        {
+          "name": "vertex_g",
+          "usage": "sterility"
+        },
+        {
+          "name": "vertex_b",
+          "usage": "bio_contamination"
+        },
+        {
+          "name": "vertex_a",
+          "usage": "damage"
+        }
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {
+          "id": "MED-IMP-001",
+          "requirement": "Medical is the runtime, UI, save, and replicated role name."
+        },
+        {
+          "id": "MED-IMP-002",
+          "requirement": "Medical pack and trauma cases remain inside the crawl and squeeze envelope when stowed."
+        },
+        {
+          "id": "MED-IMP-003",
+          "requirement": "Test treatment, carry, drag, and zero-g rescue on all nine rescuer profiles and representative casualty profiles."
+        }
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "MED-001",
+      "status": "pending",
+      "requirement": "All medical modules attach to named sockets without changing the shared base silhouette."
+    },
+    {
+      "id": "MED-002",
+      "status": "pending",
+      "requirement": "Patient contact, tools, carry, drag, tether, crawl, and squeeze pass first and third person QA."
+    },
+    {
+      "id": "MED-003",
+      "status": "pending",
+      "requirement": "Sterility and contamination masks survive all LODs and material instances."
+    }
+  ],
+  "build_questions": [
+    "Confirm casualty root-motion ownership and rescue-tether breakaway behavior in multiplayer."
+  ]
+}

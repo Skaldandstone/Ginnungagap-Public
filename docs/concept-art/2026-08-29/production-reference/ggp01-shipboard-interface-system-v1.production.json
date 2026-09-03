@@ -1,0 +1,72 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.UI.Shipboard.InterfaceSystem.ReferenceV1",
+  "title": "GGP-01 Shipboard Interface System",
+  "category": "ui-system",
+  "status": "ready-for-graybox",
+  "production_ready": false,
+  "owners": ["ui", "ux", "gameplay", "environment-art", "accessibility"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-shipboard-interface-system-v1.png", "sha256": "431903eefd0decffae78529b6ae49d1ba800d6d0f5f02095e45fa59d5e0c0a65", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Defines a shared physical-console UI language for sensors, analysis, power routing, and helm or jump commit flows."},
+  "concept_sources": [
+    {"path": "docs/concept-art/reference/cic/cic-interaction-workflows.png", "role": "workflow and physical-control source", "required": true},
+    {"path": "docs/concept-art/reference/cic/sensor-console-first-person.png", "role": "first-person sensor station source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_CIC_Sheet05.png", "role": "CIC environment context", "required": true},
+    {"path": "docs/concept-art/2026-08-28/production-reference/helm-destination-console-v1.png", "role": "helm hardware and state source", "required": true},
+    {"path": "Source/Ginnungagap/Public/UI/SensorSurveyWidget.h", "role": "sensor UI contract", "required": true},
+    {"path": "Source/Ginnungagap/Public/UI/JumpDestinationWidget.h", "role": "destination UI contract", "required": true},
+    {"path": "Source/Ginnungagap/Public/Ship/ShipHelmSystem.h", "role": "helm gameplay contract", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "presentation_boundary", "value": "navigation, maps, sensors, routing, destinations, and guarded commands live on physical stations rather than the helmet HUD", "source": "docs/PRD.md"},
+      {"field": "sensor_class", "value": "/Script/Ginnungagap.SensorSurveyWidget", "source": "Source/Ginnungagap/Public/UI/SensorSurveyWidget.h"},
+      {"field": "destination_class", "value": "/Script/Ginnungagap.JumpDestinationWidget", "source": "Source/Ginnungagap/Public/UI/JumpDestinationWidget.h"},
+      {"field": "interaction_language", "value": "physical controls with readable digital confirmation", "source": "Docs/ArtStyleGuide.md"}
+    ],
+    "provisional": [
+      {"field": "screen_grid", "value": {"aspect": "16:9", "margin_px": 72, "top_bar_px": 128, "section_bar_px": 64, "columns": 12, "gutter_px": 16}, "source": "ggp01-shipboard-interface-system-v1.png"},
+      {"field": "minimum_touch_target_px", "value": 44, "source": "ggp01-shipboard-interface-system-v1.png"},
+      {"field": "modes", "value": ["sensor_acquisition", "contact_analysis", "power_routing", "helm_jump_commit"], "source": "ggp01-shipboard-interface-system-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "physical-display-sizing", "severity": "warning", "description": "Readable distance and touch target guidance is not yet tied to approved console screen dimensions and player camera reach.", "resolution": "Measure the helm and CIC grayboxes, then convert logical pixels into physical screen and interaction constraints."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "logical-pixels", "forward": "+X", "up": "-Y", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "canvas": {"aspect": "16:9", "reference_resolution": [1920, 1080], "columns": 12, "gutter_px": 16, "margin_px": 72, "minimum_touch_target_px": 44},
+    "pivot": {"name": "ANCHOR_ConsoleScreen", "rule": "Screen UI anchors to the approved physical display plane; hardware focus and action states remain synchronized.", "authority": "provisional"},
+    "parts": [
+      {"name": "W_Console_TopBar"}, {"name": "W_Console_SectionTabs"}, {"name": "W_Console_DataReadout"},
+      {"name": "W_Console_RadarPlot"}, {"name": "W_Console_SignalTrace"}, {"name": "W_Console_Confidence"},
+      {"name": "W_Console_HazardSignature"}, {"name": "W_Console_PowerBus"}, {"name": "W_Console_DestinationCard"},
+      {"name": "W_Console_Countdown"}, {"name": "W_Console_GuardedCommit"}, {"name": "W_Console_PhysicalPrompt"}
+    ],
+    "materials": [
+      {"slot": "information", "family": "ui-cyan"}, {"slot": "pending", "family": "ui-amber"},
+      {"slot": "safe", "family": "ui-green"}, {"slot": "guarded", "family": "ui-red"},
+      {"slot": "disabled", "family": "ui-gray"}, {"slot": "backing", "family": "industrial-screen-black"}
+    ],
+    "sockets": [
+      {"name": "FOCUS_Primary"}, {"name": "FOCUS_Secondary"}, {"name": "INPUT_Trackball"},
+      {"name": "INPUT_Lever"}, {"name": "INPUT_GuardedButton"}, {"name": "INPUT_MouseGamepad"}, {"name": "INPUT_Keyboard"}
+    ],
+    "states": [
+      {"id": "idle"}, {"id": "focused"}, {"id": "pending"}, {"id": "confirmed"}, {"id": "warning"}, {"id": "locked"}, {"id": "offline"}
+    ],
+    "blender": {"root_collection": "N_A_UI_Shipboard", "note": "Console meshes and screen planes remain in their prop packets; this packet controls UI composition and data binding."},
+    "unreal": {"asset_type": "UserWidgetFamily", "destination_root": "/Game/UI/Shipboard", "existing_classes": ["/Script/Ginnungagap.SensorSurveyWidget", "/Script/Ginnungagap.JumpDestinationWidget"], "import_policy": "Implement shared UMG components first, then compose mode-specific screens around existing native gameplay classes."}
+  },
+  "acceptance_checks": [
+    {"id": "component-reuse", "status": "pending", "requirement": "All four modes use one shared top bar, tabs, buttons, state colors, focus language, and data-readout family."},
+    {"id": "data-authority", "status": "pending", "requirement": "Every control and readout maps to authoritative sensor, power, helm, jump, or inventory state."},
+    {"id": "physical-handoff", "status": "pending", "requirement": "Mouse or gamepad focus and physical trackball, lever, and guarded-button states remain synchronized."},
+    {"id": "reach-readability", "status": "pending", "requirement": "Touch targets and typography remain usable from measured seated and standing console positions."},
+    {"id": "guarded-commit", "status": "pending", "requirement": "Jump and destructive actions require clear pending, confirm, refuse, warning, and locked states."},
+    {"id": "offline", "status": "pending", "requirement": "Offline and degraded modes remain understandable without fabricated data."}
+  ],
+  "build_questions": ["What physical screen sizes and viewing distances are approved for helm and CIC stations?", "Which power-routing actions are native UI today versus planned gameplay?"]
+}

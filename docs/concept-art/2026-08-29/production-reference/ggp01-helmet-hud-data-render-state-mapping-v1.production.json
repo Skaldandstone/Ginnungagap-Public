@@ -1,0 +1,192 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.UI.HelmetHUD.DataRenderState.ReferenceV1",
+  "title": "GGP-01 Helmet HUD Data, Render, and State Mapping",
+  "category": "ui-system",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.UI.HelmetHUD.ModularSystem.ReferenceV2",
+  "owners": ["ui-art", "ui-engineering", "gameplay", "accessibility", "audio"],
+  "metadata": {
+    "purpose": "Authoritative UMG hierarchy, data binding, render layer, state, accessibility, and deception contract for the modular helmet HUD.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8 UMG", "Slate", "Material Editor"],
+    "export_targets": ["Widget Blueprints", "HUD material functions", "DataTable or DataAsset", "JSON state contract"],
+    "source_preservation": "Additive packet. Helmet HUD v2 and all original UI concepts remain unchanged.",
+    "naming_prefixes": {"widget_blueprint": "WBP_GGP01_", "material": "M_HUD_", "material_instance": "MI_HUD_", "render_target": "RT_HUD_", "animation": "ANI_", "data_asset": "DA_HUD_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-helmet-hud-data-render-state-mapping-v1.png",
+    "sha256": "53dcd0e65de6e880d9831071a94186e19bfa0ce218caf99b352ff6fee7f67fde",
+    "width_px": 1586,
+    "height_px": 992,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The JSON is authoritative for widget names, data sources, rendering, timing, and Bloom truth isolation."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-modular-helmet-hud-v2.png", "role": "visual, palette, component, and state authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "safe_area_aspect", "value": "16:9 inside visor", "source": "helmet HUD v2"},
+      {"field": "bloom_genuine_false_equivalence", "value": "color, icon, copy, severity, pulse, sound, opacity, timing, animation, and motion are identical", "source": "player deception rule"},
+      {"field": "presentation_truth_access", "value": "forbidden", "source": "player deception rule"},
+      {"field": "bloom_warning_color", "value": "attention amber #FFC240 for both genuine and false signals", "source": "helmet HUD v2"}
+    ],
+    "provisional": [
+      {"field": "reference_resolution", "value": [2560, 1440], "source": "implementation proposal"},
+      {"field": "default_update_rates_hz", "value": {"reticle": 60, "vitals": 10, "navigation": 10, "objective": 5, "equipment": 5}, "source": "performance proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "logical-pixels", "forward": "+X", "up": "+Y", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"location": "safe-area center", "orientation": "+X screen right, +Y screen down", "anchors": "normalized safe-area coordinates"},
+    "parts": [
+      {"id": 1, "name": "SuitBody", "widget": "WBP_SuitBody", "anchor": "top-left"},
+      {"id": 2, "name": "Navigation", "widget": "WBP_Navigation", "anchor": "top-center"},
+      {"id": 3, "name": "Objective", "widget": "WBP_Objective", "anchor": "top-right"},
+      {"id": 4, "name": "CenterReticle", "widget": "WBP_CenterReticle", "anchor": "center"},
+      {"id": 5, "name": "Interaction", "widget": "WBP_Interaction", "anchor": "right-mid"},
+      {"id": 6, "name": "Oxygen", "widget": "WBP_Oxygen", "anchor": "bottom-left"},
+      {"id": 7, "name": "Pressure", "widget": "WBP_Pressure", "anchor": "bottom-left"},
+      {"id": 8, "name": "CO2", "widget": "WBP_CO2", "anchor": "bottom-left"},
+      {"id": 9, "name": "Power", "widget": "WBP_Power", "anchor": "bottom-right"},
+      {"id": 10, "name": "MagneticBoots", "widget": "WBP_MagBoots", "anchor": "bottom-right"},
+      {"id": 11, "name": "Equipment", "widget": "WBP_Equipment", "anchor": "bottom-right"},
+      {"id": 12, "name": "BloomWarning", "widget": "WBP_BloomWarning", "anchor": "bottom-right"}
+    ],
+    "materials": [
+      {"id": "M_HUD_Additive", "usage": "icons, lines, bars"},
+      {"id": "M_HUD_AlphaBlend", "usage": "panels and frames"},
+      {"id": "M_HUD_AlphaMasked", "usage": "reticle and crisp shapes"},
+      {"id": "PP_HUD_VisorVignette", "usage": "visor edge"},
+      {"id": "PP_HUD_Bloom", "usage": "controlled emissive response"},
+      {"id": "PP_HUD_ChromaticAberration", "usage": "optional optical distress"},
+      {"id": "PP_HUD_ScanDesaturate", "usage": "scan mode"}
+    ],
+    "sockets": [
+      {"name": "Anchor_TopLeft", "normalized": [0.0, 0.0]}, {"name": "Anchor_TopCenter", "normalized": [0.5, 0.0]},
+      {"name": "Anchor_TopRight", "normalized": [1.0, 0.0]}, {"name": "Anchor_Center", "normalized": [0.5, 0.5]},
+      {"name": "Anchor_BottomLeft", "normalized": [0.0, 1.0]}, {"name": "Anchor_BottomCenter", "normalized": [0.5, 1.0]},
+      {"name": "Anchor_BottomRight", "normalized": [1.0, 1.0]}, {"name": "Anchor_LeftMid", "normalized": [0.0, 0.5]},
+      {"name": "Anchor_RightMid", "normalized": [1.0, 0.5]}
+    ],
+    "states": [
+      {"id": "baseline", "presentation": "cyan information"},
+      {"id": "interaction", "presentation": "cyan highlight"},
+      {"id": "warning", "presentation": "amber attention"},
+      {"id": "critical", "presentation": "red critical"},
+      {"id": "scan_active", "presentation": "violet anomaly scan"},
+      {"id": "bloom_warning_genuine", "presentation_contract": "bloom_warning_normalized"},
+      {"id": "bloom_warning_false", "presentation_contract": "bloom_warning_normalized"}
+    ],
+    "blender": {"root_collection": "GGP01_HelmetHUD_Reference", "not_applicable_for_runtime": true, "usage": "visor spatial preview only"},
+    "unreal": {"asset_type": "UMG Widget Blueprint, Material, RenderTarget, and DataAsset", "destination_root": "/Game/UI/HUD/Helmet/Production", "root_widget": "WBP_GGP01_HUD", "data_asset": "DA_HUD_GGP01_StateMap"},
+    "rig": {
+      "not_applicable": true,
+      "reason": "UI uses a widget hierarchy, normalized anchors, and animation tracks rather than a skeletal rig.",
+      "controls": [
+        {"id": "safe_area", "type": "normalized anchor bounds"},
+        {"id": "visor_parallax", "type": "material parameter"},
+        {"id": "widget_scale", "type": "DPI curve and accessibility scalar"},
+        {"id": "HUD_opacity", "type": "global scalar"}
+      ]
+    },
+    "animation": {
+      "states": [
+        {"id": "ANI_Intro", "trigger": "Player or BeginPlay", "duration_s": 0.2, "loop": false, "reduced_motion": "instant"},
+        {"id": "ANI_PulseWarning", "trigger": "normalized warning active", "duration_s": 1.2, "loop": true, "reduced_motion": "static amber"},
+        {"id": "ANI_FlickerCritical", "trigger": "critical state", "duration_s": 0.15, "loop": true, "reduced_motion": "static red"},
+        {"id": "ANI_ScanEnter", "trigger": "scan started", "duration_s": 0.5, "loop": false, "reduced_motion": "static overlay"},
+        {"id": "ANI_ScanLoop", "trigger": "scan active", "duration_s": 8.0, "loop": true, "reduced_motion": "static overlay"},
+        {"id": "ANI_ScanExit", "trigger": "scan ended", "duration_s": 0.5, "loop": false, "reduced_motion": "instant"}
+      ],
+      "requirements": [
+        {"id": "AN-001", "requirement": "Bloom genuine and false use the same WBP_BloomWarning instance and ANI_PulseWarning track."},
+        {"id": "AN-002", "requirement": "Reduced motion replaces sweeps, pulses, and flicker with static state changes while preserving severity."}
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "visor_vignette", "render_layer": 0, "target": "RT_HUD_Backdrop"},
+        {"id": "information", "render_layer": 100, "target": "RT_HUD_Info"},
+        {"id": "warning", "render_layer": 110, "target": "RT_HUD_Warning"},
+        {"id": "interaction", "render_layer": 150, "target": "RT_HUD_Interaction"},
+        {"id": "scan_overlay", "render_layer": 300, "target": "RT_HUD_Overlay"}
+      ],
+      "requirements": [
+        {"id": "VFX-001", "requirement": "Post-process distortion cannot change Bloom color, icon, copy, pulse, timing, sound, opacity, or motion based on hidden truth."},
+        {"id": "VFX-002", "requirement": "Warnings retain text or icon redundancy and never depend on color alone."}
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "UI_ScanSweepPath", "purpose": "scan overlay motion path", "coordinate_space": "safe-area normalized", "reduced_motion": "disabled"},
+        {"id": "UI_NavigationHeadingPath", "purpose": "heading tape movement", "coordinate_space": "widget local", "reduced_motion": "step update"},
+        {"id": "UI_ObjectiveMarkerPath", "purpose": "edge-clamped objective marker", "coordinate_space": "safe-area normalized", "reduced_motion": "instant position"}
+      ],
+      "requirements": [{"id": "SP-001", "requirement": "UI motion paths are data-driven and have deterministic reduced-motion fallbacks."}]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "RT_HUD_Backdrop", "layer_range": [0, 0], "usage": "visor vignette and frame"},
+        {"id": "RT_HUD_Info", "layer_range": [100, 100], "usage": "information widgets"},
+        {"id": "RT_HUD_Warning", "layer_range": [110, 110], "usage": "Bloom and objective warnings"},
+        {"id": "RT_HUD_Interaction", "layer_range": [150, 200], "usage": "reticle and interaction"},
+        {"id": "RT_HUD_Overlay", "layer_range": [300, 300], "usage": "scan overlay"},
+        {"id": "RT_HUD_Composed", "usage": "final composited HUD"}
+      ],
+      "channels": [
+        {"name": "HUD_Info", "blend": "additive", "color": "#66EEFF"},
+        {"name": "HUD_Warning", "blend": "alpha", "color": "#FFC240"},
+        {"name": "HUD_Critical", "blend": "alpha", "color": "#FF4040"},
+        {"name": "HUD_Scan", "blend": "additive", "color": "#B779FF"}
+      ],
+      "DPI": {"reference_resolution": [2560, 1440], "scale_range": [0.75, 1.5], "default_opacity": 1.0, "minimum_accessible_opacity": 0.6}
+    },
+    "implementation": {
+      "widget_hierarchy": {"root": "WBP_GGP01_HUD", "children": ["WBP_SuitBody", "WBP_Navigation", "WBP_Objective", "WBP_CenterReticle", "WBP_Interaction", "WBP_VitalsLeft", "WBP_PowerRight", "WBP_BloomWarning", "WBP_ScanOverlay"]},
+      "data_bindings": [
+        {"widget": "WBP_SuitBody", "source": "Player.SuitStatus", "type": "struct", "update_hz": 20, "fallback": "last_known"},
+        {"widget": "WBP_Navigation", "source": "Nav.Compass", "type": "struct", "update_hz": 10, "fallback": "dead_reckoning"},
+        {"widget": "WBP_Objective", "source": "Mission.ActiveObjective", "type": "struct", "update_hz": 5, "fallback": "hidden"},
+        {"widget": "WBP_CenterReticle", "source": "Aim.Reticle", "type": "vector2", "update_hz": 60, "fallback": "crosshair"},
+        {"widget": "WBP_Interaction", "source": "Interact.Target", "type": "struct", "update_hz": 20, "fallback": "hidden"},
+        {"widget": "WBP_Oxygen", "source": "Vitals.Oxygen", "type": "float", "update_hz": 10, "range": [0, 100], "fallback": "last_known"},
+        {"widget": "WBP_Pressure", "source": "Env.Pressure", "type": "float", "update_hz": 10, "range": [0, 2], "fallback": "last_known"},
+        {"widget": "WBP_CO2", "source": "Vitals.CO2", "type": "float", "update_hz": 10, "range": [0, 1], "fallback": "last_known"},
+        {"widget": "WBP_Power", "source": "Suit.Power", "type": "float", "update_hz": 10, "range": [0, 100], "fallback": "last_known"},
+        {"widget": "WBP_MagBoots", "source": "Gear.MagneticBoots", "type": "bool", "update_hz": 5, "fallback": false},
+        {"widget": "WBP_Equipment", "source": "Gear.Equipment", "type": "float", "update_hz": 5, "range": [0, 100], "fallback": "last_known"},
+        {"widget": "WBP_BloomWarning", "source": "Presentation.BloomWarningNormalized", "type": "enum", "update_hz": 10, "range": ["none", "low", "medium", "high"], "forbidden_sources": ["Psychosis.IsFalseInfectionVisible", "BloomWarningTruth", "IsFalseSignal"]}
+      ],
+      "bloom_warning_contract": {
+        "presentation_input": ["severity", "active"],
+        "forbidden_input": ["truth", "is_false", "confidence", "source", "diagnostic_reason"],
+        "genuine": {"color": "#FFC240", "icon": "BIOHAZARD", "copy": "BLOOM", "severity": "normalized", "pulse_s": 1.2, "sound": "HUD_BLOOM_WARNING", "opacity": 1.0, "timing": "immediate", "animation": "ANI_PulseWarning"},
+        "false": {"color": "#FFC240", "icon": "BIOHAZARD", "copy": "BLOOM", "severity": "normalized", "pulse_s": 1.2, "sound": "HUD_BLOOM_WARNING", "opacity": 1.0, "timing": "immediate", "animation": "ANI_PulseWarning"},
+        "invariant": "genuine and false objects must remain structurally and value identical"
+      },
+      "accessibility": {"color_independent": true, "captions_for_critical_audio": true, "reduced_motion": true, "high_contrast": true, "DPI_scaling": true, "safe_area": true, "localization_expansion": 1.3},
+      "requirements": [
+        {"id": "IMP-001", "requirement": "Gameplay converts genuine or false truth to Presentation.BloomWarningNormalized before UI dispatch."},
+        {"id": "IMP-002", "requirement": "No UI widget, animation, material, audio cue, accessibility mode, telemetry label, or debug overlay available in normal play receives hidden truth."},
+        {"id": "IMP-003", "requirement": "All critical states expose equivalent text or icon information and caption critical audio cues."},
+        {"id": "IMP-004", "requirement": "Localization supports at least 30 percent expansion without overlap at the minimum supported DPI scale."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "HUD-MAP-001", "status": "pending", "requirement": "All 12 widgets bind to the declared presentation data sources and honor fallbacks."},
+    {"id": "HUD-MAP-002", "status": "pending", "requirement": "Render targets and z-order reproduce the visual hierarchy at all supported resolutions."},
+    {"id": "HUD-MAP-003", "status": "pending", "requirement": "Genuine and false Bloom warning objects are structurally and value identical across color, icon, copy, severity, pulse, sound, opacity, timing, animation, and motion."},
+    {"id": "HUD-MAP-004", "status": "pending", "requirement": "Automated UI tests confirm the presentation layer cannot access truth, is_false, confidence, source, or diagnostic reason."},
+    {"id": "HUD-MAP-005", "status": "pending", "requirement": "Reduced motion, high contrast, captions, DPI scaling, safe area, and localization expansion pass accessibility QA."}
+  ],
+  "build_questions": ["Confirm final supported minimum resolution and ultrawide policy.", "Confirm whether diagnostic developer builds may expose hidden truth only behind explicit non-shipping debug guards."]
+}

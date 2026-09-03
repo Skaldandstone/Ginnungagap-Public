@@ -1,0 +1,155 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Enemy.BloomReanimatedCrew.ReferenceV1",
+  "title": "Bloom Reanimated Crew Member",
+  "category": "enemy",
+  "status": "technical-review",
+  "production_ready": false,
+  "owners": ["character-art", "animation", "vfx", "gameplay"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/bloom-reanimated-crew-v1.png",
+    "sha256": "aa2f88feb42043c8fcc80319c307da3467f9250f2d14b15a8899e870015d38a2",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "visual-reference",
+    "generated_on": "2026-08-28",
+    "notes": "Authoritative for recognizable host layering, growth zones, and separable VFX intent."
+  },
+  "concept_sources": [
+    {
+      "path": "Content/Assets/ConceptArt/Trailer/Bloom_Infected_Crew.png",
+      "role": "primary Unreal concept-library infected crew source",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Trailer/Bloom_Threat_Lineup.png",
+      "role": "primary Unreal concept-library Bloom scale and family lineup",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/bloom/reanimated-crew-variants.png",
+      "role": "enemy family concept source",
+      "required": true
+    },
+    {
+      "path": "Art/Characters/BloomEnemies/RealityScan/BloomReanimatedCrew/CaptureManifest.json",
+      "role": "current capture and gameplay mapping",
+      "required": true
+    },
+    {
+      "path": "docs/BloomFabRealityScanPrototypes.md",
+      "role": "rig and implementation authority",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "gameplay_class",
+        "value": "/Script/Ginnungagap.BloomReanimatedCrewEnemy",
+        "source": "Art/Characters/BloomEnemies/RealityScan/BloomReanimatedCrew/CaptureManifest.json"
+      },
+      {
+        "field": "skeleton",
+        "value": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple",
+        "source": "docs/BloomFabRealityScanPrototypes.md",
+        "note": "Manny-compatible host shell remains the animation source."
+      },
+      {
+        "field": "layering",
+        "value": "infection pieces remain separate from the animated host skeleton",
+        "source": "Source/Ginnungagap/Public/Bloom/BloomEnemyArchetypes.h"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "height_m",
+        "value": 1.8,
+        "source": "bloom-reanimated-crew-v1.png"
+      },
+      {
+        "field": "signature_animations",
+        "value": ["dormant", "listening", "reaching", "locomotion"],
+        "source": "bloom-reanimated-crew-v1.png"
+      },
+      {
+        "field": "secondary_tendril_simulation",
+        "value": "dynamic bones or jiggle chains",
+        "source": "bloom-reanimated-crew-v1.png"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "root",
+      "rule": "Use the exact Manny-compatible skeleton root and existing capsule contract.",
+      "authority": "approved"
+    },
+    "parts": [
+      { "name": "SK_HostBody", "role": "Manny-compatible animation host", "authority": "approved" },
+      { "name": "SK_SoftSuit", "role": "recognizable crew suit layer", "authority": "provisional" },
+      { "name": "SK_HardShell", "role": "recognizable pressure shell", "authority": "provisional" },
+      { "name": "SM_BloomRootAnchors", "role": "growth attachment layer", "authority": "provisional" },
+      { "name": "SK_BloomTendrils", "role": "secondary animated tendril chains", "authority": "provisional" },
+      { "name": "VFX_BloomNodes", "role": "separate particles and emissive pulses", "authority": "approved" }
+    ],
+    "materials": [
+      { "slot": "host_suit", "family": "worn-pressure-suit", "authority": "approved" },
+      { "slot": "bloom_surface", "family": "bloom-organic", "authority": "approved" },
+      { "slot": "bloom_nodes_primary", "family": "bloom-emissive", "authority": "provisional" },
+      { "slot": "bloom_nodes_secondary", "family": "bloom-emissive", "authority": "provisional" },
+      { "slot": "tendrils", "family": "bloom-organic", "authority": "provisional" }
+    ],
+    "sockets": [
+      { "name": "SOCKET_BloomChest", "bone": "spine_03", "authority": "provisional" },
+      { "name": "SOCKET_BloomHead", "bone": "head", "authority": "provisional" },
+      { "name": "SOCKET_BloomShoulder_L", "bone": "upperarm_l", "authority": "provisional" },
+      { "name": "SOCKET_BloomShoulder_R", "bone": "upperarm_r", "authority": "provisional" }
+    ],
+    "states": [
+      { "id": "dormant", "animation_required": true, "authority": "provisional" },
+      { "id": "listening", "animation_required": true, "authority": "provisional" },
+      { "id": "reaching", "animation_required": true, "authority": "provisional" },
+      { "id": "locomotion", "animation_required": true, "authority": "approved" },
+      { "id": "emissive_low", "material_state": true, "authority": "provisional" },
+      { "id": "emissive_high", "material_state": true, "authority": "provisional" }
+    ],
+    "blender": {
+      "root_collection": "PR_BloomReanimatedCrew",
+      "source_files": [],
+      "export_files": [],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "SkeletalEnemyAssembly",
+      "destination_root": "/Game/Assets/Models/Bloom/ReanimatedCrew",
+      "existing_assets": [],
+      "source_files": [],
+      "skeleton": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple",
+      "gameplay_class": "/Script/Ginnungagap.BloomReanimatedCrewEnemy",
+      "collision": "retain gameplay capsule and add query-only tendril collision only where required",
+      "import_policy": "Do not replace the Manny animation source with RealityScan geometry."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "skeleton-identity", "status": "pass", "requirement": "Host uses the exact approved Manny-compatible skeleton.", "evidence": "Art/Characters/BloomEnemies/RealityScan/BloomReanimatedCrew/CaptureManifest.json" },
+    { "id": "host-read", "status": "pending", "requirement": "The original crew and pressure-suit silhouette remains readable at gameplay distance." },
+    { "id": "tendril-budget", "status": "pending", "requirement": "Approve secondary-bone, collision, and shadow budgets for tendrils." },
+    { "id": "vfx-separation", "status": "pending", "requirement": "Emissive nodes, particles, and ambient trails can be disabled independently." },
+    { "id": "animation-test", "status": "pending", "requirement": "Validate locomotion, attack, death, and representative secondary motion in Unreal." }
+  ],
+  "build_questions": [
+    "How many tendril chains may simulate concurrently at the target enemy count?",
+    "Which growth modules vary by progression stage without changing the host skeleton?"
+  ]
+}

@@ -1,0 +1,490 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.PerformanceRig.ReferenceV2",
+  "title": "GGP-01 Suit Traversal and Performance V2",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "supersedes": "GGP.Character.PressureSuit.PerformanceRig.ReferenceV1",
+  "owners": [
+    "character-art",
+    "animation",
+    "technical-animation",
+    "gameplay",
+    "vfx"
+  ],
+  "metadata": {
+    "purpose": "PRD-derived movement, constrained traversal, zero-g, activity, casualty, and hazard performance authority.",
+    "pose_count": 20,
+    "engine_targets": [
+      "Unreal Engine 5.8",
+      "Blender 4.x"
+    ],
+    "required_profile_count": 9,
+    "first_person_rule": "One left and one right arm only, with parity to the third-person skeleton."
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-pressure-suit-traversal-performance-v2.png",
+    "sha256": "4468a9e1f135e13c1196b555ff375197a166aabe4312585f041b3453d99f7a15",
+    "width_px": 1568,
+    "height_px": 1003,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The JSON action IDs and requirements are authoritative where visual labels are abbreviated."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/PRD.md",
+      "role": "player verbs, activities, zero-g, and remaining animation requirements",
+      "required": true
+    },
+    {
+      "path": "docs/CharacterCreator.md",
+      "role": "body profiles and traversal requirements",
+      "required": true
+    },
+    {
+      "path": "docs/MagneticSuitTraversal.md",
+      "role": "mag boots, glove anchors, push-off, and zero-g behavior",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+      "role": "locked suit appearance",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "actions",
+        "value": [
+          "sealed_idle",
+          "walk",
+          "sprint",
+          "crouch",
+          "vent_crawl",
+          "sideways_gap_squeeze",
+          "ladder_climb",
+          "mantle_step_over",
+          "zero_g_drift",
+          "zero_g_push_off",
+          "mag_boot_wall_transition",
+          "left_glove_anchor",
+          "dual_glove_pull",
+          "object_pull_throw",
+          "scan",
+          "repair_rewire",
+          "weld_tool_brace",
+          "casualty_carry",
+          "casualty_drag",
+          "decompression_low_o2_reaction"
+        ],
+        "source": "source sheet and PRD"
+      },
+      {
+        "field": "tool_clearance",
+        "value": "oriented sweep plus preserved retreat or slide-out path",
+        "source": "docs/PRD.md"
+      },
+      {
+        "field": "false_bloom_signal",
+        "value": "genuine and false signals are presentation-identical",
+        "source": "player deception rule"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "root_motion_policy",
+        "value": "root motion for traversal entry and exit, in-place for ordinary locomotion and activities",
+        "source": "animation proposal"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "parts": [
+      {
+        "id": "third_person_body",
+        "type": "skeletal_mesh"
+      },
+      {
+        "id": "first_person_arms",
+        "type": "derived_skeletal_mesh"
+      },
+      {
+        "id": "rigid_suit_parts",
+        "type": "socketed_or_skinned_rigid"
+      },
+      {
+        "id": "harness_straps",
+        "type": "secondary_motion"
+      },
+      {
+        "id": "hose_left",
+        "type": "spline_mesh"
+      },
+      {
+        "id": "hose_right",
+        "type": "spline_mesh"
+      }
+    ],
+    "materials": [
+      {
+        "id": "suit_pbr",
+        "channels": [
+          "base_color",
+          "normal",
+          "ORM",
+          "wear",
+          "damage"
+        ]
+      },
+      {
+        "id": "visor",
+        "channels": [
+          "transmission",
+          "roughness",
+          "frost",
+          "crack"
+        ]
+      },
+      {
+        "id": "role_kit",
+        "channels": [
+          "base_color",
+          "normal",
+          "ORM",
+          "role_id"
+        ]
+      }
+    ],
+    "sockets": [
+      {
+        "name": "IK_HAND_L"
+      },
+      {
+        "name": "IK_HAND_R"
+      },
+      {
+        "name": "IK_FOOT_L"
+      },
+      {
+        "name": "IK_FOOT_R"
+      },
+      {
+        "name": "ANCHOR_GLOVE_L"
+      },
+      {
+        "name": "ANCHOR_GLOVE_R"
+      },
+      {
+        "name": "ANCHOR_LADDER_L"
+      },
+      {
+        "name": "ANCHOR_LADDER_R"
+      },
+      {
+        "name": "ANCHOR_CASUALTY"
+      },
+      {
+        "name": "SOCKET_TOOL_SWEEP"
+      }
+    ],
+    "states": [
+      {
+        "id": "grounded"
+      },
+      {
+        "id": "crouched"
+      },
+      {
+        "id": "crawling"
+      },
+      {
+        "id": "squeezing"
+      },
+      {
+        "id": "climbing"
+      },
+      {
+        "id": "zero_g_free"
+      },
+      {
+        "id": "mag_boot_anchored"
+      },
+      {
+        "id": "single_glove_anchored"
+      },
+      {
+        "id": "dual_glove_anchored"
+      },
+      {
+        "id": "activity"
+      },
+      {
+        "id": "hazard_reaction"
+      }
+    ],
+    "blender": {
+      "root_collection": "PR_GGP01_SuitPerformance_V2",
+      "armature": "RIG_GGP01_PressureSuit",
+      "actions_collection": "ANIM_GGP01_PressureSuit_V2"
+    },
+    "unreal": {
+      "asset_type": "SkeletalMesh and AnimationSequence",
+      "destination_root": "/Game/Characters/Player/Suit/Production/Animation",
+      "skeleton": "SKEL_GGP01_PressureSuit",
+      "anim_blueprint": "ABP_GGP01_PressureSuit"
+    },
+    "rig": {
+      "deformation_zones": [
+        "shoulders",
+        "elbows",
+        "wrists",
+        "fingers",
+        "torso_twist",
+        "hips",
+        "knees",
+        "ankles",
+        "crouch_compression",
+        "crawl_compression",
+        "squeeze_compression"
+      ],
+      "rigid_zones": [
+        "visor",
+        "collar",
+        "chest_frame",
+        "backpack",
+        "forearm_modules",
+        "knee_shells",
+        "boots"
+      ],
+      "requirements": [
+        {
+          "id": "PERF-RIG-001",
+          "requirement": "All poses preserve exactly two arms, two legs, and exactly two collar-to-pack hoses."
+        },
+        {
+          "id": "PERF-RIG-002",
+          "requirement": "Independent left and right glove anchors support one-hand and dual-hand traversal."
+        },
+        {
+          "id": "PERF-RIG-003",
+          "requirement": "Role equipment remains inside the approved crawl and squeeze envelope when stowed."
+        }
+      ]
+    },
+    "animation": {
+      "clips": [
+        "idle",
+        "walk",
+        "sprint",
+        "crouch",
+        "prone_crawl",
+        "vent_crawl",
+        "squeeze_entry",
+        "squeeze_loop",
+        "squeeze_exit",
+        "ladder_climb",
+        "mantle_step_over",
+        "zero_g_drift",
+        "zero_g_push_off",
+        "mag_boot_plant",
+        "mag_boot_release",
+        "single_glove_anchor",
+        "dual_glove_anchor",
+        "object_pull",
+        "object_throw",
+        "scan",
+        "repair",
+        "rewire",
+        "weld_tool_brace",
+        "casualty_carry",
+        "casualty_drag",
+        "decompression_reaction",
+        "low_oxygen_reaction",
+        "wake",
+        "suit_up"
+      ],
+      "requirements": [
+        {
+          "id": "PERF-AN-001",
+          "requirement": "Squeeze uses explicit entry, loop, and exit clips and rotates shoulders to protect the backpack."
+        },
+        {
+          "id": "PERF-AN-002",
+          "requirement": "Vent crawl validates helmet, chest frame, backpack, hoses, knees, boots, and role-kit clearance."
+        },
+        {
+          "id": "PERF-AN-003",
+          "requirement": "First-person arms share pose names, proportions, and tool sockets with third person."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "mag_contact",
+          "attachment": "boots_or_gloves"
+        },
+        {
+          "id": "weld_sparks",
+          "attachment": "tool_tip"
+        },
+        {
+          "id": "decompression_jet",
+          "attachment": "runtime_damage_point"
+        },
+        {
+          "id": "bloom_warning",
+          "attachment": "HUD",
+          "truth_independent": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "PERF-VFX-001",
+          "requirement": "No visual or audio parameter reveals whether a Bloom warning is genuine or false."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {
+          "id": "SP_Hose_Left",
+          "root_socket": "collar_left",
+          "end_socket": "backpack_left",
+          "controls": [
+            "root",
+            "mid",
+            "tip",
+            "slack",
+            "collision",
+            "stiffness"
+          ]
+        },
+        {
+          "id": "SP_Hose_Right",
+          "root_socket": "collar_right",
+          "end_socket": "backpack_right",
+          "controls": [
+            "root",
+            "mid",
+            "tip",
+            "slack",
+            "collision",
+            "stiffness"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "id": "PERF-SP-001",
+          "requirement": "Hoses do not snag, detach, duplicate, or penetrate the helmet, pack, arms, or traversal geometry."
+        }
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "beauty"
+        },
+        {
+          "id": "body_id"
+        },
+        {
+          "id": "equipment_id"
+        },
+        {
+          "id": "visor_mask"
+        },
+        {
+          "id": "role_id"
+        },
+        {
+          "id": "velocity"
+        },
+        {
+          "id": "contact_points"
+        },
+        {
+          "id": "tool_sweep"
+        }
+      ],
+      "channels": [
+        {
+          "name": "vertex_r",
+          "usage": "wear"
+        },
+        {
+          "name": "vertex_g",
+          "usage": "role_tint_eligibility"
+        },
+        {
+          "name": "vertex_b",
+          "usage": "wetness_or_frost"
+        },
+        {
+          "name": "vertex_a",
+          "usage": "damage_reveal"
+        }
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {
+          "id": "PERF-IMP-001",
+          "requirement": "Test every clip on all nine body profiles and each role kit."
+        },
+        {
+          "id": "PERF-IMP-002",
+          "requirement": "FCharacterBodyProfile supplies exact body envelopes; FTraversalRequirement supplies opening and action requirements."
+        },
+        {
+          "id": "PERF-IMP-003",
+          "requirement": "Networked root motion and anchor ownership are server authoritative."
+        },
+        {
+          "id": "PERF-IMP-004",
+          "requirement": "Presentation receives a normalized Bloom warning state and never hidden truth."
+        }
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "PERF-V2-001",
+      "status": "pending",
+      "requirement": "All 20 visual actions and 29 animation deliverables are represented by named clips or state-machine tasks."
+    },
+    {
+      "id": "PERF-V2-002",
+      "status": "pending",
+      "requirement": "All nine body profiles can enter, perform, retreat from, and exit every approved constrained traversal."
+    },
+    {
+      "id": "PERF-V2-003",
+      "status": "pending",
+      "requirement": "First-person and third-person arms, tools, anchors, and sockets remain in parity."
+    },
+    {
+      "id": "PERF-V2-004",
+      "status": "pending",
+      "requirement": "Genuine and false Bloom-warning presentation parameters are byte-identical."
+    }
+  ],
+  "build_questions": [
+    "Confirm which traversal transitions require replicated root motion after multiplayer PIE validation."
+  ]
+}

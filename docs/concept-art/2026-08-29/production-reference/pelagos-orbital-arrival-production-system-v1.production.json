@@ -1,0 +1,125 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Pelagos.OrbitalArrival.ReferenceV1",
+  "title": "Pelagos Orbital Arrival Production System V1",
+  "category": "environment-kit",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["environment-art", "technical-art", "world-design", "gameplay", "lighting", "vfx", "audio"],
+  "metadata": {
+    "purpose": "Authoritative orbital-arrival environment, route, gate, dock, traffic, service, hazard, lighting, spline, collision, streaming, render, and rebuild contract for Pelagos.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"],
+    "export_targets": ["FBX", "GLB", "World Partition level", "Data Asset", "Spline Actors", "Niagara", "Movie Render Queue"],
+    "source_preservation": "Additive packet. Existing Pelagos art, ledgers, Blender scenes, export manifests, source code, and generated Unreal assets remain unchanged.",
+    "naming_prefixes": {"level": "L_Pelagos_", "mesh": "SM_Pelagos_", "blueprint": "BP_Pelagos_", "data_asset": "DA_Pelagos_", "niagara": "NS_Pelagos_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/pelagos-orbital-arrival-production-system-v1.png",
+    "sha256": "0cabfa2a17424382cfefc5daa373ba1ddca3965105fb62980dbf0a3a9976c8fa",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The authoritative sequence has 12 arrival states plus Departure as step 13. The printed flow contains a duplicated tiny 12 label after generative text QA; the ordered implementation sequence in this JSON and code is authoritative."
+  },
+  "concept_sources": [
+    {"path": "Art/SpaceSystems/Pelagos_OrbitalArrival_AAA_Concept_v1.png", "role": "primary orbital arrival concept", "required": true},
+    {"path": "Art/SpaceSystems/Pelagos_OrbitalArrival_AAA_Rebuild_v1.png", "role": "AAA rebuild reference", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_AAA_Final.png", "role": "final visual target", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_AAA.png", "role": "AAA composition reference", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_ArtistPass.png", "role": "artist-pass detail reference", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_Beauty.png", "role": "beauty and lighting target", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_Phase19.png", "role": "arrival development lineage", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_Phase20.png", "role": "arrival development lineage", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_Phase21.png", "role": "arrival development lineage", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_Pelagos_Phase87_Final.png", "role": "latest checked-in Pelagos final", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_Phase15_OperationalMap.png", "role": "operational map and route topology", "required": true},
+    {"path": "docs/PelagosOrbitalArrivalMap.md", "role": "runtime flow and authored-count authority", "required": true},
+    {"path": "Source/Ginnungagap/Public/StarSystem/PelagosArrivalDefinition.h", "role": "state, dock, hazard, service, and budget authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "local_operations_diameter_km", "value": 60, "source": "PRD and system-map architecture"},
+      {"field": "imported_triangle_count", "value": 87364, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "source_material_count", "value": 11, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "arrival_routes", "value": 4, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "route_checkpoints", "value": 16, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "arrival_gates", "value": 4, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "dock_approach_and_capture_sets", "value": 4, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "traffic_spawn_anchors", "value": 24, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "station_service_anchors", "value": 10, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "hazard_and_exclusion_volumes", "value": 6, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "navigation_beacons", "value": 12, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "cinematic_cameras", "value": 4, "source": "PelagosOrbitalArrivalMap.md"},
+      {"field": "max_active_traffic", "value": 24, "source": "UPelagosArrivalDefinition"},
+      {"field": "max_traffic_near_docks", "value": 5, "source": "UPelagosArrivalDefinition"}
+    ],
+    "provisional": [
+      {"field": "station_module_dimensions", "value": "capture from Blender collections and imported bounds", "source": "production workflow"},
+      {"field": "cinematic_exposure", "value": "tune per stellar key after runtime Lumen validation", "source": "lighting workflow"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"world_origin": "Pelagos local-operations origin", "station": "superstructure center of mass", "route_points": "spline-local with world-origin rebasing support"},
+    "parts": [
+      {"id": "station_superstructure", "type": "Nanite modular environment"},
+      {"id": "planet_and_atmosphere", "type": "background environment"},
+      {"id": "stellar_key", "type": "directional light"},
+      {"id": "debris_fields", "type": "HISM and Niagara"},
+      {"id": "arrival_routes", "count": 4, "type": "splines"},
+      {"id": "route_checkpoints", "count": 16, "type": "scene anchors"},
+      {"id": "arrival_gates", "count": 4, "type": "authority-controlled volumes"},
+      {"id": "dock_approaches", "count": 4, "type": "volumes and splines"},
+      {"id": "dock_capture_volumes", "count": 4, "type": "authority-controlled volumes"},
+      {"id": "traffic_anchors", "count": 24, "type": "spawn transforms"},
+      {"id": "service_anchors", "count": 10, "type": "typed service transforms"},
+      {"id": "hazards", "count": 6, "type": "typed overlap volumes"},
+      {"id": "navigation_beacons", "count": 12, "type": "emissive mesh and light"},
+      {"id": "cinematic_cameras", "count": 4, "type": "CineCameraActor"}
+    ],
+    "materials": [
+      {"id": "station_hull", "channels": ["base_color", "normal", "ORM", "damage", "district"]},
+      {"id": "station_emissive", "channels": ["district", "state", "traffic"]},
+      {"id": "planet_surface", "channels": ["surface", "cloud", "night", "atmosphere"]},
+      {"id": "debris", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "route_beacon", "channels": ["route_id", "state", "intensity"]},
+      {"id": "hazard_volume_debug", "channels": ["hazard_type", "severity"]}
+    ],
+    "sockets": [
+      {"name": "SOCKET_JumpExit"}, {"name": "SOCKET_StationRoot"},
+      {"name": "SOCKET_Dock_A"}, {"name": "SOCKET_Dock_B"}, {"name": "SOCKET_Dock_C"}, {"name": "SOCKET_Dock_D"},
+      {"name": "SOCKET_Service_01"}, {"name": "SOCKET_Hazard_01"}, {"name": "SOCKET_Camera_01"}
+    ],
+    "states": [
+      {"id": "JumpExit", "order": 1}, {"id": "SensorAcquisition", "order": 2},
+      {"id": "IFFChallenge", "order": 3}, {"id": "ControlHandoff", "order": 4},
+      {"id": "TrafficContact", "order": 5}, {"id": "DockRequest", "order": 6},
+      {"id": "DockAssignment", "order": 7}, {"id": "FinalApproach", "order": 8},
+      {"id": "SoftCapture", "order": 9}, {"id": "HardDock", "order": 10},
+      {"id": "ServicesAvailable", "order": 11}, {"id": "ArrivalComplete", "order": 12},
+      {"id": "Departure", "order": 13, "note": "releases reserved dock and permits a later arrival"}
+    ],
+    "blender": {"root_collection": "Pelagos_OrbitalArrival", "collections": ["STATION_MODULES", "PLANET_ATMO", "STAR_NEBULA", "DEBRIS_FIELDS", "ROUTES_SPLINES", "DOCKS_CAPTURE", "HAZARD_VOLUMES", "SERVICE_ANCHORS", "JUMP_VFX", "NAV_BEACONS", "CINEMA_RAILS", "COLLISION"], "source_scene": "Art/SpaceSystems/SpaceSystems_PelagosOrbitalArrival_Level.blend", "unit_scale": 1.0},
+    "unreal": {"asset_type": "World Partition level plus native actors and Data Asset", "destination_root": "/Game/Assets/Maps/SpaceSystems", "level": "/Game/Assets/Maps/SpaceSystems/L_PelagosOrbitalArrival", "data_asset": "DA_PelagosArrivalDefinition", "native_systems": ["APelagosOrbitalArrivalDirector", "APelagosArrivalGateVolume", "APelagosHazardVolume", "APelagosTrafficController"], "replication": "server authoritative arrival, docking, hazards, services, and traffic"},
+    "rig": {"not_applicable": true, "reason": "Environment behavior is driven by transforms, spline actors, volumes, traffic actors, and dock components rather than a skeletal rig."},
+    "animation": {"states": [{"id": "jump_exit"}, {"id": "traffic_flow"}, {"id": "dock_approach"}, {"id": "soft_capture"}, {"id": "hard_dock"}, {"id": "departure"}], "requirements": [{"id": "AN-PEL-001", "requirement": "Arrival cinematics remain subordinate to server-authoritative state and can be skipped without state divergence."}, {"id": "AN-PEL-002", "requirement": "Traffic and docking motion use deterministic spline progress and respect the active traffic budgets."}]},
+    "vfx": {"layers": [{"id": "jump_exit"}, {"id": "stellar_light"}, {"id": "nebula_backplate"}, {"id": "debris_dust"}, {"id": "route_beacons"}, {"id": "station_service"}, {"id": "hazard"}], "requirements": [{"id": "VFX-PEL-001", "requirement": "Jump, hazard, route, and dock effects remain readable at ship scale and do not obscure traffic or capture alignment."}]},
+    "spline_mapping": {"splines": [{"id": "RouteAlpha", "checkpoint_count": 4}, {"id": "RouteBravo", "checkpoint_count": 4}, {"id": "RouteCharlie", "checkpoint_count": 4}, {"id": "RouteDelta", "checkpoint_count": 4}, {"id": "DockApproachA"}, {"id": "DockApproachB"}, {"id": "DockApproachC"}, {"id": "DockApproachD"}, {"id": "CinemaRail01"}, {"id": "CinemaRail02"}, {"id": "CinemaRail03"}, {"id": "CinemaRail04"}], "requirements": [{"id": "SP-PEL-001", "requirement": "Each route and dock spline declares checkpoint order, clearance radius, nominal and maximum speed, lane direction, capture handoff, and origin-rebase policy."}]},
+    "render_mapping": {"passes": [{"id": "station_opaque"}, {"id": "station_emissive"}, {"id": "planet_atmosphere"}, {"id": "stars_nebula"}, {"id": "debris"}, {"id": "traffic"}, {"id": "route_beacons"}, {"id": "jump_vfx"}, {"id": "hazards"}, {"id": "cinematic_depth_velocity"}], "channels": [{"name": "RouteId", "range": [0, 4]}, {"name": "DockState", "range": [0, 5]}, {"name": "HazardType", "range": [0, 5]}, {"name": "ServiceType", "range": [0, 9]}], "requirements": [{"id": "REN-PEL-001", "requirement": "World, traffic, VFX, emissive, depth, and velocity layers remain available for Lumen validation and Movie Render Queue."}]},
+    "implementation": {"world_partition": "60 km local operations volume with origin rebasing", "collision": "Nanite environment uses validated complex-as-simple ship collision; gameplay volumes use simple query shapes", "traffic": {"global_max": 24, "near_dock_max": 5, "spawn_anchors": 24}, "rebuild_sequence": ["update Blender assets", "validate collections", "export FBX/GLB", "import to Unreal", "assign materials", "build Nanite and collision", "generate HLODs", "validate Data Assets", "cook content", "multiplayer playtest"]}
+  },
+  "acceptance_checks": [
+    {"id": "PEL-001", "status": "pending", "requirement": "Exactly four routes, sixteen checkpoints, four gates, four dock approach and capture sets, twenty-four traffic anchors, ten services, six hazards, twelve beacons, and four cameras are present."},
+    {"id": "PEL-002", "status": "pending", "requirement": "The authoritative arrival sequence contains exactly the twelve runtime states in code, followed by Departure as workflow step 13, with no duplicate labels."},
+    {"id": "PEL-003", "status": "pending", "requirement": "Dock reservation, occupation, emergency-only state, release, and late-join replication pass multiplayer testing."},
+    {"id": "PEL-004", "status": "pending", "requirement": "Route clearance, traffic budgets, hazard contacts, service availability, collision, origin rebasing, HLOD, and cook pass at ship scale."},
+    {"id": "PEL-005", "status": "pending", "requirement": "The printed state-flow strip is corrected in the next sheet revision without changing approved environment art."}
+  ],
+  "build_questions": ["Capture exact route speeds, clearance radii, dock capture times, traffic intervals, service radii, and hazard extents from the current Data Asset.", "Confirm whether the 87,364-triangle combined set remains one Nanite asset or is split into operational streaming modules."]
+}

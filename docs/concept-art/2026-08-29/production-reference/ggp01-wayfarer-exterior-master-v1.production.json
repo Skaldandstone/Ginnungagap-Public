@@ -1,0 +1,70 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Ship.Wayfarer.ExteriorMaster.ReferenceV1",
+  "title": "GGP-01 Wayfarer Exterior Master",
+  "category": "ship",
+  "status": "technical-review",
+  "production_ready": false,
+  "owners": ["vehicle-art", "environment-art", "technical-art", "gameplay"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-wayfarer-exterior-master-v1.png", "sha256": "7cf40fbdafc439689dab2bc28123d3c3a57bd1c0e31c7f4c9b21faf11b02c186", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Master exterior board corrected to the current 1,400 x 260 x 320 m contract, 24-32 operational decks, and maximum complement of 1,000."},
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_ModelSheet_v4.png", "role": "primary exterior silhouette", "required": true},
+    {"path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_CrossSections_v1.png", "role": "cross-section lineage", "required": true},
+    {"path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_InteriorDeckPlans.svg", "role": "district and deck planning", "required": true},
+    {"path": "docs/concept-art/reference/ships/small-utility-escort-exterior.png", "role": "approved fleet-scale exterior direction", "required": true},
+    {"path": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json", "role": "measured build authority", "required": true},
+    {"path": "Docs/SmallEscortExteriorProductionReview.md", "role": "Unreal production review", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "build.dimensions_m", "value": [1400.0, 260.0, 320.0], "source": "Config/Ships/SmallUtilityEscortInterior.json"},
+      {"field": "operational_decks", "value": [24, 32], "source": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json"},
+      {"field": "maximum_complement", "value": 1000, "source": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json"},
+      {"field": "streaming_districts", "value": ["bow", "midship", "hangar_docking", "command_sensor", "drive"], "source": "Docs/SmallEscortExteriorProductionReview.md"},
+      {"field": "build.blender.source_files", "value": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/SmallUtilityEscort_ConceptMatch.blend"], "source": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json"}
+    ],
+    "provisional": [
+      {"field": "module_breakdown", "value": ["clean_hull", "damage_replaceable_armor", "docking_mechanisms", "defense_mounts", "vfx_emitters", "bloom_overlay"], "source": "ggp01-wayfarer-exterior-master-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "wayfarer-queue-scale-drift", "severity": "warning", "description": "Docs/ShipBuildQueue.md still describes GGP-01 as roughly 1,150 m.", "resolution": "Update the older queue text to the current 1,400 m production contract."},
+      {"id": "shipping-module-count", "severity": "blocker", "description": "The approved high-detail review assembly contains 705 visible components and is not the shipping draw-call layout.", "resolution": "Merge to approximately 18-30 material-preserving Nanite modules while retaining animated, damage, interaction, and VFX separation."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": [1400.0, 260.0, 320.0],
+    "current_bounds_cm": {"length": 139999.16, "beam": 26000, "height": 32000},
+    "pivot": {"name": "PIVOT_ShipRoot", "rule": "Preserve the concept-match flight and streaming origin.", "authority": "approved"},
+    "parts": [
+      {"id": "01", "name": "DISTRICT_Bow"}, {"id": "02", "name": "DISTRICT_Midship"}, {"id": "03", "name": "DISTRICT_HangarDocking"},
+      {"id": "04", "name": "DISTRICT_CommandSensor"}, {"id": "05", "name": "DISTRICT_Drive"},
+      {"name": "MODULE_DamageArmor", "separate": true}, {"name": "MODULE_DockingMechanism", "separate": true},
+      {"name": "MODULE_DefenseMount", "separate": true}, {"name": "MODULE_VFXEmitter", "separate": true}, {"name": "OVERLAY_Bloom", "separate": true}
+    ],
+    "materials": [
+      {"slot": "armor", "family": "worn-dark-armor"}, {"slot": "structure", "family": "gunmetal"}, {"slot": "thermal", "family": "ceramic-black"},
+      {"slot": "identification", "family": "muted-safety-orange"}, {"slot": "observation", "family": "transparent"},
+      {"slot": "drive_emissive", "family": "blue-white"}, {"slot": "bloom_overlay", "family": "bloom-violet"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Docking_Port"}, {"name": "SOCKET_Docking_Starboard"}, {"name": "SOCKET_Hangar"},
+      {"name": "SOCKET_Defense"}, {"name": "SOCKET_VFX_Drive"}, {"name": "SOCKET_VFX_RCS"}, {"name": "SOCKET_BloomAnchor"}
+    ],
+    "states": [
+      {"id": "pristine", "base_geometry": true}, {"id": "scorched", "separate_overlays": true},
+      {"id": "breached_edge", "separate_modules": true}, {"id": "bloom_overlay", "separate_overlays": true}
+    ],
+    "blender": {"root_collection": "PR_GGP01_Wayfarer", "source_files": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/SmallUtilityEscort_ConceptMatch.blend"], "export_files": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/Exports/SM_Ship_SmallUtilityEscort_ConceptMatch.glb"], "collections": ["00_GUIDES", "10_DISTRICTS", "20_ARMOR", "30_INTERACTIONS", "40_COLLISION", "50_SOCKETS", "60_DAMAGE", "70_BLOOM", "90_EXPORT"]},
+    "unreal": {"asset_type": "StaticMeshSet", "destination_root": "/Game/Assets/Ships/Exterior/ConceptMatch/SmallUtilityEscort", "nanite": "required for shipping opaque exterior modules", "collision": "three approved UCX zones plus interaction collision", "import_policy": "Do not replace the approved concept-match build. Optimize its module layout and tangents in place."}
+  },
+  "acceptance_checks": [
+    {"id": "aggregate-bounds", "status": "pass", "requirement": "Aggregate actor bounds remain within 0.1 percent of 1,400 x 260 x 320 m.", "evidence": "Docs/SmallEscortExteriorProductionReview.md"},
+    {"id": "shipping-modules", "status": "blocked", "requirement": "Undamaged baseline uses no more than 30 material-preserving exterior modules."},
+    {"id": "tangents", "status": "pending", "requirement": "Shipping geometry produces no degenerate tangent warnings."},
+    {"id": "interaction-separation", "status": "pending", "requirement": "Docking, damage, defense, and VFX components retain stable sockets."},
+    {"id": "silhouette", "status": "pending", "requirement": "EVA and fleet-distance silhouettes remain equivalent to approved concept-match references."}
+  ],
+  "build_questions": ["Which 18-30 shipping module boundaries preserve the best damage replacement and EVA readability?", "When should the stale 1,150 m queue text be retired?"]
+}

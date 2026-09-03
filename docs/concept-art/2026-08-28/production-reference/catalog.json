@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-29T07:41:27Z",
+  "packet_count": 6,
+  "production_ready_count": 0,
+  "blocked_count": 4,
+  "assets": [
+    {
+      "asset_id": "GGP.Character.PressureSuit.SalvageSpecialist.ReferenceV1",
+      "title": "Pressure Suit Salvage Specialist",
+      "category": "character",
+      "status": "blocked",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/pressure-suit-salvage-specialist-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/pressure-suit-salvage-specialist-v1.png",
+      "blocking_conflict_count": 1,
+      "pending_check_count": 5,
+      "unreal_destination": "/Game/Characters/PlayerSuits/RoleModules/Salvage",
+      "blender_collection": "PR_PressureSuit_SalvageSpecialist"
+    },
+    {
+      "asset_id": "GGP.Enemy.BloomReanimatedCrew.ReferenceV1",
+      "title": "Bloom Reanimated Crew Member",
+      "category": "enemy",
+      "status": "technical-review",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/bloom-reanimated-crew-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/bloom-reanimated-crew-v1.png",
+      "blocking_conflict_count": 0,
+      "pending_check_count": 4,
+      "unreal_destination": "/Game/Assets/Models/Bloom/ReanimatedCrew",
+      "blender_collection": "PR_BloomReanimatedCrew"
+    },
+    {
+      "asset_id": "GGP.Environment.CryoBay.ModularKit.ReferenceV1",
+      "title": "Cryo Bay Modular Environment Kit",
+      "category": "environment-kit",
+      "status": "blocked",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/cryo-bay-modular-kit-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/cryo-bay-modular-kit-v1.png",
+      "blocking_conflict_count": 1,
+      "pending_check_count": 4,
+      "unreal_destination": "/Game/Assets/ShipRooms/Cryo",
+      "blender_collection": "PR_CryoBay_ModularKit"
+    },
+    {
+      "asset_id": "GGP.Prop.HelmDestinationConsole.ReferenceV1",
+      "title": "Helm and Destination Console",
+      "category": "interactive-prop",
+      "status": "ready-for-graybox",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/helm-destination-console-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/helm-destination-console-v1.png",
+      "blocking_conflict_count": 0,
+      "pending_check_count": 5,
+      "unreal_destination": "/Game/Assets/Models/ShipSystems/HelmDestinationConsole",
+      "blender_collection": "PR_HelmDestinationConsole"
+    },
+    {
+      "asset_id": "GGP.PropKit.EVASalvageTools.ReferenceV1",
+      "title": "EVA Salvage Tool Kit",
+      "category": "prop-kit",
+      "status": "blocked",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/eva-salvage-tool-kit-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/eva-salvage-tool-kit-v1.png",
+      "blocking_conflict_count": 1,
+      "pending_check_count": 6,
+      "unreal_destination": "/Game/Assets/Models/Tools/EVASalvage",
+      "blender_collection": "PR_EVASalvageToolKit"
+    },
+    {
+      "asset_id": "GGP.Ship.SmallUtilityEscort.ReferenceV1",
+      "title": "Small Utility Escort",
+      "category": "ship",
+      "status": "blocked",
+      "production_ready": false,
+      "manifest": "docs/concept-art/2026-08-28/production-reference/small-utility-escort-production-sheet-v1.production.json",
+      "source_sheet": "docs/concept-art/2026-08-28/production-reference/small-utility-escort-production-sheet-v1.png",
+      "blocking_conflict_count": 1,
+      "pending_check_count": 4,
+      "unreal_destination": "/Game/Assets/Ships/Exterior/ConceptMatch/SmallUtilityEscort",
+      "blender_collection": "PR_SmallUtilityEscort"
+    }
+  ]
+}

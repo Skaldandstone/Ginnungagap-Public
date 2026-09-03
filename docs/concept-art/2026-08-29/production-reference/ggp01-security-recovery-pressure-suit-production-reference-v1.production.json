@@ -1,0 +1,403 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.SecurityRecovery.ReferenceV1",
+  "title": "GGP-01 Security and Recovery Pressure Suit",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "owners": [
+    "character-art",
+    "technical-art",
+    "animation",
+    "gameplay",
+    "vfx"
+  ],
+  "metadata": {
+    "canonical_enum": "EPressureSuitRole::Security",
+    "display_name": "Security / Recovery",
+    "legacy_art_alias": "Marine",
+    "class_purpose": "Protection, restraint, breaching assistance, casualty extraction, and zero-g recovery."
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-security-recovery-pressure-suit-production-reference-v1.png",
+    "sha256": "6650af6593df60ffe3d71b24ee0b1eb29d5ad02629dad4205e6694c2a06c4d4d",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Marine is a legacy art-source alias. Security / Recovery is the canonical player-facing role."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+      "role": "strict base suit authority",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/suits/player-suit-role-lineup.png",
+      "role": "security palette and equipment density",
+      "required": true
+    },
+    {
+      "path": "Art/Characters/PlayerSuits/PrimaryOversuits/Previews_v23/PlayerOversuit_Marine_v23_Front.png",
+      "role": "legacy module placement evidence",
+      "required": true
+    },
+    {
+      "path": "docs/PlayerSuitAssets.md",
+      "role": "Marine to Security mapping and module contract",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "role",
+        "value": "Security / Recovery",
+        "source": "EPressureSuitRole"
+      },
+      {
+        "field": "legacy_art_alias",
+        "value": "Marine",
+        "source": "docs/PlayerSuitAssets.md"
+      },
+      {
+        "field": "modules",
+        "value": [
+          "cuirass",
+          "shoulder_cap_l",
+          "shoulder_cap_r",
+          "forearm_guard_l",
+          "forearm_guard_r",
+          "restraint_pouch",
+          "breach_tool",
+          "recovery_hardpoint_l",
+          "recovery_hardpoint_r",
+          "drag_harness"
+        ],
+        "source": "source sheet and PlayerSuitAssets.md"
+      },
+      {
+        "field": "weapon_policy",
+        "value": "weapons are optional equipment and never part of the suit mesh",
+        "source": "source sheet"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "security_accent",
+        "value": "charcoal modules with restrained safety red markings",
+        "source": "role lineup"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "parts": [
+      {
+        "id": "base_suit",
+        "type": "inherit",
+        "source": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2"
+      },
+      {
+        "id": "cuirass",
+        "type": "conformal_rigid_removable"
+      },
+      {
+        "id": "shoulder_caps",
+        "type": "paired_rigid_removable"
+      },
+      {
+        "id": "forearm_guards",
+        "type": "paired_rigid_removable"
+      },
+      {
+        "id": "restraint_pouch",
+        "type": "removable"
+      },
+      {
+        "id": "breach_tool",
+        "type": "handheld_or_stowed"
+      },
+      {
+        "id": "recovery_hardpoints",
+        "type": "paired_rigid_removable"
+      },
+      {
+        "id": "drag_harness",
+        "type": "folded_or_deployed"
+      }
+    ],
+    "materials": [
+      {
+        "id": "security_modules",
+        "channels": [
+          "base_color",
+          "normal",
+          "ORM",
+          "security_id",
+          "wear"
+        ]
+      },
+      {
+        "id": "restraint_status",
+        "channels": [
+          "ready",
+          "deployed",
+          "spent"
+        ]
+      },
+      {
+        "id": "recovery_hardpoints",
+        "channels": [
+          "load",
+          "damage",
+          "contact"
+        ]
+      }
+    ],
+    "sockets": [
+      {
+        "name": "SOCKET_CUIRASS"
+      },
+      {
+        "name": "SOCKET_SHOULDER_CAP_L"
+      },
+      {
+        "name": "SOCKET_SHOULDER_CAP_R"
+      },
+      {
+        "name": "SOCKET_FOREARM_GUARD_L"
+      },
+      {
+        "name": "SOCKET_FOREARM_GUARD_R"
+      },
+      {
+        "name": "SOCKET_RESTRAINT_POUCH"
+      },
+      {
+        "name": "SOCKET_BREACH_TOOL"
+      },
+      {
+        "name": "SOCKET_RECOVERY_HARDPOINT_L"
+      },
+      {
+        "name": "SOCKET_RECOVERY_HARDPOINT_R"
+      },
+      {
+        "name": "SOCKET_RECOVERY_TETHER"
+      },
+      {
+        "name": "SOCKET_DRAG_HARNESS"
+      }
+    ],
+    "states": [
+      {
+        "id": "stowed"
+      },
+      {
+        "id": "guarded_scan"
+      },
+      {
+        "id": "restraint_deploy"
+      },
+      {
+        "id": "breach_assist"
+      },
+      {
+        "id": "shielded_tool_brace"
+      },
+      {
+        "id": "casualty_carry"
+      },
+      {
+        "id": "casualty_drag"
+      },
+      {
+        "id": "zero_g_recovery"
+      }
+    ],
+    "blender": {
+      "root_collection": "PR_GGP01_Suit_SecurityRecovery",
+      "module_collection": "KIT_SecurityRecovery",
+      "shared_base_link": "PR_GGP01_SharedPressureSuit_V2"
+    },
+    "unreal": {
+      "asset_type": "Modular SkeletalMesh and StaticMesh kit",
+      "destination_root": "/Game/Characters/Player/Suit/Roles/Security",
+      "role_enum": "Security"
+    },
+    "rig": {
+      "requirements": [
+        {
+          "id": "SEC-RIG-001",
+          "requirement": "Cuirass, shoulder caps, forearm guards, and hardpoints remain rigid and conformal across all nine body profiles."
+        },
+        {
+          "id": "SEC-RIG-002",
+          "requirement": "Drag harness and recovery tether expose named rescuer, casualty, and anchor IK targets."
+        },
+        {
+          "id": "SEC-RIG-003",
+          "requirement": "Stowed modules stay inside the shared crawl and squeeze envelope."
+        }
+      ]
+    },
+    "animation": {
+      "clips": [
+        "guarded_scan",
+        "restraint_deploy",
+        "door_breach_assist",
+        "shielded_tool_brace",
+        "casualty_carry",
+        "casualty_drag",
+        "mag_boot_wall_transition",
+        "zero_g_recovery_tether"
+      ],
+      "requirements": [
+        {
+          "id": "SEC-AN-001",
+          "requirement": "Recovery and restraint actions support first and third person, network authority, body-size offsets, and constrained-space cancellation."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "restraint_status",
+          "attachment": "SOCKET_RESTRAINT_POUCH"
+        },
+        {
+          "id": "breach_tool_effect",
+          "attachment": "SOCKET_BREACH_TOOL"
+        },
+        {
+          "id": "recovery_hardpoint_contact",
+          "attachment": "SOCKET_RECOVERY_HARDPOINT_L and R"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "SEC-VFX-001",
+          "requirement": "Security markings remain distinct from medical symbols and Bloom warnings."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {
+          "id": "hose_left",
+          "inherit": "SP_Hose_Left"
+        },
+        {
+          "id": "hose_right",
+          "inherit": "SP_Hose_Right"
+        },
+        {
+          "id": "recovery_tether",
+          "root_socket": "SOCKET_RECOVERY_TETHER",
+          "end_socket": "runtime_casualty_or_anchor",
+          "optional": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "SEC-SP-001",
+          "requirement": "Recovery tether exposes slack, collision, reel, detach, load, and server-authority controls independent of life-support hoses."
+        }
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "beauty"
+        },
+        {
+          "id": "base_suit_id"
+        },
+        {
+          "id": "security_module_id"
+        },
+        {
+          "id": "restraint_id"
+        },
+        {
+          "id": "recovery_hardpoint"
+        },
+        {
+          "id": "contact"
+        },
+        {
+          "id": "velocity"
+        },
+        {
+          "id": "tether"
+        }
+      ],
+      "channels": [
+        {
+          "name": "vertex_r",
+          "usage": "wear"
+        },
+        {
+          "name": "vertex_g",
+          "usage": "contact_load"
+        },
+        {
+          "name": "vertex_b",
+          "usage": "wetness"
+        },
+        {
+          "name": "vertex_a",
+          "usage": "damage"
+        }
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {
+          "id": "SEC-IMP-001",
+          "requirement": "Register only Security as the enum and Security / Recovery as the display name; Marine remains metadata for art provenance."
+        },
+        {
+          "id": "SEC-IMP-002",
+          "requirement": "Weapons remain separate equipment assets and are never merged into the suit skeletal mesh."
+        },
+        {
+          "id": "SEC-IMP-003",
+          "requirement": "Test restraint, breach assist, carry, drag, mag transition, and recovery tether on all nine body profiles."
+        }
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "SEC-001",
+      "status": "pending",
+      "requirement": "All Security / Recovery modules attach to named sockets without changing the shared base silhouette."
+    },
+    {
+      "id": "SEC-002",
+      "status": "pending",
+      "requirement": "Restraint, breach tool, carry, drag, tether, crawl, squeeze, ladder, and zero-g actions pass first and third person QA."
+    },
+    {
+      "id": "SEC-003",
+      "status": "pending",
+      "requirement": "Security equipment contains no medical cross and remains visually distinct from Medical."
+    }
+  ],
+  "build_questions": [
+    "Confirm whether recovery tether load limits are suit-driven, tool-driven, or shared between both systems."
+  ]
+}

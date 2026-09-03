@@ -1,0 +1,93 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Companionway.ModularKit.ReferenceV1",
+  "title": "GGP-01 Companionway Modular Kit",
+  "category": "environment-kit",
+  "status": "ready-for-graybox",
+  "production_ready": false,
+  "owners": ["environment-art", "level-design", "gameplay", "technical-art"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-companionway-modular-kit-v1.png",
+    "sha256": "d31392b90531a2ff0dd718e78e9779e46314692a01f452dd777259fe426fa3c9",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Derived from the existing clean, damaged, low-light, and Bloom corridor concepts. Dimensions were corrected to the current quick-demo procedural corridor contract."
+  },
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Corridors/GGP01_ShipCorridor_Undamaged.png", "role": "clean visual language", "required": true},
+    {"path": "Content/Assets/ConceptArt/Corridors/GGP01_ShipCorridor_Damaged.png", "role": "damage-state language", "required": true},
+    {"path": "Content/Assets/ConceptArt/Corridors/GGP01_ShipCorridor_DamagedPoorlyLit.png", "role": "unpowered and emergency-lighting language", "required": true},
+    {"path": "Content/Assets/ConceptArt/Corridors/GGP01_ShipCorridor_BloomCorrupted_v6.png", "role": "Bloom overlay language", "required": true},
+    {"path": "Config/Ships/QuickDemoFourDeck.json", "role": "current demo corridor dimensions", "required": true},
+    {"path": "Source/Ginnungagap/Public/LevelSetup/ProceduralShipBuilder.h", "role": "runtime corridor bounds", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "build.dimensions_m", "value": [6.0, 3.6, 6.0], "source": "Config/Ships/QuickDemoFourDeck.json", "note": "One 6 m planning bay, 3.6 m quick-demo traversal width, and 6.0 m procedural corridor height."},
+      {"field": "build.states", "value": ["clean", "damaged", "unpowered", "depressurized", "bloom_overlay"], "source": "Content/Assets/ConceptArt/Corridors"},
+      {"field": "build.sockets", "value": ["body", "obstacle", "bloom_growth", "activity", "damage_repair"], "source": "Source/Ginnungagap/Private/LevelSetup/ProceduralShipBuilder.cpp"}
+    ],
+    "provisional": [
+      {"field": "build.parts", "value": ["straight", "corner", "t_junction", "four_way", "pressure_door", "floor", "ceiling", "wall_service_bay", "obstruction_socket"], "source": "ggp01-companionway-modular-kit-v1.png", "note": "Visual decomposition must be reconciled to the live corridor graph and door actors."},
+      {"field": "material_allocation", "value": "shared trim and state-overlay family", "source": "ggp01-companionway-modular-kit-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "corridor-width-scope", "severity": "warning", "description": "Config/ShipLayout.json retains a 2.6 m major-corridor width while the current quick-demo builder uses 3.6 m.", "resolution": "Use 3.6 m for the GGP-01 quick-demo kit and name any future 2.6 m narrow companionway as a separate profile."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": [6.0, 3.6, 6.0],
+    "current_bounds_cm": {"module_length": 600, "traversal_width": 360, "section_height": 600},
+    "pivot": {"name": "PIVOT_ModuleFloorCenter", "rule": "Floor center at the negative-X snap face; snap faces remain on the 6 m bay grid.", "authority": "provisional"},
+    "parts": [
+      {"id": "01", "name": "SM_Companionway_Straight", "role": "base 6 m run"},
+      {"id": "02", "name": "SM_Companionway_Corner90", "role": "90 degree turn"},
+      {"id": "03", "name": "SM_Companionway_TJunction", "role": "three-way junction"},
+      {"id": "04", "name": "SM_Companionway_FourWay", "role": "four-way junction"},
+      {"id": "05", "name": "SM_PressureDoor_Frame", "role": "door interface"},
+      {"id": "06", "name": "SM_Companionway_Floor", "role": "replaceable floor module"},
+      {"id": "07", "name": "SM_Companionway_Ceiling", "role": "service ceiling module"},
+      {"id": "08", "name": "SM_Companionway_WallService", "role": "utility and access wall"},
+      {"id": "09", "name": "SM_Companionway_ObstructionSocket", "role": "damage and Bloom placement carrier"}
+    ],
+    "materials": [
+      {"slot": "structure", "family": "black-gunmetal"},
+      {"slot": "panels", "family": "dark-painted-metal"},
+      {"slot": "floor", "family": "steel-grate"},
+      {"slot": "utilities", "family": "steel-copper"},
+      {"slot": "emissive", "family": "cold-white-cyan"},
+      {"slot": "damage_overlay", "family": "damage"},
+      {"slot": "bloom_overlay", "family": "bloom-violet"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Obstacle", "purpose": "traversal obstruction"},
+      {"name": "SOCKET_BloomGrowth", "purpose": "separate Bloom geometry"},
+      {"name": "SOCKET_Activity", "purpose": "player activity station"},
+      {"name": "SOCKET_DamageRepair", "purpose": "repair interaction"},
+      {"name": "SOCKET_Door_A", "purpose": "pressure-door interface"},
+      {"name": "SOCKET_Door_B", "purpose": "pressure-door interface"}
+    ],
+    "states": [
+      {"id": "clean", "base_geometry": true},
+      {"id": "damaged", "base_geometry": true, "separate_overlays": true},
+      {"id": "unpowered", "base_geometry": true, "lighting_only": true},
+      {"id": "depressurized", "base_geometry": true, "vfx_only": true},
+      {"id": "bloom_overlay", "base_geometry": true, "separate_overlays": true}
+    ],
+    "blender": {"root_collection": "PR_GGP01_Companionway", "collections": ["00_GUIDES", "10_SHELL", "20_MODULES", "30_COLLISION", "40_SOCKETS", "50_DAMAGE", "60_BLOOM", "90_EXPORT"], "validation_scene": "Build/Validation/ProductionReference/ggp01-companionway-scaffold-v1.blend", "export_files": ["Art/ShipRooms/Production/Companionway/GGP01_CompanionwayKit.glb"]},
+    "unreal": {"asset_type": "StaticMeshSet", "destination_root": "/Game/Assets/Ships/Production/Companionway", "collision": "authored simple collision per module", "nanite": "enabled for opaque structural modules after performance review", "import_policy": "Import graybox only after snap, clearance, and door-interface checks pass."}
+  },
+  "acceptance_checks": [
+    {"id": "blender-bootstrap", "status": "pass", "requirement": "Packet creates and reopens a Blender scaffold with the expected root collection, guide, and sockets.", "evidence": "Build/Validation/ProductionReference/ggp01-companionway-scaffold-v1.blend"},
+    {"id": "dimensions", "status": "pending", "requirement": "Measured assembly preserves 600 x 360 x 600 cm bounds and standing traversal clearance."},
+    {"id": "junction-snap", "status": "pending", "requirement": "Straight, corner, T, and four-way modules connect without gaps, overlap, or navigation discontinuity."},
+    {"id": "door-interface", "status": "pending", "requirement": "Pressure-door frame matches the runtime door actor, seal plane, and interaction clearance."},
+    {"id": "state-separation", "status": "pending", "requirement": "Damage, lighting, decompression VFX, and Bloom layers can be controlled independently."},
+    {"id": "playable-assembly", "status": "pending", "requirement": "One measured corridor loop passes traversal, obstruction, combat, and repair tests in the quick-demo map."}
+  ],
+  "build_questions": ["Should the 2.6 m profile become a separately named narrow companionway kit?", "Which junction types are required by the current procedural graph before the first art pass?"]
+}

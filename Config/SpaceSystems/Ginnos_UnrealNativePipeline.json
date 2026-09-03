@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "system_id": "c6449799-ec65-58df-b772-9aead6c05d5e",
+  "display_name": "Ginnos",
+  "engine": "Unreal Engine 5.8",
+  "visual_pipeline": "unreal_native",
+  "legacy_cosmic_sky": false,
+  "plugins": [
+    "CelestialVault",
+    "PCG",
+    "Niagara",
+    "NiagaraFluids",
+    "Volumetrics",
+    "DatasmithImporter"
+  ],
+  "layers": {
+    "deep_sky": {
+      "provider": "CelestialVault",
+      "seed_layer": "DeepSky",
+      "fictional_star_catalog": true
+    },
+    "celestial_bodies": {
+      "provider": "AProceduralStarSystemMap",
+      "seed_layer": "CelestialBodies"
+    },
+    "asteroids": {
+      "provider": "PCG",
+      "component": "AsteroidPCG",
+      "seed_layer": "Asteroids",
+      "runtime_generated": true
+    },
+    "radiation_and_dust": {
+      "provider": "Niagara",
+      "component": "RadiationDustFX",
+      "seed_layer": "RadiationDust",
+      "runtime_generated": true
+    },
+    "nebulae": {
+      "provider": "Volumetrics",
+      "component": "NebulaFX",
+      "seed_layer": "NebulaVolumes",
+      "runtime_generated": true
+    }
+  },
+  "landmarks": [],
+  "blender_role": "optional_hero_mesh_source_only",
+  "twinmotion_role": "optional_lookdev_and_datasmith_hero_asset_staging_only",
+  "twinmotion_staging_path": "/Game/Assets/SpaceSystems/TwinmotionStaging",
+  "proof_level": "/Game/Assets/Maps/SpaceSystems/L_Ginnos_UnrealNativeProof",
+  "fictional_star_catalog": "/Game/Assets/SpaceSystems/Native/Data/DT_GinnungagapFictionalStars",
+  "visual_quality_tiers": ["Low", "Medium", "High", "Cinematic"],
+  "default_visual_quality": "High",
+  "arrival_exclusion_radius_cm": 120000.0
+}

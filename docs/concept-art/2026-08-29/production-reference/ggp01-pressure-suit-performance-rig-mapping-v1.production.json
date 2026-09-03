@@ -1,0 +1,176 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.PerformanceRig.ReferenceV1",
+  "title": "GGP-01 Pressure Suit Performance and Rig Mapping",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "superseded_by": "GGP.Character.PressureSuit.PerformanceRig.ReferenceV2",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV1",
+  "owners": ["character-art", "animation", "technical-animation", "gameplay", "vfx"],
+  "metadata": {
+    "purpose": "Authoritative performance, rig, socket, state-machine, and export companion to the shared pressure suit master.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 4.x"],
+    "export_targets": ["FBX skeletal mesh", "FBX animation clips", "glTF review", "JSON rig map"],
+    "source_preservation": "Additive packet. The master sheet and all original concept files remain unchanged.",
+    "naming_prefixes": {"skeletal_mesh": "SK_", "skeleton": "SKEL_", "animation": "AN_", "anim_blueprint": "ABP_", "physics": "PHYS_", "control_rig": "CR_", "data_asset": "DA_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-pressure-suit-performance-rig-mapping-v1.png",
+    "sha256": "4db134443c3deaa405f6d3c8348f3c3c2b651566f965706353dd69c0508f1432",
+    "width_px": 1586,
+    "height_px": 992,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The JSON is authoritative where small labels on the visual sheet are abbreviated."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v1.png", "role": "appearance and modular construction authority", "required": true},
+    {"path": "Content/Assets/ConceptArt/Trailer/Player_Concept_Likeness_v2.png", "role": "player silhouette reference", "required": false},
+    {"path": "Content/Assets/ConceptArt/Trailer/ZeroG_Crew.png", "role": "zero-g performance reference", "required": false}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "appearance", "value": "inherit from shared pressure suit master without redesign", "source": "companion master"},
+      {"field": "pose_count", "value": 16, "source": "source sheet"},
+      {"field": "false_bloom_signal_presentation", "value": "identical to genuine Bloom signal with no unique visual, audio, timing, pulse, opacity, copy, icon, or motion tell", "source": "player deception rule"},
+      {"field": "engine_scale", "value": "1 Unreal unit equals 1 centimeter", "source": "project convention"}
+    ],
+    "provisional": [
+      {"field": "retarget_source", "value": "UE5 Manny-compatible humanoid skeleton", "source": "implementation proposal"},
+      {"field": "cloth_solver", "value": "Chaos Cloth for soft-suit folds and loose straps", "source": "implementation proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"location": "ground plane below pelvis", "orientation": "+X forward, +Y right, +Z up"},
+    "parts": [
+      {"id": "body", "type": "skeletal_mesh", "required": true},
+      {"id": "helmet_shell", "type": "skeletal_or_rigid_attachment", "required": true},
+      {"id": "visor", "type": "material-driven_attachment", "required": true},
+      {"id": "backpack", "type": "socketed_module", "required": true},
+      {"id": "forearm_rails", "type": "socketed_modules", "required": true},
+      {"id": "belt_modules", "type": "socketed_modules", "required": true},
+      {"id": "hoses_and_straps", "type": "secondary_motion", "required": true},
+      {"id": "first_person_arms", "type": "derived_skeletal_mesh", "required": true}
+    ],
+    "materials": [
+      {"id": "MI_SuitFabric", "channels": ["base_color", "normal", "ORM", "wear_mask"]},
+      {"id": "MI_SuitHardShell", "channels": ["base_color", "normal", "ORM", "role_tint_mask"]},
+      {"id": "MI_SuitVisor", "channels": ["transmission", "roughness", "frost", "damage", "HUD_mask"]},
+      {"id": "MI_SuitStatus", "channels": ["emissive", "status_intensity", "damage_flicker"]}
+    ],
+    "sockets": [
+      {"name": "SCK_HelmetShell", "bone": "head", "usage": "helmet shell"},
+      {"name": "SCK_Visor", "bone": "head", "usage": "visor and visor effects"},
+      {"name": "SCK_Backpack", "bone": "spine_03", "usage": "life-support pack"},
+      {"name": "SCK_ChestHardpoint", "bone": "spine_03", "usage": "role module"},
+      {"name": "SCK_Forearm_L", "bone": "lowerarm_l", "usage": "scanner or utility rail"},
+      {"name": "SCK_Forearm_R", "bone": "lowerarm_r", "usage": "scanner or utility rail"},
+      {"name": "SCK_HandGrip_L", "bone": "hand_l", "usage": "tool IK"},
+      {"name": "SCK_HandGrip_R", "bone": "hand_r", "usage": "tool IK"},
+      {"name": "SCK_Belt_L", "bone": "pelvis", "usage": "pouch or rescue equipment"},
+      {"name": "SCK_Belt_R", "bone": "pelvis", "usage": "pouch or rescue equipment"},
+      {"name": "SCK_Thigh_L", "bone": "thigh_l", "usage": "role module"},
+      {"name": "SCK_Thigh_R", "bone": "thigh_r", "usage": "role module"}
+    ],
+    "states": [
+      {"id": "sealed_idle", "clip": "AN_GGP01_Idle_Sealed", "loop": true},
+      {"id": "helmet_open", "clip": "AN_GGP01_Idle_HelmetOpen", "loop": true},
+      {"id": "walk", "clip": "AN_GGP01_Loco_Walk_Fwd", "loop": true},
+      {"id": "sprint", "clip": "AN_GGP01_Loco_Run_Fwd", "loop": true},
+      {"id": "crouch", "clip": "AN_GGP01_Loco_Crouch_Idle", "loop": true},
+      {"id": "climb_ladder", "clip": "AN_GGP01_Climb_Ladder_Up", "loop": true},
+      {"id": "zero_g_drift", "clip": "AN_GGP01_ZG_Drift_Idle", "loop": true},
+      {"id": "zero_g_push_off", "clip": "AN_GGP01_ZG_PushOff", "loop": false},
+      {"id": "tool_brace", "clip": "AN_GGP01_Tool_TwoHand_Brace", "loop": true},
+      {"id": "scanner", "clip": "AN_GGP01_Scan_OneHand_Idle", "loop": true},
+      {"id": "carry_casualty", "clip": "AN_GGP01_Carry_Casualty", "loop": true},
+      {"id": "drag_casualty", "clip": "AN_GGP01_Drag_Casualty", "loop": true},
+      {"id": "impact_recoil", "clip": "AN_GGP01_Recoil_Impact", "loop": false},
+      {"id": "decompression_brace", "clip": "AN_GGP01_Decompress_Brace", "loop": true},
+      {"id": "low_oxygen_fatigue", "clip": "AN_GGP01_Fatigue_LowO2_Idle", "loop": true},
+      {"id": "bloom_uncertainty", "clip": "AN_GGP01_Bloom_Uncertainty_Idle", "loop": true, "truth_independent": true}
+    ],
+    "blender": {"root_collection": "GGP01_PressureSuit_PerformanceRig", "armature": "RIG_GGP01_PressureSuit", "actions_collection": "ANIM_GGP01_PressureSuit", "apply_unit_scale": true, "leaf_bones": false},
+    "unreal": {"asset_type": "SkeletalMesh and AnimationSequence", "destination_root": "/Game/Characters/Player/Suit/Production", "skeleton": "SKEL_GGP01_PressureSuit", "anim_blueprint": "ABP_GGP01_PressureSuit", "physics_asset": "PHYS_GGP01_PressureSuit"},
+    "rig": {
+      "controls": [
+        {"id": "global_root", "bones": ["root"], "space": "world"},
+        {"id": "body_core", "bones": ["pelvis", "spine_01", "spine_02", "spine_03", "neck_01", "head"], "mode": "FK with pelvis translation"},
+        {"id": "arms", "bones": ["clavicle_l", "upperarm_l", "lowerarm_l", "hand_l", "clavicle_r", "upperarm_r", "lowerarm_r", "hand_r"], "mode": "IK/FK blend"},
+        {"id": "hands", "bones": ["all finger chains"], "mode": "per-finger curl plus pose library"},
+        {"id": "legs", "bones": ["thigh_l", "calf_l", "foot_l", "ball_l", "thigh_r", "calf_r", "foot_r", "ball_r"], "mode": "IK/FK blend with foot roll"},
+        {"id": "equipment", "bones": ["helmet_hinge", "visor", "backpack_follow", "hose_roots", "strap_roots"], "mode": "FK and driven secondary"}
+      ],
+      "deformation_zones": ["shoulders", "elbows", "torso", "hips", "knees", "ankles", "wrists", "all fingers"],
+      "requirements": [
+        {"id": "RIG-001", "requirement": "First-person and third-person arms share skeleton proportions and socket names."},
+        {"id": "RIG-002", "requirement": "Two-hand tools use left and right hand IK plus a tool-space effector."},
+        {"id": "RIG-003", "requirement": "Helmet opening cannot intersect visor, collar, backpack, or camera."}
+      ]
+    },
+    "animation": {
+      "state_machine": {"root": "sealed_idle", "branches": ["locomotion", "interaction", "exertion", "stress_hazard"], "hazard_substates": ["low_oxygen_fatigue", "decompression_brace", "impact_recoil", "bloom_uncertainty"]},
+      "clips": ["AN_GGP01_Idle_Sealed", "AN_GGP01_Idle_HelmetOpen", "AN_GGP01_Loco_Walk_Fwd", "AN_GGP01_Loco_Run_Fwd", "AN_GGP01_Loco_Crouch_Idle", "AN_GGP01_Climb_Ladder_Up", "AN_GGP01_ZG_Drift_Idle", "AN_GGP01_ZG_PushOff", "AN_GGP01_Tool_TwoHand_Brace", "AN_GGP01_Scan_OneHand_Idle", "AN_GGP01_Carry_Casualty", "AN_GGP01_Drag_Casualty", "AN_GGP01_Recoil_Impact", "AN_GGP01_Decompress_Brace", "AN_GGP01_Fatigue_LowO2_Idle", "AN_GGP01_Bloom_Uncertainty_Idle"],
+      "requirements": [
+        {"id": "AN-001", "requirement": "Locomotion cycles include in-place masters and root-motion derived clips where gameplay requires them."},
+        {"id": "AN-002", "requirement": "Hoses, straps, and soft folds lag body motion and settle without penetrating hard-shell parts."},
+        {"id": "AN-003", "requirement": "Bloom uncertainty animation is selected independently of whether the hidden signal is genuine or false."}
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "visor_frost", "attachment": "SCK_Visor", "system": "NS_Suit_VisorFrost"},
+        {"id": "decompression_jet", "attachment": "damage_socket_runtime", "system": "NS_Suit_Decompression"},
+        {"id": "impact_sparks", "attachment": "impact_point_runtime", "system": "NS_Suit_Impact"},
+        {"id": "bloom_warning_presentation", "attachment": "HUD", "system": "UI only", "truth_independent": true}
+      ],
+      "requirements": [{"id": "VFX-001", "requirement": "No VFX layer may reveal whether a player Bloom warning is genuine or false."}]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Hose_Backpack_L", "root_socket": "SCK_Backpack", "end_socket": "spine_left_service", "solver": "spline IK or groom-like cable"},
+        {"id": "SP_Hose_Backpack_R", "root_socket": "SCK_Backpack", "end_socket": "spine_right_service", "solver": "spline IK or groom-like cable"},
+        {"id": "SP_Collar_Hose", "root_socket": "collar_rear", "end_socket": "SCK_Backpack", "solver": "spline IK"}
+      ],
+      "requirements": [{"id": "SP-001", "requirement": "Spline controls expose root, mid, tip, radius, slack, collision, damping, and stiffness."}]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "beauty", "usage": "final shaded output"},
+        {"id": "body_id", "usage": "player silhouette and stencil"},
+        {"id": "equipment_id", "usage": "socketed module separation"},
+        {"id": "visor_mask", "usage": "transmission, frost, crack, and HUD occlusion"},
+        {"id": "role_tint_mask", "usage": "crew, engineering, medical, security module tint only"},
+        {"id": "velocity", "usage": "motion blur and temporal effects"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "wear and dirt accumulation"},
+        {"name": "vertex_color.g", "usage": "role tint eligibility"},
+        {"name": "vertex_color.b", "usage": "wetness or frost"},
+        {"name": "vertex_color.a", "usage": "damage reveal"}
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {"id": "IMP-001", "requirement": "Retarget and verify all 16 poses on the final body proportions before skin-detail polish."},
+        {"id": "IMP-002", "requirement": "Validate camera, glove, wrist device, and held-tool clearance in first person."},
+        {"id": "IMP-003", "requirement": "Store genuine or false Bloom truth only in gameplay state. Presentation receives a normalized warning state."},
+        {"id": "IMP-004", "requirement": "Export rig-map.json with bone, control, socket, action, and material parameter names."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "SUIT-PERF-001", "status": "pending", "requirement": "All 16 poses retarget without limb, visor, backpack, or socket penetration."},
+    {"id": "SUIT-PERF-002", "status": "pending", "requirement": "First-person arms match third-person proportions and hand sockets."},
+    {"id": "SUIT-PERF-003", "status": "pending", "requirement": "Genuine and false Bloom signals produce byte-identical presentation parameters for color, icon, copy, sound, timing, opacity, pulse, and motion."},
+    {"id": "SUIT-PERF-004", "status": "pending", "requirement": "Blender and Unreal names match the sidecar exactly."}
+  ],
+  "build_questions": ["Confirm final skeleton target after current player body topology is locked.", "Confirm whether casualty carry and drag require networked root motion."]
+}

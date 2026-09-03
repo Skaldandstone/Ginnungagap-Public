@@ -1,0 +1,146 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Companionway.SplineSocketRender.ReferenceV1",
+  "title": "GGP-01 Companionway Spline, Socket, and Render Mapping",
+  "category": "environment-kit",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Environment.Companionway.ModularKit.ReferenceV1",
+  "owners": ["environment-art", "technical-art", "level-design", "lighting", "vfx"],
+  "metadata": {
+    "purpose": "Authoritative modular route, socket, state-layer, render, and construction-script companion for companionways.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 4.x"],
+    "export_targets": ["FBX or glTF modules", "Unreal Blueprint construction data", "JSON splines and sockets", "trim and decal atlases"],
+    "source_preservation": "Additive packet. Existing concept and kit sheets remain unchanged.",
+    "naming_prefixes": {"static_mesh": "SM_GGP01_", "blueprint": "BP_GGP01_Companionway_", "material_instance": "MI_GGP01_Companionway_", "spline": "SP_GGP01_", "socket": "SOCK_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-companionway-spline-socket-render-mapping-v1.png",
+    "sha256": "6e5444c1d5452f8e4906565208b2b4f06bf0267914150ed11b6c67b3499e9d2f",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Provisional tolerances and nav clearances require in-engine verification."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-companionway-modular-kit-v1.png", "role": "visual, dimension, module, and state authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "module_width_m", "value": 3.6, "source": "modular kit master"},
+      {"field": "module_length_m", "value": 6.0, "source": "modular kit master"},
+      {"field": "module_types", "value": ["straight", "corner_90", "t_junction", "four_way"], "source": "modular kit master"},
+      {"field": "state_layers", "value": ["clean", "damaged", "unpowered", "depressurized", "bloom_overlay"], "source": "modular kit master"}
+    ],
+    "provisional": [
+      {"field": "grid_m", "value": 0.1, "source": "implementation proposal"},
+      {"field": "snap_tolerance_cm", "value": 0.5, "source": "implementation proposal"},
+      {"field": "nav_clear_width_m", "value": 1.8, "source": "implementation proposal"},
+      {"field": "target_texel_density_px_per_m", "value": 512, "source": "implementation proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": [6.0, 3.6, 6.0],
+    "pivot": {"location": "module center on floor plane", "orientation": "+X forward, +Y right, +Z up", "snap_plane": "each open end at x plus or minus 3.0 m for straight"},
+    "parts": [
+      {"id": "straight", "type": "module", "required": true}, {"id": "corner_90", "type": "module", "required": true},
+      {"id": "t_junction", "type": "module", "required": true}, {"id": "four_way", "type": "module", "required": true},
+      {"id": "floor", "type": "replaceable_layer", "required": true}, {"id": "ceiling", "type": "replaceable_layer", "required": true},
+      {"id": "wall_service_bay", "type": "socketed_module", "required": true}, {"id": "pressure_door", "type": "socketed_interactive", "required": true},
+      {"id": "obstruction", "type": "socketed_gameplay_layer", "required": true}, {"id": "bloom_growth", "type": "spline_and_socket_overlay", "required": true}
+    ],
+    "materials": [
+      {"id": "M01_MetalStruct", "slot": 0}, {"id": "M02_MetalPanel", "slot": 1},
+      {"id": "M03_GrateFloor", "slot": 2}, {"id": "M04_Rubber", "slot": 3},
+      {"id": "M05_LightEmissive", "slot": 4}, {"id": "M06_GlassScreen", "slot": 5},
+      {"id": "M07_PipeMetal", "slot": 6}, {"id": "M08_DecalStrips", "slot": 7},
+      {"id": "M09_BloomGrowth", "slot": 8}
+    ],
+    "sockets": [
+      {"name": "SOCK_Snap_Front", "usage": "module connection"}, {"name": "SOCK_Snap_Back", "usage": "module connection"},
+      {"name": "SOCK_Snap_Left", "usage": "junction connection"}, {"name": "SOCK_Snap_Right", "usage": "junction connection"},
+      {"name": "SOCK_Door_Front", "usage": "pressure door"}, {"name": "SOCK_Door_Back", "usage": "pressure door"},
+      {"name": "SOCK_Door_Left", "usage": "pressure door"}, {"name": "SOCK_Door_Right", "usage": "pressure door"},
+      {"name": "SOCK_Obstruction_Front", "usage": "gameplay obstruction"}, {"name": "SOCK_Obstruction_Back", "usage": "gameplay obstruction"},
+      {"name": "SOCK_Obstruction_Left", "usage": "gameplay obstruction"}, {"name": "SOCK_Obstruction_Right", "usage": "gameplay obstruction"}
+    ],
+    "states": [
+      {"id": "clean", "base_state": true}, {"id": "damaged", "overlay": true},
+      {"id": "unpowered", "lighting_state": true}, {"id": "depressurized", "atmosphere_state": true},
+      {"id": "bloom_overlay", "overlay": true, "compatible_with": ["clean", "damaged", "unpowered", "depressurized"]}
+    ],
+    "blender": {"root_collection": "GGP01_Companionway", "module_collections": ["01_Straight", "02_Corner90", "03_TJunction", "04_FourWay"], "implementation_collections": ["Splines", "Sockets", "Collision", "StateLayers", "RenderMasks"]},
+    "unreal": {"asset_type": "Nanite StaticMesh modules and Actor Blueprint", "destination_root": "/Game/Environments/Ship/Companionway/Production", "construction_blueprint": "BP_GGP01_CompanionwayModule", "data_asset": "DA_GGP01_CompanionwayKit"},
+    "rig": {"not_applicable": true, "reason": "Rigid modular environment. Pressure doors use component pivots and timelines."},
+    "animation": {
+      "states": [
+        {"id": "door_closed", "component": "pressure_door"}, {"id": "door_opening", "component": "pressure_door"},
+        {"id": "door_open", "component": "pressure_door"}, {"id": "door_closing", "component": "pressure_door"},
+        {"id": "door_locked", "component": "pressure_door"}, {"id": "door_unpowered", "component": "pressure_door"}
+      ],
+      "requirements": [{"id": "AN-001", "requirement": "Door animation, collision, nav link, audio, warning light, and pressure seal events share one state source."}]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "lighting", "route": "SP_Lighting", "system": "instanced lights and emissive strips"},
+        {"id": "depressurization", "route": "SP_Centerline", "system": "NS_Companionway_Decompression"},
+        {"id": "damage_sparks", "route": "damage sockets", "system": "NS_Companionway_Damage"},
+        {"id": "bloom_growth", "route": "SP_BloomGrowth", "system": "PCG or spline mesh plus Niagara"}
+      ],
+      "requirements": [{"id": "VFX-001", "requirement": "State layers combine without replacing base geometry or breaking snap compatibility."}]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Centerline", "purpose": "construction and navigation reference", "owner": "module", "coordinate_space": "module local", "continuity_socket": "SOCK_Snap_*"},
+        {"id": "SP_FloorService", "purpose": "floor utilities and gameplay traces", "owner": "module", "coordinate_space": "module local"},
+        {"id": "SP_CeilingService", "purpose": "ceiling utilities", "owner": "module", "coordinate_space": "module local"},
+        {"id": "SP_Lighting", "purpose": "light fixtures and emissive strips", "owner": "module", "coordinate_space": "module local"},
+        {"id": "SP_PipeCable_{NN}", "purpose": "pipe and cable spline meshes", "owner": "module", "coordinate_space": "module local"},
+        {"id": "SP_DecalStrip_{NN}", "purpose": "direction, hazard, and maintenance decals", "owner": "module", "coordinate_space": "module local"},
+        {"id": "SP_BloomGrowth_{NN}", "purpose": "corruption growth routing", "owner": "state layer", "coordinate_space": "module local"}
+      ],
+      "requirements": [
+        {"id": "SP-001", "requirement": "Each spline exports ordered points, tangent mode, roll, width, owning state, spawn class, and endpoint socket."},
+        {"id": "SP-002", "requirement": "Corner and junction splines preserve tangent continuity at every active branch."}
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "base_color", "usage": "albedo QA"}, {"id": "metallic", "usage": "PBR QA"},
+        {"id": "roughness", "usage": "PBR QA"}, {"id": "normal", "usage": "surface QA"},
+        {"id": "emissive", "usage": "light and status isolation"}, {"id": "bloom_mask", "usage": "growth state separation"},
+        {"id": "vertex_color", "usage": "layer mask QA"}, {"id": "object_id", "usage": "module and part isolation"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "dirt and AO"}, {"name": "vertex_color.g", "usage": "edge wear"},
+        {"name": "vertex_color.b", "usage": "leak and stain"}, {"name": "vertex_color.a", "usage": "Bloom overlay mask"}
+      ],
+      "texture_mapping": {"trim_sheet": "TS_GGP01_Companionway_A", "uv_policy": "UV0 trim, UV1 unique lightmap where used", "target_texel_density_px_per_m": 512, "acceptable_range_px_per_m": [256, 1024]},
+      "lighting": {"primary": "Lumen", "emissive_lights": "spawned along SP_Lighting", "static_mesh_Nanite": true}
+    },
+    "implementation": {
+      "grid": {"xy_m": 0.1, "vertical_m": 0.1, "angle_step_deg": 15, "snap_tolerance_cm": 0.5, "fit_tolerance_cm": 0.25, "float_tolerance_cm": 0.1},
+      "collision_channels": ["WorldStatic_Structure", "WorldStatic_TrimKit", "WorldDynamic_DoorsProps", "Pawn_Player", "Visibility_Trace", "Camera_NoClip"],
+      "navmesh": {"clear_width_m": 1.8, "clear_height_m": 2.1, "agent_radius_m": 0.5, "step_height_m": 0.3, "status": "provisional"},
+      "construction_order": ["centerline", "floor_service", "ceiling_service", "lighting", "pipe_cable", "decal", "bloom", "obstruction_sockets", "door_sockets", "snap_planes", "material_overrides", "state_layer"],
+      "requirements": [
+        {"id": "IMP-001", "requirement": "One module data asset stores splines, sockets, collision, nav clearances, render masks, state compatibility, and construction order."},
+        {"id": "IMP-002", "requirement": "Occlusion and streaming cell boundaries align to module bounds and do not cut an open doorway."},
+        {"id": "IMP-003", "requirement": "Bloom overlay is additive and can coexist with damage, power, and pressure states."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "COR-MAP-001", "status": "pending", "requirement": "All four module types snap on the 3.6 m by 6.0 m system without visible gaps or collision overlaps."},
+    {"id": "COR-MAP-002", "status": "pending", "requirement": "Every active branch maintains centerline, utility, lighting, decal, and state spline continuity."},
+    {"id": "COR-MAP-003", "status": "pending", "requirement": "Navmesh, pressure doors, obstruction sockets, and occlusion cells work in straight and junction assemblies."},
+    {"id": "COR-MAP-004", "status": "pending", "requirement": "All five state layers combine correctly and preserve base-module dimensions and sockets."}
+  ],
+  "build_questions": ["Confirm final player collision capsule and camera clearance before locking nav dimensions.", "Confirm whether depressurization uses per-module atmosphere volumes or zone-level pressure graphs."]
+}

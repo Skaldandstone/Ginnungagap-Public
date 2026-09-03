@@ -1,0 +1,153 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.PropKit.EVASalvageTools.ReferenceV1",
+  "title": "EVA Salvage Tool Kit",
+  "category": "prop-kit",
+  "status": "blocked",
+  "production_ready": false,
+  "owners": ["prop-art", "animation", "gameplay", "vfx"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/eva-salvage-tool-kit-v1.png",
+    "sha256": "871718162e7a118d17f99f24212574e395e35fe706eefad9ce327391f3ec1ef7",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "exploration",
+    "generated_on": "2026-08-28",
+    "notes": "Useful shared prop grammar and hand-use reference. Canonical item IDs and mechanics must be mapped before modeling."
+  },
+  "concept_sources": [
+    {
+      "path": "Art/Weapons/Concepts/WeaponConcepts_41-50_MiningSalvage.png",
+      "role": "existing mining and salvage concept family",
+      "required": true
+    },
+    {
+      "path": "Art/Weapons/ProductionBatch02/Metadata/WeaponBatch02.json",
+      "role": "current tool dimensions and export authority",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Public/WorldItems/WorldItemSeedCatalog.h",
+      "role": "world-item identity authority",
+      "required": true
+    }
+  ],
+  "concept_source_sets": [
+    {"root": "Art/Weapons/SalvageBatch03/CleanFirstUseReferences", "role": "clean first-use salvage-tool orbit references", "required": true, "lifecycle": "production-reference"},
+    {"root": "Art/Weapons/RealityScan/CompactRockCorer_Pilot/CleanReference", "role": "compact rock-corer clean-reference orbit", "required": true, "lifecycle": "production-reference"}
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "shared_material_language",
+        "value": ["industrial yellow", "dark ceramic", "gunmetal", "brushed steel", "rubber", "amber emissive", "teal emissive"],
+        "source": "Docs/ArtStyleGuide.md"
+      },
+      {
+        "field": "candidate_existing_assets",
+        "value": ["ThermalSeamCutter", "CableAnchorLauncher", "SampleCanister"],
+        "source": "Art/Weapons/ProductionBatch02/Metadata/WeaponBatch02.json and tools/build_gameplay_model_library.py"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "sheet_items",
+        "value": ["tether_launcher", "compact_cutting_torch", "hull_scanner", "magnetic_clamp", "sample_canister", "emergency_beacon"],
+        "source": "eva-salvage-tool-kit-v1.png"
+      },
+      {
+        "field": "shared_interfaces",
+        "value": ["tool_rail", "lanyard", "data_port", "fuel_canister", "magnetic_mount"],
+        "source": "eva-salvage-tool-kit-v1.png"
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "eva-tool-id-mapping",
+        "severity": "blocker",
+        "description": "The sheet introduces six names that do not all map one-to-one to current gameplay item IDs. Tether Launcher may overlap Cable Anchor Launcher, Compact Cutting Torch may overlap Thermal Seam Cutter, and Sample Canister already exists as a generic pickup.",
+        "resolution": "Approve a canonical ID mapping and decide which sheet items are skins, variants, or new gameplay definitions before final modeling and import."
+      }
+    ]
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "PIVOT_ItemRoot",
+      "rule": "Per-item grip or stable placement origin after the canonical ID mapping is approved.",
+      "authority": "provisional"
+    },
+    "parts": [
+      { "name": "SM_TetherLauncher", "role": "tether deployment tool", "candidate_mapping": "CableAnchorLauncher", "authority": "provisional" },
+      { "name": "SM_CompactCuttingTorch", "role": "captive thermal cutting tool", "candidate_mapping": "ThermalSeamCutter", "authority": "provisional" },
+      { "name": "SM_HullScanner", "role": "inspection and scan tool", "candidate_mapping": null, "authority": "provisional" },
+      { "name": "SM_MagneticClamp", "role": "temporary attachment tool", "candidate_mapping": null, "authority": "provisional" },
+      { "name": "SM_SampleCanister", "role": "sample storage pickup", "candidate_mapping": "SM_Pickup_SampleCanister", "authority": "provisional" },
+      { "name": "SM_EmergencyBeacon", "role": "deployable status beacon", "candidate_mapping": null, "authority": "provisional" },
+      { "name": "SM_SalvageHolster", "role": "shared pack and rail storage", "candidate_mapping": null, "authority": "provisional" }
+    ],
+    "materials": [
+      { "slot": "industrial_yellow", "family": "painted-hard-surface", "authority": "approved" },
+      { "slot": "dark_ceramic", "family": "hard-surface", "authority": "approved" },
+      { "slot": "gunmetal", "family": "hard-surface", "authority": "approved" },
+      { "slot": "brushed_steel", "family": "hard-surface", "authority": "approved" },
+      { "slot": "rubber_grip", "family": "rubber", "authority": "approved" },
+      { "slot": "amber_emissive", "family": "work-light", "authority": "approved" },
+      { "slot": "teal_emissive", "family": "scan-feedback", "authority": "approved" }
+    ],
+    "sockets": [
+      { "name": "SOCKET_Grip_R", "authority": "provisional" },
+      { "name": "SOCKET_Grip_L", "authority": "provisional" },
+      { "name": "SOCKET_ToolRail", "authority": "provisional" },
+      { "name": "SOCKET_Lanyard", "authority": "provisional" },
+      { "name": "SOCKET_VFX", "authority": "provisional" }
+    ],
+    "states": [
+      { "id": "holstered", "authority": "provisional" },
+      { "id": "held_first_person", "authority": "approved" },
+      { "id": "held_third_person", "authority": "approved" },
+      { "id": "deployed", "authority": "provisional" },
+      { "id": "emissive_active", "material_state": true, "authority": "approved" }
+    ],
+    "blender": {
+      "root_collection": "PR_EVASalvageToolKit",
+      "source_files": ["Art/Weapons/ProductionBatch02/ShipboardWeapons_ProductionBatch02.blend"],
+      "export_files": [
+        "Art/Weapons/ProductionBatch02/Exports/SM_CableAnchorLauncher.glb",
+        "Art/Weapons/ProductionBatch02/Exports/SM_ThermalSeamCutter.glb"
+      ],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "InteractivePropKit",
+      "destination_root": "/Game/Assets/Models/Tools/EVASalvage",
+      "existing_assets": ["/Game/Assets/Models/Pickups/SM_Pickup_SampleCanister"],
+      "source_files": [
+        "Art/Weapons/ProductionBatch02/Exports/SM_CableAnchorLauncher.glb",
+        "Art/Weapons/ProductionBatch02/Exports/SM_ThermalSeamCutter.glb"
+      ],
+      "collision": "simple per-item collision with explicit deployed-state envelopes",
+      "import_policy": "Do not import new item identities until eva-tool-id-mapping is resolved."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "canonical-id-map", "status": "blocked", "requirement": "Approve each sheet item as an existing asset, variant, skin, or new gameplay definition." },
+    { "id": "hand-scale", "status": "pending", "requirement": "Validate first-person grip scale and silhouette against the project glove." },
+    { "id": "socket-contract", "status": "pending", "requirement": "Approve grip, rail, lanyard, and VFX sockets per item." },
+    { "id": "moving-parts", "status": "pending", "requirement": "Separate and animate every gameplay-significant trigger, clamp, barrel, dial, and deployable part." },
+    { "id": "holster-clearance", "status": "pending", "requirement": "All items fit the shared holster and avoid suit and backpack clipping." },
+    { "id": "first-third-person", "status": "pending", "requirement": "Each approved tool passes first-person and third-person readability tests." }
+  ],
+  "build_questions": [
+    "Which generated items map to current production assets?",
+    "Are Hull Scanner, Magnetic Clamp, and Emergency Beacon new gameplay items or visual props?"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "selection_layer": "Landmarks",
+  "spawn_chance": 0.35,
+  "maximum_landmarks_per_system": 1,
+  "gameplay_generation_authority": false,
+  "entries": [
+    {
+      "id": "derelict_cargo_ship",
+      "asset": "/Game/Sci-Fi_Flying_Cargo_Ship/Meshes/Cargo/SM_cargo_02.SM_cargo_02",
+      "role": "exterior_derelict"
+    },
+    {
+      "id": "biomass_rock_a",
+      "asset": "/Game/Alien_Biomass/Meshes/rocks/SM_rock_01.SM_rock_01",
+      "role": "organic_anomaly"
+    },
+    {
+      "id": "biomass_rock_b",
+      "asset": "/Game/Alien_Biomass/Meshes/rocks/SM_rock_02.SM_rock_02",
+      "role": "organic_anomaly"
+    },
+    {
+      "id": "biomass_growth",
+      "asset": "/Game/Alien_Biomass/Meshes/Alien_organism/SM_alien_organism_07.SM_alien_organism_07",
+      "role": "organic_anomaly"
+    },
+    {
+      "id": "alien_portal",
+      "asset": "/Game/Alien_Portal/BP/BP_portal.BP_portal_C",
+      "role": "portal_anomaly"
+    }
+  ],
+  "staged_for_later": [
+    {
+      "pack": "Ice_Station",
+      "reason": "Orbital research habitats and interior rooms are intentionally deferred"
+    },
+    {
+      "pack": "MaterialsScifi",
+      "reason": "Material donor library; not spawned as a landmark"
+    }
+  ]
+}

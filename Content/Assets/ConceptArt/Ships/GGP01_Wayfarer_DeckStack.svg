@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <style>.bg{fill:#090e13}.hull{fill:#111a21;stroke:#566a75;stroke-width:3}.deck{stroke:#60737c;stroke-width:1}.t{fill:#e6eff0;font:700 27px sans-serif}.s{fill:#9db0b5;font:15px sans-serif}.n{fill:#dce9eb;font:700 15px monospace}.c1{fill:#294762}.c2{fill:#28514c}.c3{fill:#4d3f60}.c4{fill:#725239}.c5{fill:#633b31}.c6{fill:#373f46}.play{fill:none;stroke:#f2c85b;stroke-width:6}.shaft{fill:#68bcb5;opacity:.8}.void{fill:#080c10;stroke:#8c6e48;stroke-width:2;stroke-dasharray:7 5}</style>
+  <rect width="1200" height="1500" class="bg"/>
+  <text x="70" y="65" class="t">GGP-01 WAYFARER // 24-DECK ORGANIZATION</text>
+  <text x="70" y="94" class="s">Capital-ship stack · schematic section, not to exterior proportion · dorsal crown at top</text>
+  <path d="M250 130H950L1050 250V1315L910 1410H290L150 1315V250Z" class="hull"/>
+  <g>
+    <rect x="220" y="160" width="760" height="172" class="c1 deck"/><text x="245" y="190" class="n">D24</text><text x="245" y="310" class="n">D21</text><text x="360" y="240" class="t">COMMAND CROWN</text><text x="360" y="270" class="s">bridge · flag CIC · navigation · strategic sensors</text>
+    <rect x="205" y="332" width="790" height="172" class="c2 deck"/><text x="230" y="362" class="n">D20</text><text x="230" y="482" class="n">D17</text><text x="360" y="410" class="t">CREW HABITAT</text><text x="360" y="440" class="s">cabins · medical · galley · recreation · hydroponics</text>
+    <rect x="190" y="504" width="820" height="172" class="c3 deck"/><text x="215" y="534" class="n">D16</text><text x="215" y="654" class="n">D13</text><text x="360" y="582" class="t">MISSION OPERATIONS</text><text x="360" y="612" class="s">hangars · laboratories · drones · workshops · auxiliary CICs</text>
+    <rect x="180" y="676" width="840" height="172" class="c4 deck"/><rect x="170" y="666" width="860" height="192" rx="8" class="play"/><text x="205" y="706" class="n">D12</text><text x="205" y="826" class="n">D09</text><text x="360" y="752" class="t">PLAYABLE DAMAGE-CONTROL SECTOR</text><text x="360" y="782" class="s">cryo refuge · field workshop · distribution power · emergency CIC</text><text x="360" y="815" class="n">CURRENT PROCEDURAL PROTOTYPE</text>
+    <rect x="190" y="848" width="820" height="172" class="c5 deck"/><text x="215" y="878" class="n">D08</text><text x="215" y="998" class="n">D05</text><text x="360" y="924" class="t">MAIN ENGINEERING</text><text x="360" y="954" class="s">reactors · jump machinery · drive control · coolant conversion</text>
+    <rect x="215" y="1020" width="770" height="172" class="c6 deck"/><text x="240" y="1050" class="n">D04</text><text x="240" y="1170" class="n">D01</text><text x="360" y="1095" class="t">KEEL + STORES</text><text x="360" y="1125" class="s">tankage · bulk cargo · feedstock · water and waste recovery</text>
+    <rect x="548" y="160" width="22" height="1032" class="shaft"/><rect x="630" y="160" width="22" height="1032" class="shaft"/>
+    <rect x="250" y="540" width="135" height="100" rx="8" class="void"/><text x="270" y="595" class="s">HANGAR</text>
+    <rect x="805" y="870" width="140" height="110" rx="8" class="void"/><text x="824" y="930" class="s">JUMP VOID</text>
+  </g>
+  <text x="190" y="1250" class="s">Cyan trunks: primary lifts / emergency vertical circulation</text>
+  <text x="190" y="1280" class="s">Dashed voids: multi-deck spaces that interrupt the regular stack</text>
+  <text x="190" y="1310" class="s">Gold outline: current four-deck playable slice</text>
+</svg>

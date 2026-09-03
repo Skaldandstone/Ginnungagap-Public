@@ -1,0 +1,2086 @@
+{
+  "$schema": "../../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Ship.L01.ThrustTower.ReferenceV1",
+  "title": "GGP-L01 Large Expedition Carrier Thrust-Tower Production Reference",
+  "category": "ship",
+  "status": "ready-for-graybox",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "metadata": {
+    "purpose": "Canonical source-grounded ship, room-kit, DCC, and Unreal implementation contract",
+    "authoritative_sidecar": true,
+    "engine_targets": [
+      "Unreal Engine 5.8"
+    ],
+    "export_targets": [
+      "FBX",
+      "glTF",
+      "USD"
+    ],
+    "source_preservation": "All v1, superseded, and generated source images remain unchanged and traceable.",
+    "ship_code": "GGP-L01",
+    "scale_class": "large",
+    "coordinate_contract": "The ship is a thrust-gravity vertical stack. +X is bow and up-stack, -X is aft toward engines and gravity-down, and every occupied floor is a transverse YZ slab with +X normal.",
+    "visual_presentation_contract": "Canonical stack proofs show +X toward page top and -X engines toward page bottom. Room views are authored upright in local thrust gravity because their geometry, fixtures, and occupants all bear on the engine-facing floor.",
+    "supersedes": [
+      "Conventional horizontal-deck interpretations",
+      "Mirrored engine-bank layouts",
+      "Repeated symmetric room filler"
+    ]
+  },
+  "owners": [
+    "vehicle-art",
+    "environment-art",
+    "technical-art",
+    "level-design",
+    "gameplay"
+  ],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-enlarged-room-traversal-splines-v1.png",
+    "sha256": "e6ddc46b52d95c168d735645d9cec95fd48dcb2574452905527fc9a07433a322",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "enlarged-room-traversal-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Visual authority for large room plans, sections, traversal splines, sockets, clearances, utility routes, overlays, and DCC mapping. This JSON is numeric authority."
+  },
+  "supplemental_sheets": [
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-vertical-stack-room-production-v2.png",
+      "sha256": "d2286e55df10f35fab3599316d02635cb34f62339599852b56f660e0bef0521f",
+      "width_px": 1024,
+      "height_px": 1536,
+      "role": "vertical-stack-room-overview-authority",
+      "generated_on": "2026-08-29"
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp-main-engine-orthographic-alignment-authority-v1.png",
+      "sha256": "3dcc981a6c9e9def420edb818b632824504ccfc043cb8a4f091212f3e3bc28e9",
+      "width_px": 1536,
+      "height_px": 1024,
+      "role": "main-engine-orthographic-geometry-authority",
+      "generated_on": "2026-08-29",
+      "notes": "Overrides perspective or angled engine depictions in every other raster sheet."
+    }
+  ],
+  "concept_sources": [
+    {
+      "path": "docs/concept-art/reference/ships/replacement-fleet/concepts/ggp-l01-large-expedition-carrier-replacement-exterior-v1.png",
+      "role": "approved replacement exterior baseline",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-vertical-stack-room-production-v2.png",
+      "role": "canonical from-scratch vertical-stack room overview",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-enlarged-room-traversal-splines-v1.png",
+      "role": "canonical from-scratch enlarged room and traversal reference",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp-main-engine-orthographic-alignment-authority-v1.png",
+      "role": "canonical straight-axis and common-aft-plane engine geometry reference",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "build.dimensions_m",
+        "value": [
+          6500.0,
+          1400.0,
+          1800.0
+        ],
+        "source": "docs/ShipArchitectureAuthority.md"
+      },
+      {
+        "field": "build.coordinate_system.gravity",
+        "value": "-X",
+        "source": "docs/ShipArchitectureAuthority.md"
+      },
+      {
+        "field": "build.implementation.floor_plane",
+        "value": "YZ",
+        "source": "docs/ShipArchitectureAuthority.md"
+      },
+      {
+        "field": "build.implementation.floor_normal",
+        "value": "+X",
+        "source": "docs/ShipArchitectureAuthority.md"
+      },
+      {
+        "field": "build.implementation.room_symmetry",
+        "value": "deliberately asymmetric",
+        "source": "docs/ShipArchitectureAuthority.md"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "build.parts.surface_panel_seams",
+        "value": "visual proposal",
+        "source": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-vertical-stack-room-production-v2.png"
+      },
+      {
+        "field": "build.materials.color_balance",
+        "value": "visual proposal",
+        "source": "docs/concept-art/2026-08-29/production-reference/ggp-l01-large-expedition-carrier-enlarged-room-traversal-splines-v1.png"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": [
+      6500.0,
+      1400.0,
+      1800.0
+    ],
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "PIVOT_ShipRoot_AftCenter",
+      "location_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rule": "Aft engine-base center. Geometry extends toward +X. No export rotation."
+    },
+    "parts": [
+      {
+        "name": "HULL_PrimaryShell",
+        "role": "broad low-clutter silhouette",
+        "nanite": true
+      },
+      {
+        "name": "HULL_PressureSpine",
+        "role": "primary structural and pressure spine",
+        "nanite": true
+      },
+      {
+        "name": "FRAME_TransverseSet",
+        "role": "seven transverse YZ frames",
+        "instances": [
+          {
+            "id": "FRAME_01",
+            "x_m": 260.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_02",
+            "x_m": 1170.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_03",
+            "x_m": 2210.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_04",
+            "x_m": 3250.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_05",
+            "x_m": 4290.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_06",
+            "x_m": 5330.0,
+            "plane": "YZ",
+            "normal": "+X"
+          },
+          {
+            "id": "FRAME_07",
+            "x_m": 6240.0,
+            "plane": "YZ",
+            "normal": "+X"
+          }
+        ]
+      },
+      {
+        "name": "MODULE_EngineBase",
+        "role": "asymmetric aft main-drive base with straight parallel centerlines and a common nozzle plane",
+        "modules": [
+          {
+            "id": "ENG_01",
+            "role": "primary main thrust",
+            "aft_plane_x": 0.0,
+            "axis_ship_space": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "exhaust_direction": "-X",
+            "gimbal_allowed": false,
+            "y_norm": -0.21,
+            "z_norm": -0.12,
+            "radius_norm": 0.34,
+            "priority": 1
+          },
+          {
+            "id": "ENG_02",
+            "role": "sustained main thrust",
+            "aft_plane_x": 0.0,
+            "axis_ship_space": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "exhaust_direction": "-X",
+            "gimbal_allowed": false,
+            "y_norm": 0.26,
+            "z_norm": 0.19,
+            "radius_norm": 0.24480000000000002,
+            "priority": 2
+          },
+          {
+            "id": "ENG_03",
+            "role": "emergency return main thrust",
+            "aft_plane_x": 0.0,
+            "axis_ship_space": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "exhaust_direction": "-X",
+            "gimbal_allowed": false,
+            "y_norm": 0.3,
+            "z_norm": -0.27,
+            "radius_norm": 0.1666,
+            "priority": 3
+          },
+          {
+            "id": "ENG_04",
+            "role": "auxiliary main thrust",
+            "aft_plane_x": 0.0,
+            "axis_ship_space": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "exhaust_direction": "-X",
+            "gimbal_allowed": false,
+            "y_norm": -0.36,
+            "z_norm": 0.25,
+            "radius_norm": 0.10540000000000001,
+            "priority": 4
+          },
+          {
+            "id": "ENG_05",
+            "role": "boost main thrust",
+            "aft_plane_x": 0.0,
+            "axis_ship_space": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "exhaust_direction": "-X",
+            "gimbal_allowed": false,
+            "y_norm": 0.08,
+            "z_norm": 0.34,
+            "radius_norm": 0.0748,
+            "priority": 5
+          }
+        ]
+      },
+      {
+        "name": "MODULE_ManeuveringThrusters",
+        "role": "separate attitude, translation, and docking thrusters; never classified as main engines"
+      },
+      {
+        "name": "KIT_Rooms",
+        "role": "unique asymmetric transverse-slab room modules",
+        "modules": [
+          {
+            "id": "ROOM_01_FLIGHT_OPERATIONS",
+            "role": "flight_operations",
+            "archetype": "offset flight control canyon",
+            "x_band_m": [
+              780.0,
+              1560.0
+            ],
+            "floor_plane": "YZ",
+            "floor_normal": "+X",
+            "gravity_down": "-X",
+            "door_offset_fraction_y": -0.28,
+            "dominant_alcove": "port",
+            "plan_silhouette": "long crescent",
+            "mirrored_pair_allowed": false,
+            "duplicate_furniture_array_allowed": false,
+            "minimum_unique_landmarks": 3,
+            "unique_footprint_id": "L01_ROOM_01_FOOTPRINT_A",
+            "traversal_splines": [
+              "SPL_WALK_PRIMARY",
+              "SPL_CROUCH_ALTERNATE",
+              "SPL_CRAWL_SERVICE",
+              "SPL_VENT_BYPASS",
+              "SPL_SQUEEZE_EMERGENCY"
+            ],
+            "interdeck_splines_available": [
+              "SPL_LIFT_PRIMARY",
+              "SPL_STAIR_PRESSURE",
+              "SPL_LADDER_SERVICE",
+              "SPL_TRUNK_EMERGENCY"
+            ],
+            "sockets": [
+              "SOCK_DOOR_Y_POS",
+              "SOCK_DOOR_Y_NEG",
+              "SOCK_LIFT_X_POS",
+              "SOCK_LADDER_X_NEG",
+              "SOCK_STAIR_X_POS",
+              "SOCK_STAIR_X_NEG",
+              "SOCK_TRUNK_X_POS",
+              "SOCK_TRUNK_X_NEG",
+              "SOCK_VENT_IN",
+              "SOCK_VENT_OUT",
+              "SOCK_DAMAGE_BREACH"
+            ],
+            "corridor_topology": {
+              "id": "offset_perimeter_c",
+              "centerline_points_yz_norm": [
+                [
+                  -0.42,
+                  -0.3
+                ],
+                [
+                  -0.42,
+                  0.28
+                ],
+                [
+                  -0.08,
+                  0.42
+                ],
+                [
+                  0.36,
+                  0.24
+                ],
+                [
+                  0.31,
+                  -0.18
+                ]
+              ],
+              "terminal_gameplay": "repair"
+            },
+            "corridor_wraps_room_footprint": true,
+            "minimum_interdeck_methods": 2,
+            "render_layers": [
+              "RL_Interior",
+              "RL_Decals",
+              "RL_Damage",
+              "RL_Bloom",
+              "RL_Fog"
+            ],
+            "required_volumes": [
+              "NAV_WALK_VOL",
+              "NAV_CRAWL_VOL",
+              "NAV_SQUEEZE_VOL",
+              "MAINT_VENT_VOL",
+              "PRESSURE_BOUNDARY",
+              "STREAMING_OWNERSHIP_CELL"
+            ]
+          },
+          {
+            "id": "ROOM_02_READY_ROOM",
+            "role": "ready_room",
+            "archetype": "asymmetric crew and officer ready room",
+            "x_band_m": [
+              1820.0,
+              2600.0
+            ],
+            "floor_plane": "YZ",
+            "floor_normal": "+X",
+            "gravity_down": "-X",
+            "door_offset_fraction_y": 0.22,
+            "dominant_alcove": "starboard",
+            "plan_silhouette": "broken atrium",
+            "mirrored_pair_allowed": false,
+            "duplicate_furniture_array_allowed": false,
+            "minimum_unique_landmarks": 3,
+            "unique_footprint_id": "L01_ROOM_02_FOOTPRINT_A",
+            "traversal_splines": [
+              "SPL_WALK_PRIMARY",
+              "SPL_CROUCH_ALTERNATE",
+              "SPL_CRAWL_SERVICE",
+              "SPL_VENT_BYPASS",
+              "SPL_SQUEEZE_EMERGENCY"
+            ],
+            "interdeck_splines_available": [
+              "SPL_LIFT_PRIMARY",
+              "SPL_STAIR_PRESSURE",
+              "SPL_LADDER_SERVICE",
+              "SPL_TRUNK_EMERGENCY"
+            ],
+            "sockets": [
+              "SOCK_DOOR_Y_POS",
+              "SOCK_DOOR_Y_NEG",
+              "SOCK_LIFT_X_POS",
+              "SOCK_LADDER_X_NEG",
+              "SOCK_STAIR_X_POS",
+              "SOCK_STAIR_X_NEG",
+              "SOCK_TRUNK_X_POS",
+              "SOCK_TRUNK_X_NEG",
+              "SOCK_VENT_IN",
+              "SOCK_VENT_OUT",
+              "SOCK_DAMAGE_BREACH"
+            ],
+            "corridor_topology": {
+              "id": "dogleg_split_loop",
+              "centerline_points_yz_norm": [
+                [
+                  0.38,
+                  -0.34
+                ],
+                [
+                  0.15,
+                  -0.08
+                ],
+                [
+                  0.34,
+                  0.31
+                ],
+                [
+                  -0.12,
+                  0.38
+                ],
+                [
+                  -0.4,
+                  0.05
+                ]
+              ],
+              "terminal_gameplay": "hazard_bypass"
+            },
+            "corridor_wraps_room_footprint": true,
+            "minimum_interdeck_methods": 2,
+            "render_layers": [
+              "RL_Interior",
+              "RL_Decals",
+              "RL_Damage",
+              "RL_Bloom",
+              "RL_Fog"
+            ],
+            "required_volumes": [
+              "NAV_WALK_VOL",
+              "NAV_CRAWL_VOL",
+              "NAV_SQUEEZE_VOL",
+              "MAINT_VENT_VOL",
+              "PRESSURE_BOUNDARY",
+              "STREAMING_OWNERSHIP_CELL"
+            ]
+          },
+          {
+            "id": "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+            "role": "maintenance_hangar_work_cell",
+            "archetype": "offset maintenance hangar work cell",
+            "x_band_m": [
+              2860.0,
+              3640.0
+            ],
+            "floor_plane": "YZ",
+            "floor_normal": "+X",
+            "gravity_down": "-X",
+            "door_offset_fraction_y": -0.17,
+            "dominant_alcove": "port",
+            "plan_silhouette": "faceted wedge",
+            "mirrored_pair_allowed": false,
+            "duplicate_furniture_array_allowed": false,
+            "minimum_unique_landmarks": 3,
+            "unique_footprint_id": "L01_ROOM_03_FOOTPRINT_A",
+            "traversal_splines": [
+              "SPL_WALK_PRIMARY",
+              "SPL_CROUCH_ALTERNATE",
+              "SPL_CRAWL_SERVICE",
+              "SPL_VENT_BYPASS",
+              "SPL_SQUEEZE_EMERGENCY"
+            ],
+            "interdeck_splines_available": [
+              "SPL_LIFT_PRIMARY",
+              "SPL_STAIR_PRESSURE",
+              "SPL_LADDER_SERVICE",
+              "SPL_TRUNK_EMERGENCY"
+            ],
+            "sockets": [
+              "SOCK_DOOR_Y_POS",
+              "SOCK_DOOR_Y_NEG",
+              "SOCK_LIFT_X_POS",
+              "SOCK_LADDER_X_NEG",
+              "SOCK_STAIR_X_POS",
+              "SOCK_STAIR_X_NEG",
+              "SOCK_TRUNK_X_POS",
+              "SOCK_TRUNK_X_NEG",
+              "SOCK_VENT_IN",
+              "SOCK_VENT_OUT",
+              "SOCK_DAMAGE_BREACH"
+            ],
+            "corridor_topology": {
+              "id": "void_perimeter_catwalk",
+              "centerline_points_yz_norm": [
+                [
+                  -0.44,
+                  -0.22
+                ],
+                [
+                  -0.31,
+                  0.4
+                ],
+                [
+                  0.27,
+                  0.43
+                ],
+                [
+                  0.43,
+                  0.03
+                ],
+                [
+                  0.22,
+                  -0.41
+                ]
+              ],
+              "terminal_gameplay": "sabotage"
+            },
+            "corridor_wraps_room_footprint": true,
+            "minimum_interdeck_methods": 2,
+            "render_layers": [
+              "RL_Interior",
+              "RL_Decals",
+              "RL_Damage",
+              "RL_Bloom",
+              "RL_Fog"
+            ],
+            "required_volumes": [
+              "NAV_WALK_VOL",
+              "NAV_CRAWL_VOL",
+              "NAV_SQUEEZE_VOL",
+              "MAINT_VENT_VOL",
+              "PRESSURE_BOUNDARY",
+              "STREAMING_OWNERSHIP_CELL"
+            ]
+          },
+          {
+            "id": "ROOM_04_EXPEDITION_PLANNING",
+            "role": "expedition_planning",
+            "archetype": "raised expedition planning theater",
+            "x_band_m": [
+              3900.0,
+              4680.0
+            ],
+            "floor_plane": "YZ",
+            "floor_normal": "+X",
+            "gravity_down": "-X",
+            "door_offset_fraction_y": 0.33,
+            "dominant_alcove": "starboard",
+            "plan_silhouette": "vertical village",
+            "mirrored_pair_allowed": false,
+            "duplicate_furniture_array_allowed": false,
+            "minimum_unique_landmarks": 3,
+            "unique_footprint_id": "L01_ROOM_04_FOOTPRINT_A",
+            "traversal_splines": [
+              "SPL_WALK_PRIMARY",
+              "SPL_CROUCH_ALTERNATE",
+              "SPL_CRAWL_SERVICE",
+              "SPL_VENT_BYPASS",
+              "SPL_SQUEEZE_EMERGENCY"
+            ],
+            "interdeck_splines_available": [
+              "SPL_LIFT_PRIMARY",
+              "SPL_STAIR_PRESSURE",
+              "SPL_LADDER_SERVICE",
+              "SPL_TRUNK_EMERGENCY"
+            ],
+            "sockets": [
+              "SOCK_DOOR_Y_POS",
+              "SOCK_DOOR_Y_NEG",
+              "SOCK_LIFT_X_POS",
+              "SOCK_LADDER_X_NEG",
+              "SOCK_STAIR_X_POS",
+              "SOCK_STAIR_X_NEG",
+              "SOCK_TRUNK_X_POS",
+              "SOCK_TRUNK_X_NEG",
+              "SOCK_VENT_IN",
+              "SOCK_VENT_OUT",
+              "SOCK_DAMAGE_BREACH"
+            ],
+            "corridor_topology": {
+              "id": "notched_outer_ring",
+              "centerline_points_yz_norm": [
+                [
+                  0.41,
+                  0.32
+                ],
+                [
+                  0.02,
+                  0.35
+                ],
+                [
+                  -0.37,
+                  0.18
+                ],
+                [
+                  -0.28,
+                  -0.38
+                ],
+                [
+                  0.18,
+                  -0.24
+                ]
+              ],
+              "terminal_gameplay": "loot"
+            },
+            "corridor_wraps_room_footprint": true,
+            "minimum_interdeck_methods": 2,
+            "render_layers": [
+              "RL_Interior",
+              "RL_Decals",
+              "RL_Damage",
+              "RL_Bloom",
+              "RL_Fog"
+            ],
+            "required_volumes": [
+              "NAV_WALK_VOL",
+              "NAV_CRAWL_VOL",
+              "NAV_SQUEEZE_VOL",
+              "MAINT_VENT_VOL",
+              "PRESSURE_BOUNDARY",
+              "STREAMING_OWNERSHIP_CELL"
+            ]
+          },
+          {
+            "id": "ROOM_05_CARGO_DEPLOYMENT_STAGING",
+            "role": "cargo_deployment_staging",
+            "archetype": "deep cargo deployment staging room",
+            "x_band_m": [
+              4940.0,
+              5720.0
+            ],
+            "floor_plane": "YZ",
+            "floor_normal": "+X",
+            "gravity_down": "-X",
+            "door_offset_fraction_y": -0.35,
+            "dominant_alcove": "port",
+            "plan_silhouette": "offset shaft",
+            "mirrored_pair_allowed": false,
+            "duplicate_furniture_array_allowed": false,
+            "minimum_unique_landmarks": 3,
+            "unique_footprint_id": "L01_ROOM_05_FOOTPRINT_A",
+            "traversal_splines": [
+              "SPL_WALK_PRIMARY",
+              "SPL_CROUCH_ALTERNATE",
+              "SPL_CRAWL_SERVICE",
+              "SPL_VENT_BYPASS",
+              "SPL_SQUEEZE_EMERGENCY"
+            ],
+            "interdeck_splines_available": [
+              "SPL_LIFT_PRIMARY",
+              "SPL_STAIR_PRESSURE",
+              "SPL_LADDER_SERVICE",
+              "SPL_TRUNK_EMERGENCY"
+            ],
+            "sockets": [
+              "SOCK_DOOR_Y_POS",
+              "SOCK_DOOR_Y_NEG",
+              "SOCK_LIFT_X_POS",
+              "SOCK_LADDER_X_NEG",
+              "SOCK_STAIR_X_POS",
+              "SOCK_STAIR_X_NEG",
+              "SOCK_TRUNK_X_POS",
+              "SOCK_TRUNK_X_NEG",
+              "SOCK_VENT_IN",
+              "SOCK_VENT_OUT",
+              "SOCK_DAMAGE_BREACH"
+            ],
+            "corridor_topology": {
+              "id": "broken_loop_with_observation_spur",
+              "centerline_points_yz_norm": [
+                [
+                  -0.35,
+                  0.33
+                ],
+                [
+                  0.12,
+                  0.42
+                ],
+                [
+                  0.39,
+                  0.08
+                ],
+                [
+                  0.18,
+                  -0.36
+                ],
+                [
+                  -0.28,
+                  -0.29
+                ]
+              ],
+              "terminal_gameplay": "observation"
+            },
+            "corridor_wraps_room_footprint": true,
+            "minimum_interdeck_methods": 2,
+            "render_layers": [
+              "RL_Interior",
+              "RL_Decals",
+              "RL_Damage",
+              "RL_Bloom",
+              "RL_Fog"
+            ],
+            "required_volumes": [
+              "NAV_WALK_VOL",
+              "NAV_CRAWL_VOL",
+              "NAV_SQUEEZE_VOL",
+              "MAINT_VENT_VOL",
+              "PRESSURE_BOUNDARY",
+              "STREAMING_OWNERSHIP_CELL"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OVERLAY_Damage",
+        "role": "separable damage geometry and decals"
+      },
+      {
+        "name": "OVERLAY_Bloom",
+        "role": "separable contamination geometry, masks, decals, and VFX"
+      }
+    ],
+    "materials": [
+      {
+        "slot": "M_Hull_Ivory",
+        "family": "painted armor",
+        "render_layer": "RL_CleanHull"
+      },
+      {
+        "slot": "M_Structure_Dark",
+        "family": "exposed structure",
+        "render_layer": "RL_Structure"
+      },
+      {
+        "slot": "M_Safety_Amber",
+        "family": "functional markings",
+        "render_layer": "RL_Decals"
+      },
+      {
+        "slot": "M_Glass",
+        "family": "transparent",
+        "render_layer": "RL_Transparency"
+      },
+      {
+        "slot": "M_EngineEmissive",
+        "family": "propulsion emissive",
+        "render_layer": "RL_EngineVFX"
+      },
+      {
+        "slot": "M_Damage",
+        "family": "damage overlay",
+        "render_layer": "RL_Damage"
+      },
+      {
+        "slot": "M_Bloom",
+        "family": "Bloom overlay",
+        "render_layer": "RL_Bloom"
+      }
+    ],
+    "sockets": [
+      {
+        "id": "SOCK_AFT_ENGINE_BASE",
+        "location_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "forward": "-X",
+        "use": "engine VFX and thrust force"
+      },
+      {
+        "id": "SOCK_BOW_DOCK",
+        "location_m": [
+          6500.0,
+          0.0,
+          0.0
+        ],
+        "forward": "+X",
+        "use": "fore docking and alignment"
+      },
+      {
+        "id": "SOCK_DOCK_PORT",
+        "location_m": [
+          3769.9999999999995,
+          -700.0,
+          144.0
+        ],
+        "forward": "-Y",
+        "use": "asymmetric docking"
+      },
+      {
+        "id": "SOCK_SERVICE_STARBOARD",
+        "location_m": [
+          2665.0,
+          700.0,
+          -306.0
+        ],
+        "forward": "+Y",
+        "use": "service access"
+      },
+      {
+        "id": "SOCK_SENSOR_DORSAL",
+        "location_m": [
+          5005.0,
+          154.0,
+          900.0
+        ],
+        "forward": "+Z",
+        "use": "sensor suite"
+      }
+    ],
+    "room_story_construction": {
+      "axis": "+X from engine-facing floor toward next bowward deck",
+      "ordered_layers": [
+        {
+          "id": "structural_floor_slab",
+          "plane": "YZ",
+          "load_bearing": true
+        },
+        {
+          "id": "utility_plenum",
+          "services": [
+            "power",
+            "data",
+            "coolant",
+            "air"
+          ]
+        },
+        {
+          "id": "finished_floor",
+          "walkable": true,
+          "normal": "+X"
+        },
+        {
+          "id": "occupied_room_volume",
+          "gravity_down": "-X"
+        },
+        {
+          "id": "overhead_plenum",
+          "services": [
+            "air",
+            "fire suppression",
+            "lighting"
+          ]
+        },
+        {
+          "id": "ceiling_finish",
+          "walkable": false
+        },
+        {
+          "id": "next_deck_structural_slab",
+          "plane": "YZ"
+        }
+      ],
+      "engines_must_be_engineward_of_every_occupied_floor": true
+    },
+    "circulation_network": {
+      "authority": "Numeric route topology and engine integration contract. Runtime navigation remains pending until graybox traversal tests pass.",
+      "coordinate_contract": {
+        "within_deck_motion": "YZ",
+        "interdeck_motion": "+/-X",
+        "gravity_down": "-X",
+        "floor_plane": "YZ"
+      },
+      "corridor_rules": {
+        "centered_axial_corridor_allowed": false,
+        "room_center_crossing_allowed": false,
+        "mirrored_floor_plan_allowed": false,
+        "identical_topology_repeat_allowed": false,
+        "maximum_purposeless_dead_ends": 0,
+        "pressure_boundary_socket_required": true,
+        "minimum_interdeck_methods_per_occupied_band": 2,
+        "rule": "Corridors wrap around each room footprint and equipment island. Their offsets respond to local hull openings, pressure zones, maintenance clearances, and gameplay terminals."
+      },
+      "deck_corridor_networks": [
+        {
+          "deck_id": "L01_F01",
+          "room_id": "ROOM_01_FLIGHT_OPERATIONS",
+          "topology_id": "offset_perimeter_c",
+          "centerline_points_yz_norm": [
+            [
+              -0.42,
+              -0.3
+            ],
+            [
+              -0.42,
+              0.28
+            ],
+            [
+              -0.08,
+              0.42
+            ],
+            [
+              0.36,
+              0.24
+            ],
+            [
+              0.31,
+              -0.18
+            ]
+          ],
+          "wraps_room_footprint": true,
+          "primary_route": "SPL_WALK_PRIMARY",
+          "alternate_routes": [
+            "SPL_CROUCH_ALTERNATE",
+            "SPL_CRAWL_SERVICE",
+            "SPL_VENT_BYPASS",
+            "SPL_SQUEEZE_EMERGENCY"
+          ],
+          "terminal_gameplay": "repair",
+          "pressure_boundaries": [
+            "SOCK_DOOR_Y_POS",
+            "SOCK_DOOR_Y_NEG"
+          ]
+        },
+        {
+          "deck_id": "L01_F02",
+          "room_id": "ROOM_02_READY_ROOM",
+          "topology_id": "dogleg_split_loop",
+          "centerline_points_yz_norm": [
+            [
+              0.38,
+              -0.34
+            ],
+            [
+              0.15,
+              -0.08
+            ],
+            [
+              0.34,
+              0.31
+            ],
+            [
+              -0.12,
+              0.38
+            ],
+            [
+              -0.4,
+              0.05
+            ]
+          ],
+          "wraps_room_footprint": true,
+          "primary_route": "SPL_WALK_PRIMARY",
+          "alternate_routes": [
+            "SPL_CROUCH_ALTERNATE",
+            "SPL_CRAWL_SERVICE",
+            "SPL_VENT_BYPASS",
+            "SPL_SQUEEZE_EMERGENCY"
+          ],
+          "terminal_gameplay": "hazard_bypass",
+          "pressure_boundaries": [
+            "SOCK_DOOR_Y_POS",
+            "SOCK_DOOR_Y_NEG"
+          ]
+        },
+        {
+          "deck_id": "L01_F03",
+          "room_id": "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+          "topology_id": "void_perimeter_catwalk",
+          "centerline_points_yz_norm": [
+            [
+              -0.44,
+              -0.22
+            ],
+            [
+              -0.31,
+              0.4
+            ],
+            [
+              0.27,
+              0.43
+            ],
+            [
+              0.43,
+              0.03
+            ],
+            [
+              0.22,
+              -0.41
+            ]
+          ],
+          "wraps_room_footprint": true,
+          "primary_route": "SPL_WALK_PRIMARY",
+          "alternate_routes": [
+            "SPL_CROUCH_ALTERNATE",
+            "SPL_CRAWL_SERVICE",
+            "SPL_VENT_BYPASS",
+            "SPL_SQUEEZE_EMERGENCY"
+          ],
+          "terminal_gameplay": "sabotage",
+          "pressure_boundaries": [
+            "SOCK_DOOR_Y_POS",
+            "SOCK_DOOR_Y_NEG"
+          ]
+        },
+        {
+          "deck_id": "L01_F04",
+          "room_id": "ROOM_04_EXPEDITION_PLANNING",
+          "topology_id": "notched_outer_ring",
+          "centerline_points_yz_norm": [
+            [
+              0.41,
+              0.32
+            ],
+            [
+              0.02,
+              0.35
+            ],
+            [
+              -0.37,
+              0.18
+            ],
+            [
+              -0.28,
+              -0.38
+            ],
+            [
+              0.18,
+              -0.24
+            ]
+          ],
+          "wraps_room_footprint": true,
+          "primary_route": "SPL_WALK_PRIMARY",
+          "alternate_routes": [
+            "SPL_CROUCH_ALTERNATE",
+            "SPL_CRAWL_SERVICE",
+            "SPL_VENT_BYPASS",
+            "SPL_SQUEEZE_EMERGENCY"
+          ],
+          "terminal_gameplay": "loot",
+          "pressure_boundaries": [
+            "SOCK_DOOR_Y_POS",
+            "SOCK_DOOR_Y_NEG"
+          ]
+        },
+        {
+          "deck_id": "L01_F05",
+          "room_id": "ROOM_05_CARGO_DEPLOYMENT_STAGING",
+          "topology_id": "broken_loop_with_observation_spur",
+          "centerline_points_yz_norm": [
+            [
+              -0.35,
+              0.33
+            ],
+            [
+              0.12,
+              0.42
+            ],
+            [
+              0.39,
+              0.08
+            ],
+            [
+              0.18,
+              -0.36
+            ],
+            [
+              -0.28,
+              -0.29
+            ]
+          ],
+          "wraps_room_footprint": true,
+          "primary_route": "SPL_WALK_PRIMARY",
+          "alternate_routes": [
+            "SPL_CROUCH_ALTERNATE",
+            "SPL_CRAWL_SERVICE",
+            "SPL_VENT_BYPASS",
+            "SPL_SQUEEZE_EMERGENCY"
+          ],
+          "terminal_gameplay": "observation",
+          "pressure_boundaries": [
+            "SOCK_DOOR_Y_POS",
+            "SOCK_DOOR_Y_NEG"
+          ]
+        }
+      ],
+      "interdeck_devices": [
+        {
+          "id": "L01_LIFT_A",
+          "type": "pressure_lift",
+          "spline": "SPL_LIFT_PRIMARY",
+          "yz_offset_norm": [
+            -0.23,
+            0.16
+          ],
+          "serves": [
+            "ROOM_01_FLIGHT_OPERATIONS",
+            "ROOM_02_READY_ROOM",
+            "ROOM_04_EXPEDITION_PLANNING",
+            "ROOM_05_CARGO_DEPLOYMENT_STAGING"
+          ],
+          "skips": [
+            "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL"
+          ],
+          "sockets": [
+            "SOCK_LIFT_X_POS"
+          ],
+          "unreal_actor": "BP_PressureLift",
+          "failure_mode": "disabled platform forces ladder or emergency-trunk reroute"
+        },
+        {
+          "id": "L01_STAIR_A",
+          "type": "pressure_stair",
+          "spline": "SPL_STAIR_PRESSURE",
+          "yz_offset_norm": [
+            0.27,
+            -0.18
+          ],
+          "adjacent_deck_pairs": [
+            [
+              "ROOM_01_FLIGHT_OPERATIONS",
+              "ROOM_02_READY_ROOM"
+            ],
+            [
+              "ROOM_04_EXPEDITION_PLANNING",
+              "ROOM_05_CARGO_DEPLOYMENT_STAGING"
+            ]
+          ],
+          "sockets": [
+            "SOCK_STAIR_X_POS",
+            "SOCK_STAIR_X_NEG"
+          ],
+          "unreal_actor": "BP_PressureStair"
+        },
+        {
+          "id": "L01_LADDER_PORT",
+          "type": "service_ladder",
+          "spline": "SPL_LADDER_SERVICE",
+          "yz_offset_norm": [
+            -0.36,
+            -0.21
+          ],
+          "serves": [
+            "ROOM_01_FLIGHT_OPERATIONS",
+            "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+            "ROOM_05_CARGO_DEPLOYMENT_STAGING"
+          ],
+          "sockets": [
+            "SOCK_LADDER_X_NEG"
+          ],
+          "unreal_actor": "BP_ServiceLadder"
+        },
+        {
+          "id": "L01_LADDER_STARBOARD",
+          "type": "service_ladder",
+          "spline": "SPL_LADDER_SERVICE",
+          "yz_offset_norm": [
+            0.31,
+            0.26
+          ],
+          "serves": [
+            "ROOM_02_READY_ROOM",
+            "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+            "ROOM_04_EXPEDITION_PLANNING"
+          ],
+          "sockets": [
+            "SOCK_LADDER_X_NEG"
+          ],
+          "unreal_actor": "BP_ServiceLadder"
+        },
+        {
+          "id": "L01_TRUNK_EMERGENCY",
+          "type": "independent_pressure_trunk",
+          "spline": "SPL_TRUNK_EMERGENCY",
+          "yz_offset_norm": [
+            0.41,
+            -0.31
+          ],
+          "serves": [
+            "ROOM_01_FLIGHT_OPERATIONS",
+            "ROOM_02_READY_ROOM",
+            "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+            "ROOM_04_EXPEDITION_PLANNING",
+            "ROOM_05_CARGO_DEPLOYMENT_STAGING"
+          ],
+          "sockets": [
+            "SOCK_TRUNK_X_POS",
+            "SOCK_TRUNK_X_NEG"
+          ],
+          "unreal_actor": "BP_EmergencyTrunk",
+          "pressure_doors_independent": true
+        }
+      ],
+      "special_routes": [
+        {
+          "id": "L01_SPECIAL_BAND_03",
+          "room_id": "ROOM_03_MAINTENANCE_HANGAR_WORK_CELL",
+          "components": [
+            "perimeter catwalk",
+            "service ladder descent",
+            "squeeze route behind structural braces"
+          ],
+          "normal_floor_through_void_allowed": false
+        },
+        {
+          "id": "L01_LOCKED_BOUNDARY_BYPASS",
+          "components": [
+            "SPL_VENT_BYPASS",
+            "SPL_CRAWL_SERVICE"
+          ],
+          "entry_socket": "SOCK_VENT_IN",
+          "exit_socket": "SOCK_VENT_OUT",
+          "crosses_exactly_one_pressure_boundary": true
+        }
+      ],
+      "route_state_matrix": [
+        {
+          "state": "nominal",
+          "primary": "SPL_LIFT_PRIMARY",
+          "alternate": "SPL_STAIR_PRESSURE",
+          "fallback": "SPL_LADDER_SERVICE"
+        },
+        {
+          "state": "lift_disabled",
+          "primary": "SPL_STAIR_PRESSURE",
+          "alternate": "SPL_LADDER_SERVICE",
+          "fallback": "SPL_TRUNK_EMERGENCY"
+        },
+        {
+          "state": "depressurized_deck",
+          "primary": "sealed pressure detour",
+          "alternate": "SPL_TRUNK_EMERGENCY",
+          "fallback": "suit-only breach route"
+        },
+        {
+          "state": "fire_obstruction",
+          "primary": "alternate YZ corridor",
+          "alternate": "SPL_VENT_BYPASS",
+          "fallback": "SPL_TRUNK_EMERGENCY"
+        },
+        {
+          "state": "locked_door",
+          "primary": "alternate pressure door",
+          "alternate": "SPL_CRAWL_SERVICE",
+          "fallback": "SPL_VENT_BYPASS"
+        },
+        {
+          "state": "damage_breach",
+          "primary": "sealed detour",
+          "alternate": "SOCK_DAMAGE_BREACH suit-only",
+          "fallback": "SPL_TRUNK_EMERGENCY"
+        },
+        {
+          "state": "bloom_false_signal",
+          "primary": "normal-signal",
+          "alternate": "normal-signal",
+          "fallback": "normal-signal",
+          "player_visible_difference": false
+        }
+      ],
+      "dcc_mapping": {
+        "houdini_attributes": [
+          "deck_frame_x",
+          "corridor_centerline",
+          "pressure_boundary",
+          "route_class",
+          "clearance_m",
+          "socket_type",
+          "deck_span",
+          "fallback_priority"
+        ],
+        "blender_collections": [
+          "ROUTES_WALK",
+          "ROUTES_CROUCH",
+          "ROUTES_CRAWL",
+          "ROUTES_VERTICAL",
+          "SOCKETS",
+          "PRESSURE_DOORS"
+        ],
+        "unreal": {
+          "components": [
+            "SplineComponents",
+            "NavModifierVolumes",
+            "NavLinkProxy",
+            "SmartLinks"
+          ],
+          "actors": [
+            "BP_PressureLift",
+            "BP_PressureStair",
+            "BP_ServiceLadder",
+            "BP_EmergencyTrunk"
+          ],
+          "streaming_ownership": "deck band",
+          "route_variants": [
+            "locked",
+            "damaged",
+            "depressurized",
+            "Bloom false signal"
+          ]
+        }
+      }
+    },
+    "states": [
+      {
+        "id": "clean",
+        "base_geometry": true,
+        "overlay": null
+      },
+      {
+        "id": "light_damage",
+        "base_geometry": true,
+        "overlay": "OVERLAY_Damage",
+        "intensity": 0.25
+      },
+      {
+        "id": "heavy_damage",
+        "base_geometry": true,
+        "overlay": "OVERLAY_Damage",
+        "intensity": 0.7
+      },
+      {
+        "id": "bloom_contaminated",
+        "base_geometry": true,
+        "overlay": "OVERLAY_Bloom",
+        "concealment_required": true
+      }
+    ],
+    "blender": {
+      "root_collection": "GGP_L01_LARGE_EXPEDITION_CARRIER",
+      "collections": [
+        "00_GUIDES",
+        "10_HULL",
+        "20_FRAMES",
+        "30_ENGINES",
+        "40_ROOM_KIT",
+        "50_COLLISION",
+        "60_SOCKETS",
+        "70_SPLINES",
+        "71_ROUTES_VERTICAL",
+        "72_PRESSURE_DOORS",
+        "80_DAMAGE",
+        "81_BLOOM",
+        "90_EXPORT"
+      ],
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "geometry_nodes": [
+        "GN_HullPartitionAssembler",
+        "GN_TransverseFrameArray",
+        "GN_SplineUtilityRouter",
+        "GN_DamageOverlayScatter"
+      ],
+      "export_set": "EXP_GGP_L01"
+    },
+    "unreal": {
+      "asset_type": "ModularStaticMeshBlueprintSet",
+      "destination_root": "/Game/Assets/Ships/ThrustTower/L01",
+      "blueprint_root": "BP_GGP_L01_ShipRoot",
+      "pcg_graphs": [
+        "PCG_GGP_L01_HullAssembly",
+        "PCG_GGP_L01_RoomPopulation",
+        "PCG_GGP_L01_DamageOverlay"
+      ],
+      "world_partition": true,
+      "data_layers": [
+        "DL_Clean",
+        "DL_Damage",
+        "DL_Bloom",
+        "DL_Interior",
+        "DL_Exterior",
+        "DL_VFX"
+      ],
+      "nanite": "Enable on opaque static hull and structural modules. Disable on translucent and deforming overlays.",
+      "collision": "Authored simple collision by streamed hull partition. Separate walkable room and blocking hull channels.",
+      "import_policy": "Import modules with aft-root pivot, +X forward, +Z display-up, no corrective rotation, and 1 m equals 100 uu.",
+      "circulation_blueprints": [
+        "BP_PressureLift",
+        "BP_PressureStair",
+        "BP_ServiceLadder",
+        "BP_EmergencyTrunk"
+      ],
+      "navigation_links": [
+        "NavLinkProxy",
+        "SmartLink_Ladder",
+        "SmartLink_Stair",
+        "SmartLink_Vent",
+        "SmartLink_Squeeze"
+      ]
+    },
+    "rig": {
+      "controls": [
+        {
+          "id": "CTRL_ShipRoot",
+          "type": "transform",
+          "pivot": "PIVOT_ShipRoot_AftCenter",
+          "drives": [
+            "all modules"
+          ]
+        },
+        {
+          "id": "CTRL_MainEngineThrottle",
+          "type": "scalar",
+          "limits": [
+            0.0,
+            1.0
+          ],
+          "drives": [
+            "ENG_01",
+            "ENG_02",
+            "ENG_03",
+            "ENG_04",
+            "ENG_05"
+          ]
+        },
+        {
+          "id": "CTRL_ManeuveringThrusters",
+          "type": "vector",
+          "drives": [
+            "MODULE_ManeuveringThrusters"
+          ]
+        },
+        {
+          "id": "CTRL_DockPort",
+          "type": "transform",
+          "socket": "SOCK_DOCK_PORT",
+          "drives": [
+            "docking collar"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "id": "rig-root-axis",
+          "rule": "Root control preserves +X forward and -X gravity with no corrective parent rotation."
+        },
+        {
+          "id": "rig-streaming-safe",
+          "rule": "Animated service modules cannot own streamed hull partitions."
+        }
+      ]
+    },
+    "animation": {
+      "states": [
+        {
+          "id": "idle_thrust",
+          "loops": true,
+          "channels": [
+            "engine emissive",
+            "subtle vector trim",
+            "service vibration"
+          ]
+        },
+        {
+          "id": "maneuver",
+          "loops": false,
+          "channels": [
+            "maneuvering-thruster pulse",
+            "hull light cue"
+          ]
+        },
+        {
+          "id": "damage_transition",
+          "loops": false,
+          "channels": [
+            "breach reveal",
+            "light failure",
+            "debris impulse"
+          ]
+        },
+        {
+          "id": "bloom_reveal",
+          "loops": false,
+          "channels": [
+            "overlay growth",
+            "hidden spline activation",
+            "localized particulate"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "id": "animation-gravity-frame",
+          "rule": "All room and prop animation remains authored in the ship local frame where gravity is -X."
+        },
+        {
+          "id": "animation-no-false-signal-tell",
+          "rule": "False-signal animation cannot reveal deception through color, timing, or unique motion."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "VFX_EnginePrimary",
+          "sockets": [
+            "SOCK_AFT_ENGINE_BASE"
+          ],
+          "data_layer": "DL_VFX",
+          "scalable": true
+        },
+        {
+          "id": "VFX_RCS",
+          "source": "engine module sockets",
+          "data_layer": "DL_VFX",
+          "scalable": true
+        },
+        {
+          "id": "VFX_Damage",
+          "source": "SPL_POWER and SPL_COOLANT breaks",
+          "data_layer": "DL_Damage",
+          "scalable": true
+        },
+        {
+          "id": "VFX_Bloom",
+          "source": "SPL_BLOOM_HIDDEN",
+          "data_layer": "DL_Bloom",
+          "scalable": true,
+          "hidden_until_reveal": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "vfx-streaming-ownership",
+          "rule": "Each emitter belongs to the same streaming cell as its socket or spline segment."
+        },
+        {
+          "id": "vfx-false-signal",
+          "rule": "False Bloom signals reuse clean-state rendering and do not receive a warning-color override."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "traversal_splines": [
+        {
+          "id": "SPL_WALK_PRIMARY",
+          "color": "cyan",
+          "profile": "walk",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_CROUCH_ALTERNATE",
+          "color": "orange",
+          "profile": "crouch",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_CRAWL_SERVICE",
+          "color": "magenta",
+          "profile": "crawl",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_VENT_BYPASS",
+          "color": "green",
+          "profile": "maintenance_vent",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_SQUEEZE_EMERGENCY",
+          "color": "yellow",
+          "profile": "squeeze_gap",
+          "unreal_component": "USplineComponent"
+        }
+      ],
+      "interdeck_splines": [
+        {
+          "id": "SPL_LIFT_PRIMARY",
+          "color": "bright-blue",
+          "profile": "lift",
+          "axis": "+/-X",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_STAIR_PRESSURE",
+          "color": "white",
+          "profile": "pressure_stair",
+          "axis": "+/-X",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_LADDER_SERVICE",
+          "color": "violet",
+          "profile": "service_ladder",
+          "axis": "+/-X",
+          "unreal_component": "USplineComponent"
+        },
+        {
+          "id": "SPL_TRUNK_EMERGENCY",
+          "color": "red-dashed",
+          "profile": "emergency_trunk",
+          "axis": "+/-X",
+          "unreal_component": "USplineComponent"
+        }
+      ],
+      "environment_splines": [
+        {
+          "id": "SPL_POWER",
+          "color": "red",
+          "purpose": "primary and emergency power",
+          "failure_state": "sparking and dark"
+        },
+        {
+          "id": "SPL_DATA",
+          "color": "cyan",
+          "purpose": "data backbone",
+          "failure_state": "UI and sensor dropout"
+        },
+        {
+          "id": "SPL_COOLANT",
+          "color": "blue",
+          "purpose": "coolant routing",
+          "failure_state": "leak and fog"
+        },
+        {
+          "id": "SPL_AIR",
+          "color": "green",
+          "purpose": "life support and pressure routing",
+          "failure_state": "pressure loss"
+        },
+        {
+          "id": "SPL_BLOOM_HIDDEN",
+          "color": "normal-signal",
+          "purpose": "concealed contamination propagation path",
+          "render_only_when_revealed": true
+        }
+      ],
+      "room_socket_types": [
+        "SOCK_DOOR_Y_POS",
+        "SOCK_DOOR_Y_NEG",
+        "SOCK_LIFT_X_POS",
+        "SOCK_LADDER_X_NEG",
+        "SOCK_STAIR_X_POS",
+        "SOCK_STAIR_X_NEG",
+        "SOCK_TRUNK_X_POS",
+        "SOCK_TRUNK_X_NEG",
+        "SOCK_VENT_IN",
+        "SOCK_VENT_OUT",
+        "SOCK_DAMAGE_BREACH"
+      ],
+      "dcc_mapping": {
+        "houdini": {
+          "representation": "curves and named groups",
+          "group_prefix": "grp_"
+        },
+        "blender": {
+          "representation": "curve objects and socket empties",
+          "collections": [
+            "70_SPLINES",
+            "60_SOCKETS"
+          ]
+        },
+        "unreal": {
+          "representation": "USplineComponent, scene-component sockets, and actor volumes",
+          "pcg_tags_required": true
+        }
+      },
+      "requirements": [
+        {
+          "id": "spline-boundary-crossing",
+          "rule": "Every traversal or utility spline crossing a room or pressure boundary receives a named socket."
+        },
+        {
+          "id": "spline-clearance",
+          "rule": "Every traversal spline remains inside the matching clearance volume for its full length."
+        },
+        {
+          "id": "spline-route-choice",
+          "rule": "Every room has a primary walk route plus at least one alternate, service, vent, or emergency route."
+        },
+        {
+          "id": "spline-environment-separation",
+          "rule": "Traversal and environment splines are separate assets, collections, components, and PCG tags."
+        },
+        {
+          "id": "spline-damage-breaks",
+          "rule": "Power, data, coolant, air, and vent splines expose break and reroute states per streaming cell."
+        }
+      ]
+    },
+    "volume_mapping": {
+      "NAV_WALK_VOL": {
+        "profile": "walk",
+        "unreal_class": "NavModifierVolume"
+      },
+      "NAV_CRAWL_VOL": {
+        "profile": "crawl",
+        "unreal_class": "TriggerVolume"
+      },
+      "NAV_SQUEEZE_VOL": {
+        "profile": "squeeze_gap",
+        "unreal_class": "TriggerVolume"
+      },
+      "MAINT_VENT_VOL": {
+        "profile": "maintenance_vent",
+        "unreal_class": "TriggerVolume"
+      },
+      "COLLISION_PRIMITIVE": {
+        "dcc": "UCX",
+        "unreal_class": "BodySetup"
+      },
+      "FOG_VISIBILITY_BLOCKER": {
+        "unreal_class": "PostProcessVolume"
+      },
+      "PRESSURE_BOUNDARY": {
+        "unreal_class": "TriggerVolume"
+      },
+      "STREAMING_OWNERSHIP_CELL": {
+        "unreal_class": "WorldPartitionRuntimeCell"
+      }
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "RL_CleanHull",
+          "source": [
+            "10_HULL",
+            "20_FRAMES"
+          ],
+          "unreal_data_layer": "DL_Clean"
+        },
+        {
+          "id": "RL_Interior",
+          "source": [
+            "40_ROOM_KIT"
+          ],
+          "unreal_data_layer": "DL_Interior"
+        },
+        {
+          "id": "RL_EngineVFX",
+          "source": [
+            "30_ENGINES",
+            "60_SOCKETS"
+          ],
+          "unreal_data_layer": "DL_VFX"
+        },
+        {
+          "id": "RL_Damage",
+          "source": [
+            "80_DAMAGE"
+          ],
+          "unreal_data_layer": "DL_Damage"
+        },
+        {
+          "id": "RL_Bloom",
+          "source": [
+            "81_BLOOM"
+          ],
+          "unreal_data_layer": "DL_Bloom",
+          "player_hidden_false_signal": true
+        },
+        {
+          "id": "RL_Technical",
+          "source": [
+            "00_GUIDES",
+            "50_COLLISION",
+            "70_SPLINES"
+          ],
+          "editor_only": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "bloom-no-signal-color",
+          "rule": "False-signal Bloom uses normal clean-state signal color and presentation. Never recolor it to disclose deception."
+        },
+        {
+          "id": "overlay-separation",
+          "rule": "Damage and Bloom remain separable from clean hull and from each other."
+        }
+      ]
+    },
+    "implementation": {
+      "gravity_vector_ship_space": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "thrust_vector_ship_space": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "floor_plane": "YZ",
+      "floor_normal": "+X",
+      "deck_stack_axis": "+X",
+      "engine_base": "aft -X face",
+      "deck_numbering": "aft to fore",
+      "visual_presentation": {
+        "canonical_stack_proof": {
+          "ship_on_page": "vertical thrust-gravity stack",
+          "page_up": "+X bow",
+          "page_down": "-X engines and gravity",
+          "floor_on_page": "horizontal transverse YZ slab",
+          "occupant_on_page": "upright with boots on engine-facing floor and head toward +X",
+          "engines_on_page": "directly below every occupied deck"
+        },
+        "room_view": {
+          "camera_relation": "local gravity-upright view derived from the same vertical stack frame",
+          "page_up": "+X bow",
+          "page_down": "-X engines and gravity",
+          "floor_on_page": "horizontal at bottom because the room geometry is correctly authored"
+        },
+        "forbidden": [
+          "canted or diagonal main engine",
+          "main nozzle outside common aft plane",
+          "floor not between occupant and engines",
+          "conventional axial corridor used as a room story",
+          "person pasted onto incorrectly oriented room",
+          "Y-down gravity",
+          "Z-down gravity"
+        ]
+      },
+      "main_engine_alignment": {
+        "centerline_axis_ship_space": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "exhaust_direction": "-X",
+        "all_centerlines_parallel": true,
+        "all_nozzle_exits_common_aft_plane_x_m": 0.0,
+        "cant_or_diagonal_allowed": false,
+        "gimbal_allowed": false,
+        "maneuvering_thrusters_separate": true
+      },
+      "asymmetry": {
+        "engine_centroid_must_not_equal_origin": true,
+        "paired_engine_scale_equality_forbidden": true,
+        "room_mirror_reuse_forbidden": true,
+        "minimum_unique_room_landmarks": 3,
+        "maximum_identical_fixture_run": 3,
+        "exterior_greeble_area_fraction_max": 0.18
+      },
+      "streaming_cells": [
+        {
+          "id": "CELL_01",
+          "x_m": [
+            0.0,
+            910.0
+          ],
+          "primary_frame": "FRAME_01"
+        },
+        {
+          "id": "CELL_02",
+          "x_m": [
+            910.0,
+            1885.0
+          ],
+          "primary_frame": "FRAME_02"
+        },
+        {
+          "id": "CELL_03",
+          "x_m": [
+            1885.0,
+            2860.0
+          ],
+          "primary_frame": "FRAME_03"
+        },
+        {
+          "id": "CELL_04",
+          "x_m": [
+            2860.0,
+            3835.0
+          ],
+          "primary_frame": "FRAME_04"
+        },
+        {
+          "id": "CELL_05",
+          "x_m": [
+            3835.0,
+            4810.0
+          ],
+          "primary_frame": "FRAME_05"
+        },
+        {
+          "id": "CELL_06",
+          "x_m": [
+            4810.0,
+            5785.0
+          ],
+          "primary_frame": "FRAME_06"
+        },
+        {
+          "id": "CELL_07",
+          "x_m": [
+            5785.0,
+            6500.0
+          ],
+          "primary_frame": "FRAME_07"
+        }
+      ],
+      "traversal_profiles": [
+        {
+          "id": "walk",
+          "width_m": 1.2,
+          "height_m": 2.1
+        },
+        {
+          "id": "crouch",
+          "width_m": 0.9,
+          "height_m": 1.35
+        },
+        {
+          "id": "crawl",
+          "width_m": 0.65,
+          "height_m": 0.85,
+          "length_m": 1.6
+        },
+        {
+          "id": "squeeze_gap",
+          "width_m": 0.45,
+          "height_m": 2.0
+        },
+        {
+          "id": "maintenance_vent",
+          "width_m": 0.55,
+          "height_m": 0.85
+        },
+        {
+          "id": "pressure_stair",
+          "width_m": 1.0,
+          "height_m": 2.1,
+          "axis": "+/-X"
+        },
+        {
+          "id": "service_ladder",
+          "width_m": 0.55,
+          "axis": "+/-X"
+        }
+      ],
+      "suit_clearance_envelopes": {
+        "scientist": {
+          "small": {
+            "standing_height_m": 1.75,
+            "standing_width_m": 0.45
+          },
+          "medium": {
+            "standing_height_m": 1.95,
+            "standing_width_m": 0.65
+          },
+          "large": {
+            "standing_height_m": 2.15,
+            "standing_width_m": 0.75
+          }
+        },
+        "technician": {
+          "small": {
+            "standing_height_m": 1.75,
+            "standing_width_m": 0.5
+          },
+          "medium": {
+            "standing_height_m": 1.95,
+            "standing_width_m": 0.7
+          },
+          "large": {
+            "standing_height_m": 2.15,
+            "standing_width_m": 0.8
+          }
+        }
+      },
+      "performance_budget": {
+        "streaming_cells": 7,
+        "visible_high_detail_cells_max": 3,
+        "material_slots_per_module_max": 8,
+        "dynamic_lights_per_room_max": 12,
+        "unique_room_hero_props_min": 3
+      }
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "gravity-axis",
+      "status": "pass",
+      "requirement": "Gravity is -X toward the aft engine base; no Y or Z gravity remains in canonical data.",
+      "evidence": "build.implementation.gravity_vector_ship_space"
+    },
+    {
+      "id": "floor-orientation",
+      "status": "pass",
+      "requirement": "All habitable floor planes are YZ transverse slabs with +X normals.",
+      "evidence": "build.parts KIT_Rooms and FRAME_TransverseSet"
+    },
+    {
+      "id": "gravity-true-presentation",
+      "status": "pass",
+      "requirement": "Canonical proofs show a true vertical stack with floors between occupants and engines, and room views use the same local gravity frame.",
+      "evidence": "source_sheet, supplemental_sheets, and build.implementation.visual_presentation"
+    },
+    {
+      "id": "main-engine-alignment",
+      "status": "pass",
+      "requirement": "Every main-engine centerline is parallel to X, every nozzle exits on the common aft plane, and no main engine can cant or gimbal.",
+      "evidence": "build.parts MODULE_EngineBase.modules and build.implementation.main_engine_alignment"
+    },
+    {
+      "id": "main-engine-raster-orthographic",
+      "status": "pass",
+      "requirement": "Engine-bearing overview, story, Houdini, and Unreal panels use flat orthographic engines with straight centerlines and a level common aft plane.",
+      "evidence": "supplemental_sheets vertical-stack-room-production-v2 and main-engine-orthographic-geometry-authority"
+    },
+    {
+      "id": "engine-asymmetry",
+      "status": "pass",
+      "requirement": "Straight main engines differ in scale and YZ placement and have an off-origin centroid without using diagonal canting.",
+      "evidence": "build.parts MODULE_EngineBase.modules"
+    },
+    {
+      "id": "room-asymmetry",
+      "status": "pass",
+      "requirement": "Five role rooms have unique archetypes, silhouettes, offsets, and landmarks; mirrored reuse is forbidden.",
+      "evidence": "build.parts KIT_Rooms.modules"
+    },
+    {
+      "id": "traversal-contract",
+      "status": "pass",
+      "requirement": "Every room links named walk, crouch, crawl, vent, and squeeze splines to sockets, clearance profiles, and volumes.",
+      "evidence": "build.spline_mapping, build.volume_mapping, and build.implementation.traversal_profiles"
+    },
+    {
+      "id": "circulation-contract",
+      "status": "pass",
+      "requirement": "Every occupied band has a distinct YZ corridor topology and at least two +/-X interdeck methods across lifts, pressure stairs, service ladders, or the independent emergency trunk.",
+      "evidence": "build.circulation_network"
+    },
+    {
+      "id": "source-lineage",
+      "status": "pass",
+      "requirement": "Exterior baselines and both from-scratch vertical-stack room sheets are linked while superseded images remain traceable.",
+      "evidence": "concept_sources"
+    },
+    {
+      "id": "blender-graybox",
+      "status": "pending",
+      "requirement": "Generate measured modules and verify aft-root transform, transverse slabs, and unique room footprints in Blender."
+    },
+    {
+      "id": "unreal-assembly",
+      "status": "pending",
+      "requirement": "Import modules and validate PCG assembly, World Partition, HLOD, Nanite, collision, and data layers in Unreal."
+    },
+    {
+      "id": "runtime-traversal",
+      "status": "pending",
+      "requirement": "Validate walk, crouch, crawl, vent, squeeze-gap, stair, ladder, lift, and emergency-trunk traversal using player suit profiles and route-failure states."
+    },
+    {
+      "id": "performance",
+      "status": "pending",
+      "requirement": "Meet frame, memory, streaming, light, and draw-call budgets in the target demo scene."
+    }
+  ],
+  "build_questions": [
+    "Which ship receives the first measured Blender and Unreal production prototype?",
+    "Which rooms are required for the vertical-slice demo and which remain streamed set dressing?",
+    "Which damage and Bloom states need runtime transitions in the first demo?"
+  ]
+}

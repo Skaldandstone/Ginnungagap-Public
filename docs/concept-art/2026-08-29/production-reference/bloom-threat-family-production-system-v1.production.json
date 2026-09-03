@@ -1,0 +1,75 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Enemy.Bloom.ThreatFamily.ReferenceV1",
+  "title": "Bloom Threat Family Production System",
+  "category": "enemy",
+  "status": "technical-review",
+  "production_ready": false,
+  "owners": ["character-art", "technical-art", "animation", "vfx", "gameplay"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/bloom-threat-family-production-system-v1.png", "sha256": "d7418e3c5262085e728a549b4795247a2a0a8c962601d8692a1c921c088587d9", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Consolidates existing infected crew, Bloom robotics, and threat-lineup art into a shared host-plus-growth production system."},
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Trailer/Bloom_Infected_Crew.png", "role": "reanimated crew visual source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Trailer/Bloom_Threat_Lineup.png", "role": "family silhouette and scale source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Trailer/Bloom_Robotics.png", "role": "mechanized host source", "required": true},
+    {"path": "docs/concept-art/reference/bloom/reanimated-crew-variants.png", "role": "reanimated variation source", "required": true},
+    {"path": "docs/BloomFabRealityScanPrototypes.md", "role": "runtime family and progression authority", "required": true},
+    {"path": "Source/Ginnungagap/Public/Bloom/BloomEnemyArchetypes.h", "role": "gameplay class authority", "required": true},
+    {"path": "docs/concept-art/reference/bloom/companionway-v1.png", "role": "Bloom companionway state reference", "required": true},
+    {"path": "docs/concept-art/reference/bloom/mechanized-host-v1.png", "role": "mechanized-host lineage reference", "required": true}
+  ],
+  "concept_source_sets": [
+    {"root": "docs/concept-art/reference/bloom", "role": "Bloom family, combat, host, and robot concept lineage", "required": true, "lifecycle": "design-reference"},
+    {"root": "Content/Assets/ConceptArt/Corridors", "role": "Bloom companionway corruption progression", "required": true, "lifecycle": "state-lineage"}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "host_layering", "value": "infection pieces remain separate from the animated host", "source": "Source/Ginnungagap/Public/Bloom/BloomEnemyArchetypes.h"},
+      {"field": "implemented_families", "value": ["reanimated_crew", "mechanized_host"], "source": "docs/BloomFabRealityScanPrototypes.md"},
+      {"field": "progression", "value": ["early", "mid", "late"], "source": "docs/BloomFabRealityScanPrototypes.md"},
+      {"field": "reanimated_skeleton", "value": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple", "source": "docs/BloomFabRealityScanPrototypes.md"}
+    ],
+    "provisional": [
+      {"field": "family_set", "value": ["crawler", "reanimated_crew", "mechanized_host", "brute_host"], "source": "bloom-threat-family-production-system-v1.png"},
+      {"field": "layer_stack", "value": ["clean_host", "infection_meshes", "crystal_growths", "tendrils", "emissive_core", "vfx"], "source": "bloom-threat-family-production-system-v1.png"},
+      {"field": "growth_zones", "value": ["head", "chest", "left_arm", "right_arm", "left_leg", "right_leg", "back", "ground_contact"], "source": "bloom-threat-family-production-system-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "unimplemented-family-identities", "severity": "warning", "description": "Crawler and brute host are coherent concept families but are not both confirmed as final gameplay archetypes.", "resolution": "Map each provisional family to a canonical gameplay class or remove it before full production."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {"name": "PIVOT_HostRoot", "rule": "Use each clean host's approved animation root; ground-contact growths use independent world-aligned pivots.", "authority": "approved"},
+    "parts": [
+      {"name": "HOST_Clean", "role": "recognizable base host"}, {"name": "GROWTH_InfectionMesh", "role": "skinned or rigid infection shell"},
+      {"name": "GROWTH_Crystal", "role": "separate crystalline geometry"}, {"name": "GROWTH_Tendril", "role": "secondary motion geometry"},
+      {"name": "CORE_Emissive", "role": "separate emissive structure"}, {"name": "VFX_Bloom", "role": "particles and post effects"}
+    ],
+    "materials": [
+      {"slot": "host", "family": "host-original"}, {"slot": "infection", "family": "bloom-organic-black"},
+      {"slot": "crystal", "family": "bloom-translucent-violet"}, {"slot": "core", "family": "bloom-emissive"},
+      {"slot": "damage", "family": "host-damage"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Growth_Head"}, {"name": "SOCKET_Growth_Chest"}, {"name": "SOCKET_Growth_Arm_L"}, {"name": "SOCKET_Growth_Arm_R"},
+      {"name": "SOCKET_Growth_Leg_L"}, {"name": "SOCKET_Growth_Leg_R"}, {"name": "SOCKET_Growth_Back"}, {"name": "SOCKET_GroundContact"},
+      {"name": "SOCKET_VFX_Core"}, {"name": "SOCKET_VFX_Death"}
+    ],
+    "states": [
+      {"id": "clean_host"}, {"id": "early"}, {"id": "mid"}, {"id": "late"}, {"id": "dead"}
+    ],
+    "blender": {"root_collection": "PR_BloomThreatFamily", "collections": ["00_GUIDES", "10_HOSTS", "20_INFECTION", "30_CRYSTALS", "40_TENDRILS", "50_SOCKETS", "60_VFX_GUIDES", "70_ANIMATION_POSES", "90_EXPORT"]},
+    "unreal": {"asset_type": "SkeletalMeshFamily", "destination_root": "/Game/Assets/Models/Bloom/ThreatFamily", "existing_assets": ["/Game/Assets/Models/Bloom/ReanimatedCrew", "/Game/Assets/Models/Bloom/Expansion"], "import_policy": "Preserve existing runtime classes and prototype maps; add family assets only after gameplay identity and performance checks."}
+  },
+  "acceptance_checks": [
+    {"id": "host-recognition", "status": "pending", "requirement": "Clean host identity remains readable at gameplay distance in every progression state."},
+    {"id": "layer-separation", "status": "pending", "requirement": "Infection, crystal, tendril, core, and VFX layers can be controlled independently."},
+    {"id": "rig", "status": "pending", "requirement": "Growths pass idle, locomotion, attack, hit, and death deformation without blocking core host motion."},
+    {"id": "family-mapping", "status": "pending", "requirement": "Every visual family maps to an approved gameplay class and encounter role."},
+    {"id": "performance", "status": "pending", "requirement": "LOD, material, translucency, tendril simulation, and VFX budgets pass representative encounter density."}
+  ],
+  "build_questions": ["Are crawler and brute host canonical families or visual placeholders?", "Which growth sockets must replicate as gameplay state rather than cosmetic state?"]
+}

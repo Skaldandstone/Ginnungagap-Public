@@ -1,0 +1,149 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Ship.Wayfarer.SplineStreamingRender.ReferenceV1",
+  "title": "GGP-01 Wayfarer Spline, Streaming, and Render Mapping",
+  "category": "ship",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Ship.Wayfarer.ExteriorMaster.ReferenceV1",
+  "owners": ["ship-art", "environment-art", "technical-art", "world-partition", "vfx"],
+  "metadata": {
+    "purpose": "Authoritative district, spline, socket, streaming, damage, and render implementation companion for the Wayfarer exterior.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 4.x"],
+    "export_targets": ["FBX or glTF modules", "Unreal Nanite meshes", "JSON spline and socket map", "material and decal atlases"],
+    "source_preservation": "Additive packet. The exterior master and source concepts remain unchanged.",
+    "naming_prefixes": {"static_mesh": "SM_GGP01_Wayfarer_", "blueprint": "BP_GGP01_Wayfarer_", "material_instance": "MI_GGP01_Wayfarer_", "niagara": "NS_GGP01_Wayfarer_", "data_asset": "DA_GGP01_Wayfarer_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-wayfarer-spline-streaming-render-mapping-v1.png",
+    "sha256": "8306e4e7b3cceb29ed6c6c887450c12b6a0f284f60c4fa5d0d86f1b6c3ffeda8",
+    "width_px": 1586,
+    "height_px": 992,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Visual overlays explain the map. JSON names and values are authoritative."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-wayfarer-exterior-master-v1.png", "role": "appearance, silhouette, proportion, scale, and module authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "dimensions_m", "value": [1400, 260, 320], "source": "exterior master"},
+      {"field": "districts", "value": ["bow", "midship", "hangar_docking", "command_sensor", "drive"], "source": "exterior master"},
+      {"field": "silhouette", "value": "unchanged from exterior master", "source": "appearance lock"}
+    ],
+    "provisional": [
+      {"field": "center_of_mass", "value": "module-space origin near district 03", "source": "implementation proposal"},
+      {"field": "HLOD_screen_sizes", "value": [0.5, 0.2, 0.08, 0.03], "source": "performance proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": [1400, 260, 320],
+    "pivot": {"location": "ship centerline at approved center-of-mass marker", "orientation": "+X bow, +Y starboard, +Z dorsal", "module_origins": "local to each district, transforms stored in data asset"},
+    "parts": [
+      {"id": "D01_Bow", "type": "streaming_district", "required": true},
+      {"id": "D02_Midship", "type": "streaming_district", "required": true},
+      {"id": "D03_HangarDocking", "type": "streaming_district", "required": true},
+      {"id": "D04_CommandSensor", "type": "streaming_district", "required": true},
+      {"id": "D05_Drive", "type": "streaming_district", "required": true},
+      {"id": "armor_panels", "type": "replaceable_module_set", "required": true},
+      {"id": "docking_mechanisms", "type": "socketed_module_set", "required": true},
+      {"id": "defense_mounts", "type": "socketed_module_set", "required": true},
+      {"id": "vfx_emitters", "type": "socketed_systems", "required": true}
+    ],
+    "materials": [
+      {"id": "M01_HullMetal", "slot": 0}, {"id": "M02_HullPanels", "slot": 1},
+      {"id": "M03_ArmorPanels", "slot": 2}, {"id": "M04_WindowEmissive", "slot": 3},
+      {"id": "M05_NavLights", "slot": 4}, {"id": "M06_DecalGrip", "slot": 5},
+      {"id": "M07_DockingHardware", "slot": 6}, {"id": "M08_EngineNozzle", "slot": 7},
+      {"id": "M09_BloomOverlay", "slot": 8}
+    ],
+    "sockets": [
+      {"name": "SOCK_DOCK_PORT_AFT", "district": "D03"}, {"name": "SOCK_DOCK_PORT_FWD", "district": "D03"},
+      {"name": "SOCK_DOCK_STBD_AFT", "district": "D03"}, {"name": "SOCK_DOCK_STBD_FWD", "district": "D03"},
+      {"name": "SOCK_HANGAR_BAY_01", "district": "D03"}, {"name": "SOCK_HANGAR_BAY_02", "district": "D03"},
+      {"name": "SOCK_DEFENCE_TURRET_P01-P06", "district": "distributed"}, {"name": "SOCK_DEFENCE_TURRET_S01-S06", "district": "distributed"},
+      {"name": "SOCK_SENSOR_DOME_01", "district": "D04"}, {"name": "SOCK_SENSOR_DOME_02", "district": "D04"},
+      {"name": "SOCK_VFX_ENGINE_PLUME_C01-C08", "district": "D05"}, {"name": "SOCK_VFX_THRUST_AUX_L01-L04", "district": "D05"}
+    ],
+    "states": [
+      {"id": "D0_pristine", "damage": 0.0}, {"id": "D1_light", "damage": 0.25},
+      {"id": "D2_moderate", "damage": 0.5}, {"id": "D3_heavy", "damage": 0.75},
+      {"id": "D4_critical_breached", "damage": 1.0}
+    ],
+    "blender": {"root_collection": "GGP01_Wayfarer_Exterior", "district_collections": ["D01_Bow", "D02_Midship", "D03_HangarDocking", "D04_CommandSensor", "D05_Drive"], "spline_collection": "Implementation_Splines", "socket_collection": "Implementation_Sockets"},
+    "unreal": {"asset_type": "Nanite StaticMesh modules plus Actor Blueprint", "destination_root": "/Game/Ships/GGP01/Exterior", "root_blueprint": "BP_GGP01_Wayfarer_Exterior", "data_asset": "DA_GGP01_Wayfarer_ExteriorMap"},
+    "rig": {"not_applicable": true, "reason": "Exterior is a modular rigid-body assembly. Movable docking and turret parts use component pivots rather than a character rig.", "controls": [{"id": "docking_mechanism", "type": "component transform"}, {"id": "turret_mount", "type": "yaw and pitch component hierarchy"}]},
+    "animation": {
+      "states": [
+        {"id": "dock_retracted", "component": "docking_mechanism"}, {"id": "dock_deploying", "component": "docking_mechanism"},
+        {"id": "dock_extended", "component": "docking_mechanism"}, {"id": "hangar_closed", "component": "hangar_door"},
+        {"id": "hangar_opening", "component": "hangar_door"}, {"id": "hangar_open", "component": "hangar_door"}
+      ],
+      "requirements": [{"id": "AN-001", "requirement": "Movable components keep pivots and collision local to their owning district."}]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "main_engine_plume", "socket_pattern": "SOCK_VFX_ENGINE_PLUME_C{NN}", "system": "NS_GGP01_Wayfarer_EngineMain"},
+        {"id": "aux_thruster", "socket_pattern": "SOCK_VFX_THRUST_AUX_{Side}{NN}", "system": "NS_GGP01_Wayfarer_ThrusterAux"},
+        {"id": "docking_light", "socket_pattern": "SOCK_DOCK_*", "system": "NS_GGP01_Wayfarer_DockingLight"},
+        {"id": "hangar_traffic", "socket_pattern": "SOCK_HANGAR_*", "system": "NS_GGP01_Wayfarer_HangarTraffic"},
+        {"id": "damage", "socket_pattern": "runtime_damage_socket", "system": "NS_GGP01_Wayfarer_Damage"}
+      ],
+      "requirements": [{"id": "VFX-001", "requirement": "Plume direction is aligned to each socket local +X axis and intensity is driven by normalized thrust."}]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Hull_Longitudinal_{NN}", "purpose": "armor and hull panel flow", "owner": "district", "coordinate_space": "district local"},
+        {"id": "SP_NavLight_Port", "purpose": "port navigation lights", "owner": "root", "coordinate_space": "ship local"},
+        {"id": "SP_NavLight_Starboard", "purpose": "starboard navigation lights", "owner": "root", "coordinate_space": "ship local"},
+        {"id": "SP_DockingApproach_{Bay}", "purpose": "AI and player docking approach", "owner": "D03", "coordinate_space": "district local"},
+        {"id": "SP_HangarTraffic_{Lane}", "purpose": "hangar traffic visualization and AI", "owner": "D03", "coordinate_space": "district local"},
+        {"id": "SP_DefenseArc_{Mount}", "purpose": "fire arc visualization and validation", "owner": "mount", "coordinate_space": "socket local"},
+        {"id": "SP_UtilityRoute_{NN}", "purpose": "cable and utility continuity", "owner": "district", "coordinate_space": "district local"},
+        {"id": "SP_DamagePropagation_{NN}", "purpose": "damage decal and effect routing", "owner": "district", "coordinate_space": "district local"}
+      ],
+      "requirements": [{"id": "SP-001", "requirement": "Export spline ID, owner district, ordered points, tangents, roll, width, socket endpoints, and continuity links."}]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "base_color", "usage": "albedo QA"}, {"id": "metallic", "usage": "PBR QA"},
+        {"id": "roughness", "usage": "PBR QA"}, {"id": "normal", "usage": "surface QA"},
+        {"id": "world_position_offset", "usage": "animated or damage effects"}, {"id": "emissive", "usage": "windows, nav, engines"},
+        {"id": "ambient_occlusion", "usage": "contact QA"}, {"id": "curvature", "usage": "wear authoring"},
+        {"id": "velocity", "usage": "motion effects"}, {"id": "custom_depth", "usage": "scan and selection"},
+        {"id": "object_id", "usage": "district and module isolation"}, {"id": "material_id", "usage": "material slot QA"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "damage and wear"}, {"name": "vertex_color.g", "usage": "dirt and grime"},
+        {"name": "vertex_color.b", "usage": "AO and crevice emphasis"}, {"name": "vertex_color.a", "usage": "decal blend or mask"}
+      ],
+      "lods": [
+        {"id": "LOD0", "strategy": "Nanite source mesh, full silhouette"}, {"id": "LOD1", "strategy": "HLOD district clusters"},
+        {"id": "LOD2", "strategy": "HLOD whole-ship sections"}, {"id": "LOD3", "strategy": "simple whole-ship proxy"},
+        {"id": "LOD4", "strategy": "billboard optional for extreme distance"}
+      ]
+    },
+    "implementation": {
+      "collision_layers": ["Collision_Hull", "Collision_Dock", "Collision_Hangar", "Collision_Defense", "Collision_Sensor"],
+      "streaming": {"granularity": "five districts", "HLOD_boundary": "district boundary", "cross_district_dependencies": ["socket links", "spline continuity", "damage state", "nav lights"]},
+      "requirements": [
+        {"id": "IMP-001", "requirement": "Every module stores district ID, local origin, material slots, sockets, collision layer, damage state, and HLOD membership."},
+        {"id": "IMP-002", "requirement": "Spline endpoints crossing districts terminate at named continuity sockets."},
+        {"id": "IMP-003", "requirement": "Damage masks are packed consistently across all districts and preserve the master silhouette through D3."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "WAY-MAP-001", "status": "pending", "requirement": "Combined district bounds equal 1400 m by 260 m by 320 m within approved tolerance."},
+    {"id": "WAY-MAP-002", "status": "pending", "requirement": "All cross-district splines and sockets connect without gaps or tangent flips."},
+    {"id": "WAY-MAP-003", "status": "pending", "requirement": "HLOD transitions preserve silhouette, engine count, docking recesses, and command profile."},
+    {"id": "WAY-MAP-004", "status": "pending", "requirement": "Render and damage masks are consistent for every district and module."}
+  ],
+  "build_questions": ["Confirm final center of mass and root pivot after interior massing is approved.", "Confirm whether weapon firing arcs require gameplay collision volumes or editor-only visualization."]
+}

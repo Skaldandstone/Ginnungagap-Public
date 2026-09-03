@@ -1,0 +1,99 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Ship.FleetExteriorClassLineage.ReferenceV1",
+  "title": "GGP Fleet Exterior Class and Lineage System V1",
+  "category": "ship",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["ship-art", "technical-art", "world-design", "gameplay", "lighting", "audio", "vfx"],
+  "metadata": {
+    "purpose": "Three-class exterior authority and complete concept, remaster, concept-match, sculpt-review, and shipping-module lineage for the Small Utility Escort, Medium Military Corvette, and Large Expedition Carrier or Wayfarer.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"],
+    "export_targets": ["FBX or USD", "Nanite modular meshes", "World Partition actors", "Data Assets", "Niagara", "Movie Render Queue"],
+    "source_preservation": "All intermediate renders remain unchanged and traceable. Superseded remasters and sculpt reviews are not shipping art.",
+    "naming_prefixes": {"small": "GGP_SML_", "medium": "GGP_MED_", "large": "GGP_LRG_", "mesh": "SM_", "data_asset": "DA_Fleet_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp-fleet-exterior-class-lineage-system-v1.png",
+    "sha256": "a3ff074203467e59a814fb576d4a41e4390db0a83607e8593c55e42ca9eb1db1",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The verified Small Utility Escort contract is 1400 x 260 x 320 m. Its 900 x 125 x 250 m remaster scale is superseded. Intermediate sculpt and remaster imagery is lineage, not automatic final-art authority."
+  },
+  "concept_sources": [
+    {"path": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/Previews/SmallUtilityEscort_ConceptMatch_Beauty.png", "role": "small-class current appearance reference", "required": true},
+    {"path": "Art/Ships/Exterior/ConceptRemasterV03/MilitaryCorvette/MilitaryCorvette_RemasterV03_Beauty.png", "role": "medium-class current direction", "required": true},
+    {"path": "Art/Ships/Exterior/ConceptRemasterV03/ExpeditionCarrier/ExpeditionCarrier_RemasterV03_Beauty.png", "role": "large-class current direction", "required": true},
+    {"path": "docs/concept-art/reference/ships/ship-class-scale-lineup.png", "role": "class comparison and scale authority", "required": true},
+    {"path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_ModelSheet_v3.png", "role": "Wayfarer component and silhouette lineage", "required": true},
+    {"path": "docs/ConceptShipRemasterV02.md", "role": "remaster lineage dimensions; small-class scale is superseded", "required": true},
+    {"path": "Config/Ships/SmallUtilityEscortInterior.json", "role": "current Small Utility Escort production dimensions", "required": true},
+    {"path": "docs/concept-art/reference/ships/README.md", "role": "current three-class scale and small-class supersession authority", "required": true},
+    {"path": "docs/InteriorMaps.md", "role": "class interior and district context", "required": true}
+  ],
+  "concept_source_sets": [
+    {"root": "Art/Ships/Exterior/ConceptMatch", "role": "concept-match lineage", "required": true, "lifecycle": "review"},
+    {"root": "Art/Ships/Exterior/ConceptRemasterV01", "role": "first remaster lineage", "required": true, "lifecycle": "superseded"},
+    {"root": "Art/Ships/Exterior/ConceptRemasterV02", "role": "second remaster lineage", "required": true, "lifecycle": "superseded"},
+    {"root": "Art/Ships/Exterior/ConceptRemasterV03", "role": "current remaster direction", "required": true, "lifecycle": "current-direction"},
+    {"root": "Art/Ships/Exterior/UnrealSculptReview", "role": "sculpt and silhouette review lineage", "required": true, "lifecycle": "review-only"},
+    {"root": "Content/Assets/ConceptArt/Ships", "role": "Wayfarer model-sheet, jump-arrival, and deck-stack lineage", "required": true, "lifecycle": "mixed-lineage"},
+    {"root": "docs/concept-art/reference/ships", "role": "class exterior, interior, blueprint, and scale documentation", "required": true, "lifecycle": "design-reference"}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "small_class_dimensions_m", "value": [1400, 260, 320], "source": "Config/Ships/SmallUtilityEscortInterior.json, ConceptMatch_Manifest.json, and docs/concept-art/reference/ships/README.md"},
+      {"field": "medium_class_dimensions_m", "value": [2400, 430, 620], "source": "ConceptShipRemasterV02.md"},
+      {"field": "large_class_dimensions_m", "value": [6500, 1400, 1800], "source": "ConceptShipRemasterV02.md"},
+      {"field": "class_silhouette_rule", "value": "each class is a distinct architecture, not a resized copy", "source": "concept lineage"},
+      {"field": "lineage_policy", "value": "V01 and V02 superseded; V03 current direction; concept match and Unreal sculpt remain review evidence", "source": "folder lifecycle and production review"}
+    ],
+    "provisional": [
+      {"field": "superseded_small_remaster_dimensions_m", "value": [900, 125, 250], "source": "ConceptShipRemasterV02.md", "note": "Legacy remaster scale only. Do not build the Small Utility Escort at this size."},
+      {"field": "shipping_module_counts", "value": "derive per class after import and district review", "source": "production workflow"}
+    ],
+    "conflicts": [{"id": "FLEET-SCALE-001", "severity": "warning", "description": "Config/ShipLayout.json and older interior text still describe the Wayfarer at approximately 1150 m while the measured Small Utility Escort production contract is 1400 x 260 x 320 m.", "resolution": "Use the measured 1400 m production contract and reconcile legacy layout documentation before final promotion."}]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"root": "class center of mass", "districts": "documented local module origins", "docking": "capture-plane centerline", "engines": "thrust-axis origin"},
+    "parts": [
+      {"id": "primary_hull"}, {"id": "armor_shell"}, {"id": "service_district"}, {"id": "command_district"},
+      {"id": "hangar_district"}, {"id": "docking_spine"}, {"id": "engine_district"}, {"id": "RCS_clusters"},
+      {"id": "weapon_hardpoints"}, {"id": "navigation_lights"}, {"id": "utility_ports"}, {"id": "collision"}
+    ],
+    "materials": [
+      {"id": "hull_primary", "channels": ["base_color", "normal", "ORM", "wear"]},
+      {"id": "hull_secondary"}, {"id": "accent_panels"}, {"id": "mechanical"}, {"id": "thrusters"},
+      {"id": "glass_viewports"}, {"id": "lighting_emissive"}, {"id": "decals_markings"}, {"id": "damage"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Dock_Primary"}, {"name": "SOCKET_Hangar_Port"}, {"name": "SOCKET_Hangar_Starboard"},
+      {"name": "SOCKET_Engine_Main"}, {"name": "SOCKET_RCS_Forward"}, {"name": "SOCKET_RCS_Aft"},
+      {"name": "SOCKET_Weapon_A"}, {"name": "SOCKET_Nav_Port"}, {"name": "SOCKET_Nav_Starboard"},
+      {"name": "SOCKET_Audio_Interior"}, {"name": "SOCKET_VFX_Damage"}
+    ],
+    "states": [{"id": "idle"}, {"id": "cruise"}, {"id": "combat"}, {"id": "alert"}, {"id": "damaged"}, {"id": "unpowered"}, {"id": "Bloom_corrupted"}],
+    "blender": {"root_collection": "PR_GGP_FleetExterior", "class_collections": ["SMALL_UTILITY", "MEDIUM_CORVETTE", "LARGE_CARRIER"], "subcollections": ["00_BLOCKOUT", "01_HULL", "02_MECH", "03_DECKING", "04_ENGINES", "05_WEAPONS", "06_DECALS", "07_VFX_SOCKETS", "08_EMISSIVE", "09_COLLISION", "10_LOD"], "unit_scale": 1.0},
+    "unreal": {"asset_type": "Nanite modular ship districts plus World Partition or streaming actors", "destination_root": "/Game/GGP/Fleet", "class_roots": {"small": "/Game/GGP/Fleet/Small_Utility", "medium": "/Game/GGP/Fleet/Medium_Corvette", "large": "/Game/GGP/Fleet/Large_Carrier"}, "data_asset": "DA_FleetClassDefinitions", "promotion_policy": "Do not promote intermediate sculpt review as final art."},
+    "rig": {"not_applicable": true, "reason": "Ship exteriors use component transforms, sockets, splines, and procedural system animation; local machinery may use dedicated prop rigs."},
+    "animation": {"states": [{"id": "engine_idle"}, {"id": "engine_cruise"}, {"id": "RCS_fire"}, {"id": "hangar_cycle"}, {"id": "dock_capture"}, {"id": "weapon_deploy"}, {"id": "damage_response"}], "requirements": [{"id": "AN-FLT-001", "requirement": "All class animation originates from named sockets and respects ship-relative movement and streaming."}]},
+    "vfx": {"layers": [{"id": "main_engine"}, {"id": "RCS"}, {"id": "docking_beacon"}, {"id": "navigation_lights"}, {"id": "weapon"}, {"id": "hangar"}, {"id": "interior_ambience"}, {"id": "alert_warning"}, {"id": "damage"}], "requirements": [{"id": "VFX-FLT-001", "requirement": "VFX scale, bounds, culling, and exposure are validated at human, shuttle, fleet, and orbital distances."}]},
+    "spline_mapping": {"splines": [{"id": "SP_NavigationLights"}, {"id": "SP_DockingApproach"}, {"id": "SP_HangarTraffic"}, {"id": "SP_ArmorFlow"}, {"id": "SP_Damage"}, {"id": "SP_Utility"}], "requirements": [{"id": "SP-FLT-001", "requirement": "Splines declare class, district owner, coordinate space, origin-rebase policy, width, clearance, and socket endpoints."}]},
+    "render_mapping": {"passes": [{"id": "beauty"}, {"id": "albedo"}, {"id": "normal"}, {"id": "metallic"}, {"id": "roughness"}, {"id": "emissive"}, {"id": "AO"}, {"id": "wireframe"}, {"id": "depth_velocity"}], "channels": [{"name": "Wear"}, {"name": "District"}, {"name": "AO_Cavity"}, {"name": "Damage"}, {"name": "PanelVariation"}]},
+    "implementation": {"classes": [{"id": "SmallUtilityEscort", "dimensions_m": [1400, 260, 320]}, {"id": "MediumMilitaryCorvette", "dimensions_m": [2400, 430, 620]}, {"id": "LargeExpeditionCarrier", "dimensions_m": [6500, 1400, 1800]}], "lifecycle_order": ["exploration", "V01_superseded", "V02_superseded", "V03_current_direction", "concept_match", "Unreal_sculpt_review", "shipping_module_review"], "performance": ["Nanite", "HLOD", "World Partition", "data layers", "streaming sources"]}
+  },
+  "acceptance_checks": [
+    {"id": "FLT-001", "status": "pending", "requirement": "Current imported bounds match 1400 x 260 x 320 m, 2400 x 430 x 620 m, and 6500 x 1400 x 1800 m or an approved scale revision."},
+    {"id": "FLT-002", "status": "pending", "requirement": "Small, medium, and large retain distinct silhouettes, district layouts, and engine, hangar, armor, and docking language."},
+    {"id": "FLT-003", "status": "pending", "requirement": "No V01, V02, concept experiment, or sculpt review is promoted as final art without explicit current-direction reconciliation."},
+    {"id": "FLT-004", "status": "pending", "requirement": "Sockets, splines, collision, materials, decals, LOD, Nanite, HLOD, streaming, VFX, audio, and render passes validate at class scale."}
+  ],
+  "build_questions": ["Reconcile the legacy approximately 1150 m Wayfarer layout text against the verified 1400 m Small Utility Escort production contract.", "Capture final shipping district and collision module counts per class after imported-bounds review."]
+}

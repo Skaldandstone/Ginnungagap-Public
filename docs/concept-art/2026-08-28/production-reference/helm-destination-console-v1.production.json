@@ -1,0 +1,156 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Prop.HelmDestinationConsole.ReferenceV1",
+  "title": "Helm and Destination Console",
+  "category": "interactive-prop",
+  "status": "ready-for-graybox",
+  "production_ready": false,
+  "owners": ["environment-art", "ui", "gameplay", "audio"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/helm-destination-console-v1.png",
+    "sha256": "9859e1de466e57b29eaf653ae1fac3a9bb39c7f2658975a70d69fb7c1df78958",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "visual-reference",
+    "generated_on": "2026-08-28",
+    "notes": "Good physical-control and modular-state reference. Measurements remain provisional until an Unreal reach test passes."
+  },
+  "concept_sources": [
+    {
+      "path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_CIC_Sheet05.png",
+      "role": "primary Unreal concept-library CIC environment and station source",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_BridgeCommand_Sheet01.png",
+      "role": "primary Unreal concept-library bridge and helm context source",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/cic/cic-interaction-workflows.png",
+      "role": "interaction workflow source",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Public/Ship/ShipHelmSystem.h",
+      "role": "helm gameplay authority",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Public/Ship/JumpConsoleSystem.h",
+      "role": "destination and jump gameplay authority",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "interaction_language",
+        "value": "tactile physical controls for navigation, throttle, and emergency systems",
+        "source": "Docs/ArtStyleGuide.md"
+      },
+      {
+        "field": "gameplay_classes",
+        "value": ["/Script/Ginnungagap.ShipHelmSystem", "/Script/Ginnungagap.JumpConsoleSystem"],
+        "source": "Source/Ginnungagap/Public/Ship"
+      },
+      {
+        "field": "current_proxy",
+        "value": "/Game/Assets/Models/ShipSystems/SM_System_JumpConsole",
+        "source": "Source/Ginnungagap/Public/Ship/ShipSystemActor.cpp"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "build.dimensions_m",
+        "value": [1.84, 0.98, 1.25],
+        "source": "helm-destination-console-v1.png"
+      },
+      {
+        "field": "modular_units",
+        "value": ["main_display", "aux_display", "control_panel", "throttle", "emergency_controls", "radar", "handrail"],
+        "source": "helm-destination-console-v1.png"
+      },
+      {
+        "field": "interaction_states",
+        "value": ["powered_off", "navigation", "warning", "bloom_interference"],
+        "source": "helm-destination-console-v1.png"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": [1.84, 0.98, 1.25],
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "PIVOT_FloorMountCenter",
+      "location_m": [0.0, 0.0, 0.0],
+      "rule": "Floor center at finished deck height.",
+      "authority": "provisional"
+    },
+    "parts": [
+      { "name": "SM_HelmConsole_Chassis", "role": "base and structural housing", "authority": "provisional" },
+      { "name": "SM_HelmConsole_MainDisplay", "role": "radar and navigation display", "authority": "provisional" },
+      { "name": "SM_HelmConsole_AuxDisplay", "role": "systems and diagnostic display", "authority": "provisional" },
+      { "name": "SM_HelmConsole_ControlPanel", "role": "toggles and mode controls", "authority": "provisional" },
+      { "name": "SK_HelmConsole_Throttle", "role": "animated throttle lever", "authority": "provisional" },
+      { "name": "SK_HelmConsole_CourseLever", "role": "animated heading adjustment", "authority": "provisional" },
+      { "name": "SK_HelmConsole_EmergencyCover", "role": "animated safety cover", "authority": "provisional" },
+      { "name": "SM_HelmConsole_Handrails", "role": "zero-g and standing brace", "authority": "provisional" }
+    ],
+    "materials": [
+      { "slot": "main_housing", "family": "hard-surface", "authority": "approved" },
+      { "slot": "accent_trim", "family": "hard-surface", "authority": "approved" },
+      { "slot": "screens", "family": "display", "authority": "approved" },
+      { "slot": "buttons", "family": "polymer", "authority": "approved" },
+      { "slot": "warning_covers", "family": "polymer", "authority": "approved" },
+      { "slot": "handrails", "family": "powder-coated-steel", "authority": "approved" },
+      { "slot": "bloom_interference", "family": "display-state", "authority": "approved" }
+    ],
+    "sockets": [
+      { "name": "SOCKET_Operator", "location_m": [-0.65, 0.0, 0.0], "rotation_deg": [0.0, 0.0, 0.0], "authority": "provisional" },
+      { "name": "SOCKET_Camera", "location_m": [-1.1, 0.0, 1.55], "rotation_deg": [-10.0, 0.0, 0.0], "authority": "provisional" },
+      { "name": "SOCKET_VFX_Screen", "location_m": [0.0, -0.46, 1.0], "rotation_deg": [0.0, 0.0, 0.0], "authority": "provisional" },
+      { "name": "SOCKET_Audio", "location_m": [0.0, 0.0, 0.9], "rotation_deg": [0.0, 0.0, 0.0], "authority": "provisional" }
+    ],
+    "states": [
+      { "id": "powered_off", "material_state": true, "authority": "approved" },
+      { "id": "navigation", "material_state": true, "authority": "approved" },
+      { "id": "warning", "material_state": true, "authority": "approved" },
+      { "id": "bloom_interference", "material_state": true, "authority": "approved" }
+    ],
+    "blender": {
+      "root_collection": "PR_HelmDestinationConsole",
+      "source_files": [],
+      "export_files": [],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "InteractiveBlueprintAssembly",
+      "destination_root": "/Game/Assets/Models/ShipSystems/HelmDestinationConsole",
+      "existing_assets": ["/Game/Assets/Models/ShipSystems/SM_System_JumpConsole"],
+      "source_files": [],
+      "gameplay_classes": ["/Script/Ginnungagap.ShipHelmSystem", "/Script/Ginnungagap.JumpConsoleSystem"],
+      "collision": "simple chassis collision plus explicit interaction volumes",
+      "import_policy": "Use the current proxy until the graybox reach and camera test passes."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "graybox-reach", "status": "pending", "requirement": "Standing and seated player poses reach every primary control without clipping." },
+    { "id": "first-person-read", "status": "pending", "requirement": "Primary navigation, warning, and abort controls remain readable at gameplay FOV." },
+    { "id": "state-contract", "status": "pending", "requirement": "Powered-off, navigation, warning, and Bloom states map to gameplay events." },
+    { "id": "zero-g-brace", "status": "pending", "requirement": "Handrails and operator position support the zero-g interaction posture." },
+    { "id": "audio-vfx-separation", "status": "pending", "requirement": "Screen VFX, indicator emissives, and control audio are separate components." }
+  ],
+  "build_questions": [
+    "Should helm and jump destination remain one assembly or share a modular console family?",
+    "Which controls need physical animation versus UI-only response?"
+  ]
+}

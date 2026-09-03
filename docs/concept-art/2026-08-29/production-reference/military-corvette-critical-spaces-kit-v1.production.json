@@ -1,0 +1,66 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Corvette.CriticalSpaces.ReferenceV1",
+  "title": "Military Corvette Critical Spaces Kit",
+  "category": "environment-kit",
+  "status": "blocked",
+  "production_ready": false,
+  "owners": ["environment-art", "level-design", "technical-art", "lighting", "gameplay"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/military-corvette-critical-spaces-kit-v1.png", "sha256": "4b79065862361318947762c636b4c5dc2c42b0583e24aee0a870d5c034f1b422", "width_px": 1536, "height_px": 1024, "role": "visual-reference", "generated_on": "2026-08-29", "notes": "Derives a shared military-corvette construction language from the existing corridor, med bay, and Bloom reactor concepts. The board intentionally leaves dimensions unresolved."},
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Corvette_MainCorridor_Concept.png", "role": "main corridor source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Corvette_MedBay_Concept.png", "role": "medical source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Corvette_BloomReactor_Concept.png", "role": "reactor and Bloom source", "required": true},
+    {"path": "docs/concept-art/reference/ships/README.md", "role": "corvette exterior scale and fleet identity", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "ship_class", "value": "medium military corvette", "source": "docs/concept-art/reference/ships/README.md"},
+      {"field": "ship_dimensions_m", "value": [2400.0, 430.0, 620.0], "source": "docs/concept-art/reference/ships/README.md"},
+      {"field": "space_families", "value": ["main_corridor", "med_bay", "reactor_control"], "source": "Content/Assets/ConceptArt"}
+    ],
+    "provisional": [
+      {"field": "build.parts", "value": ["armored_frame", "floor", "ceiling", "wall_panel", "service_wall", "pressure_door", "utility_spine", "light_module", "console_rail", "medical_rail", "reactor_shield", "prop_socket"], "source": "military-corvette-critical-spaces-kit-v1.png"},
+      {"field": "states", "value": ["nominal", "damaged", "unpowered", "depressurized", "quarantine", "bloom_overlay"], "source": "military-corvette-critical-spaces-kit-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "corvette-room-measurements", "severity": "blocker", "description": "The current concepts do not provide measured room plans, sections, door clearances, or a confirmed corvette interior grid.", "resolution": "Measure or approve the corvette interior grid and produce one validated corridor, med bay, and reactor graybox before final modeling."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {"name": "PIVOT_CorvetteRoomModule", "rule": "Pending measured interior grid.", "authority": "provisional"},
+    "parts": [
+      {"name": "SM_Corvette_ArmoredFrame"}, {"name": "SM_Corvette_Floor"}, {"name": "SM_Corvette_Ceiling"},
+      {"name": "SM_Corvette_WallPanel"}, {"name": "SM_Corvette_ServiceWall"}, {"name": "SM_Corvette_PressureDoor"},
+      {"name": "SM_Corvette_UtilitySpine"}, {"name": "SM_Corvette_LightModule"}, {"name": "SM_Corvette_ConsoleRail"},
+      {"name": "SM_Corvette_MedicalRail"}, {"name": "SM_Corvette_ReactorShield"}, {"name": "SM_Corvette_PropSocket"}
+    ],
+    "materials": [
+      {"slot": "armor", "family": "layered-gunmetal"}, {"slot": "panel", "family": "ceramic-black"},
+      {"slot": "metal", "family": "brushed-metal"}, {"slot": "medical", "family": "medical-off-white"},
+      {"slot": "light", "family": "cold-white"}, {"slot": "screen", "family": "cyan-ui"},
+      {"slot": "hazard", "family": "muted-orange"}, {"slot": "bloom", "family": "bloom-violet"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_PressureDoor"}, {"name": "SOCKET_Console"}, {"name": "SOCKET_Medical"},
+      {"name": "SOCKET_ReactorShield"}, {"name": "SOCKET_Utility"}, {"name": "SOCKET_Prop"}, {"name": "SOCKET_BloomGrowth"}
+    ],
+    "states": [
+      {"id": "nominal"}, {"id": "damaged"}, {"id": "unpowered"}, {"id": "depressurized"}, {"id": "quarantine"}, {"id": "bloom_overlay"}
+    ],
+    "blender": {"root_collection": "PR_Corvette_CriticalSpaces", "collections": ["00_GUIDES", "10_SHARED_SHELL", "20_CORRIDOR", "30_MEDICAL", "40_REACTOR", "50_COLLISION", "60_SOCKETS", "70_STATES", "90_EXPORT"]},
+    "unreal": {"asset_type": "StaticMeshSet", "destination_root": "/Game/Assets/Ships/Corvette/Interiors/CriticalSpaces", "collision": "pending measured graybox", "nanite": "review after modular decomposition", "import_policy": "Block production import until the corvette interior grid and room bounds are approved."}
+  },
+  "acceptance_checks": [
+    {"id": "measurements", "status": "blocked", "requirement": "Approved corridor, med bay, and reactor plans and sections define build dimensions and clearances."},
+    {"id": "shared-kit", "status": "pending", "requirement": "Shared armored construction remains consistent across all three room families."},
+    {"id": "medical-read", "status": "pending", "requirement": "Medical dressing remains readable without breaking the corvette material language."},
+    {"id": "reactor-safety", "status": "pending", "requirement": "Reactor shield, consoles, hazards, traversal, and Bloom overlay preserve gameplay clearance."},
+    {"id": "state-separation", "status": "pending", "requirement": "Damage, power, pressure, quarantine, and Bloom states remain independently controllable."}
+  ],
+  "build_questions": ["What is the canonical corvette interior bay and corridor profile?", "Which reactor-control elements are interactive gameplay systems rather than dressing?"]
+}

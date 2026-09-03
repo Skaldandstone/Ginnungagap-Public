@@ -1,0 +1,69 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.SharedSystem.ReferenceV1",
+  "title": "GGP-01 Shared Pressure Suit System",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "superseded_by": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "owners": ["character-art", "technical-art", "animation", "gameplay"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v1.png", "sha256": "b8993cac6bced4c3d777eb5fc378c2afa80fd1fea1dc7d1a26664b7e3508cb3d", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Defines one shared pressure-suit construction with removable crew, engineering, medical, and security kits. Identity and morphology remain separate from the suit."},
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Trailer/Crew_Classes.png", "role": "crew role differentiation", "required": true},
+    {"path": "docs/concept-art/reference/suits/standard-suit-turnaround.png", "role": "shared suit visual authority", "required": true},
+    {"path": "docs/concept-art/reference/suits/unreal-player-suit-final-lineup.png", "role": "current Unreal-facing lineup", "required": true},
+    {"path": "docs/concept-art/reference/suits/player-suit-role-lineup.png", "role": "role kit language", "required": true},
+    {"path": "docs/PlayerSuitAssets.md", "role": "runtime skeleton, layers, and asset destinations", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "runtime_animation_driver", "value": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple", "source": "docs/PlayerSuitAssets.md"},
+      {"field": "role_blueprints", "value": ["BP_Player_Suit_Crew", "BP_Player_Suit_Engineering", "BP_Player_Suit_Medical", "BP_Player_Suit_Security"], "source": "docs/PlayerSuitAssets.md"},
+      {"field": "architecture", "value": "shared soft suit plus rigid helmet, collar, plates, pack, gloves, boots, and removable role equipment", "source": "docs/PlayerSuitAssets.md"},
+      {"field": "identity_separation", "value": true, "source": "docs/character-creator/metahuman-library.md"}
+    ],
+    "provisional": [
+      {"field": "build.parts", "value": ["helmet_shell", "visor", "collar", "soft_suit", "chest_hardpoint", "backpack", "forearm_rail", "belt", "gloves", "boots"], "source": "ggp01-shared-pressure-suit-system-v1.png"},
+      {"field": "role_palette", "value": {"crew": "gray-blue", "engineering": "muted-orange", "medical": "off-white-red", "security": "charcoal-muted-red"}, "source": "Content/Assets/ConceptArt/Trailer/Crew_Classes.png"}
+    ],
+    "conflicts": [
+      {"id": "body-support-matrix", "severity": "blocker", "description": "The final supported body and skeleton matrix is not locked for every character morphology.", "resolution": "Approve the supported body profiles, deformation limits, and garment transfer path before final topology."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {"name": "PIVOT_CharacterRoot", "rule": "Use the approved runtime skeleton root and foot plane.", "authority": "approved"},
+    "parts": [
+      {"id": "01", "name": "SK_HelmetShell", "removable": true}, {"id": "02", "name": "SM_Visor", "removable": true},
+      {"id": "03", "name": "SK_Collar"}, {"id": "04", "name": "SK_SoftSuit"}, {"id": "05", "name": "SM_ChestHardpoint"},
+      {"id": "06", "name": "SM_Backpack"}, {"id": "07", "name": "SM_ForearmRail"}, {"id": "08", "name": "SM_Belt"},
+      {"id": "09", "name": "SK_Gloves"}, {"id": "10", "name": "SK_Boots"},
+      {"name": "KIT_Crew", "removable": true}, {"name": "KIT_Engineering", "removable": true}, {"name": "KIT_Medical", "removable": true}, {"name": "KIT_Security", "removable": true}
+    ],
+    "materials": [
+      {"slot": "soft_suit", "family": "worn-pressure-textile"}, {"slot": "hardpoints", "family": "dark-composite"},
+      {"slot": "visor", "family": "smoked-transparent"}, {"slot": "seals", "family": "rubber"},
+      {"slot": "role_id", "family": "role-color"}, {"slot": "emissive", "family": "suit-status"}, {"slot": "damage", "family": "suit-damage"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Chest"}, {"name": "SOCKET_Back"}, {"name": "SOCKET_Forearm_L"}, {"name": "SOCKET_Forearm_R"},
+      {"name": "SOCKET_Hip_L"}, {"name": "SOCKET_Hip_R"}, {"name": "SOCKET_Tool"}, {"name": "SOCKET_Helmet"}
+    ],
+    "states": [
+      {"id": "helmet_closed"}, {"id": "helmet_open"}, {"id": "nominal"}, {"id": "damaged"}, {"id": "depressurized"}, {"id": "contaminated"}
+    ],
+    "blender": {"root_collection": "PR_GGP01_SharedPressureSuit", "collections": ["00_GUIDES", "10_BODY_PROXY", "20_SOFT_SUIT", "30_RIGID_PARTS", "40_ROLE_KITS", "50_SOCKETS", "60_FIRST_PERSON", "70_DAMAGE", "90_EXPORT"]},
+    "unreal": {"asset_type": "SkeletalMeshSet", "destination_root": "/Game/Characters/Player/Suit", "skeleton": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple", "existing_assets": ["/Game/Characters/Player/Blueprints/BP_Player_Suit_Crew", "/Game/Characters/Player/Blueprints/BP_Player_Suit_Engineering", "/Game/Characters/Player/Blueprints/BP_Player_Suit_Medical", "/Game/Characters/Player/Blueprints/BP_Player_Suit_Security"], "import_policy": "Do not replace runtime suits until deformation, first-person, and morphology checks pass."}
+  },
+  "acceptance_checks": [
+    {"id": "body-matrix", "status": "blocked", "requirement": "Every supported body profile has an approved garment and deformation path."},
+    {"id": "shared-silhouette", "status": "pending", "requirement": "All four role kits preserve one shared base-suit silhouette and attachment scheme."},
+    {"id": "first-person", "status": "pending", "requirement": "Gloves and forearms pass first-person interaction, tool, and weapon poses."},
+    {"id": "helmet", "status": "pending", "requirement": "Open and closed helmet states preserve camera, visor HUD, sealing, and facial clearance."},
+    {"id": "deformation", "status": "pending", "requirement": "Shoulders, elbows, torso, hips, knees, and ankles pass the representative animation set."}
+  ],
+  "build_questions": ["Which body profiles must ship in the first production pass?", "Which role modules require skeletal deformation rather than rigid sockets?"]
+}

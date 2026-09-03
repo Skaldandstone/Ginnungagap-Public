@@ -1,0 +1,174 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Enemy.Bloom.AnimationVFX.ReferenceV1",
+  "title": "Bloom Threat Family Animation, VFX, and Intensity Mapping",
+  "category": "enemy",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Enemy.Bloom.ThreatFamily.ReferenceV1",
+  "owners": ["enemy-art", "animation", "technical-animation", "vfx", "gameplay-ai", "audio"],
+  "metadata": {
+    "purpose": "Authoritative family-wide animation, tendril spline, VFX, damage, render, and naming map.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 4.x"],
+    "export_targets": ["FBX skeletal meshes", "FBX animations", "Niagara systems", "JSON socket and notify map"],
+    "source_preservation": "Additive companion packet. Original concepts and the family master remain unchanged.",
+    "naming_prefixes": {"skeletal_mesh": "SK_Bloom_", "animation": "AN_Bloom_", "anim_blueprint": "ABP_Bloom_", "physics": "PHYS_Bloom_", "niagara_system": "NS_Bloom_", "niagara_emitter": "NE_Bloom_", "data_asset": "DA_Bloom_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/bloom-threat-family-animation-vfx-mapping-v1.png",
+    "sha256": "4a7b16058a6fac0549ad9757c716a3dc81d01f7007214cb282f75f2c610f92af",
+    "width_px": 1586,
+    "height_px": 992,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The JSON is authoritative for names, notify timing semantics, and presentation deception rules."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/2026-08-29/production-reference/bloom-threat-family-production-system-v1.png", "role": "family appearance and layer authority", "required": true},
+    {"path": "Art/Characters/BloomEnemies/Combat/BloomCombatPoses.png", "role": "combat silhouette reference", "required": true},
+    {"path": "Art/Characters/BloomEnemies/Progression/BloomProgression_Lineup.png", "role": "infection progression reference", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "families", "value": ["crawler", "reanimated_crew", "mechanized_host", "brute_host"], "source": "family master"},
+      {"field": "infection_intensity", "value": [0, 1, 2, 3], "source": "source sheet"},
+      {"field": "player_false_signal_rule", "value": "indistinguishable from genuine signal in all presentation channels", "source": "player deception rule"},
+      {"field": "enemy_telegraph_rule", "value": "enemy combat anticipation remains readable and does not expose hidden player warning truth", "source": "combat readability requirement"}
+    ],
+    "provisional": [
+      {"field": "lod_count", "value": 4, "source": "source sheet implementation proposal"},
+      {"field": "tendril_solver", "value": "Control Rig spline chains driving bones with Niagara ribbon followers", "source": "implementation proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"location": "center of ground-contact support polygon", "orientation": "+X forward, +Y right, +Z up"},
+    "parts": [
+      {"id": "clean_host", "type": "skeletal_base", "required": true},
+      {"id": "infection_meshes", "type": "skeletal_overlays", "required": true},
+      {"id": "crystal_growths", "type": "socketed_or_skinned_overlays", "required": true},
+      {"id": "tendrils", "type": "spline_driven_bone_chains", "required": true},
+      {"id": "emissive_core", "type": "material_and_vfx_anchor", "required": true},
+      {"id": "vfx", "type": "Niagara_layer_stack", "required": true}
+    ],
+    "materials": [
+      {"id": "MI_Bloom_Base", "parameters": ["wetness", "roughness", "subsurface_veining", "growth_mask"]},
+      {"id": "MI_Bloom_Crystal", "parameters": ["emissive_intensity", "emissive_ramp", "refraction", "crystal_density"]},
+      {"id": "MI_Bloom_Tendril", "parameters": ["pulse_phase", "tip_intensity", "tendril_mask"]},
+      {"id": "MI_Bloom_Core", "parameters": ["core_intensity", "core_color", "damage_flash"]}
+    ],
+    "sockets": [
+      {"name": "SCK_Bloom_Head", "zone": 1}, {"name": "SCK_Bloom_Chest", "zone": 2},
+      {"name": "SCK_Bloom_Arm_L", "zone": 3}, {"name": "SCK_Bloom_Arm_R", "zone": 4},
+      {"name": "SCK_Bloom_Leg_L", "zone": 5}, {"name": "SCK_Bloom_Leg_R", "zone": 6},
+      {"name": "SCK_Bloom_Back", "zone": 7}, {"name": "SCK_Bloom_Ground", "zone": 8},
+      {"name": "SCK_Bloom_Core", "zone": "family-specific"}, {"name": "SCK_Bloom_Impact", "zone": "runtime"}
+    ],
+    "states": [
+      {"id": "idle", "loop": true}, {"id": "alert", "loop": false},
+      {"id": "locomotion_contact", "loop": true}, {"id": "locomotion_passing", "loop": true},
+      {"id": "primary_attack_anticipation", "loop": false}, {"id": "primary_attack_impact", "loop": false},
+      {"id": "hit_react", "loop": false}, {"id": "death_collapse", "loop": false}
+    ],
+    "blender": {"root_collection": "Bloom_ThreatFamily_AnimationVFX", "family_collections": ["Crawler", "ReanimatedCrew", "MechanizedHost", "BruteHost"], "action_naming": "AN_Bloom_{Family}_{Action}"},
+    "unreal": {"asset_type": "SkeletalMesh, AnimationSequence, NiagaraSystem, and DataAsset", "destination_root": "/Game/Enemies/Bloom/Production", "data_asset_pattern": "DA_Bloom_{Family}_{Variant}"},
+    "rig": {
+      "controls": [
+        {"id": "host_core", "families": ["crawler", "reanimated_crew", "mechanized_host", "brute_host"], "requirements": ["global root", "center of mass", "spine or chassis", "head or sensor aim", "limb IK/FK"]},
+        {"id": "growth_controls", "requirements": ["socket offset", "scale", "orientation", "break threshold", "LOD visibility"]},
+        {"id": "tendril_controls", "requirements": ["root", "mid", "tip", "curl", "slack", "stiffness", "collision radius", "attack target"]}
+      ],
+      "requirements": [
+        {"id": "RIG-001", "requirement": "Each family preserves a distinct idle and locomotion silhouette at every LOD."},
+        {"id": "RIG-002", "requirement": "Crystal and tendril modules can be hidden, detached, or disabled without breaking the host rig."},
+        {"id": "RIG-003", "requirement": "Attack tendrils support authored arcs and runtime target correction within clamped limits."}
+      ]
+    },
+    "animation": {
+      "clip_pattern": "AN_Bloom_{Family}_{Action}_{Variant}",
+      "actions": ["Idle", "Alert", "LocoContact", "LocoPassing", "AttackAnticipation", "AttackImpact", "HitReact", "DeathCollapse"],
+      "notifies": [
+        {"id": "FootstepContact", "payload": ["surface", "weight", "family"]},
+        {"id": "AttackStart", "payload": ["attack_id", "cancel_window_end"]},
+        {"id": "AttackImpact", "payload": ["damage_profile", "hit_shape", "vfx_socket"]},
+        {"id": "HitReact", "payload": ["zone", "direction", "severity"]},
+        {"id": "DeathStart", "payload": ["death_variant"]},
+        {"id": "DeathEnd", "payload": ["corpse_or_dissolve"]},
+        {"id": "GrowthSpawn", "payload": ["socket", "growth_archetype"]},
+        {"id": "TendrilWhip", "payload": ["spline_id", "target"]},
+        {"id": "GroundRupture", "payload": ["radius", "decal", "hazard"]}
+      ],
+      "requirements": [
+        {"id": "AN-001", "requirement": "Attack anticipation remains readable at gameplay camera distance and reduced effects quality."},
+        {"id": "AN-002", "requirement": "Death collapse removes collision only after the final damage window closes."},
+        {"id": "AN-003", "requirement": "Tendrils lag host motion but reach the authored attack target on the impact notify."}
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "core_emissive", "system": "NS_Bloom_{Family}_Core", "intensity_driver": "infection_intensity"},
+        {"id": "crystal_growths", "system": "NS_Bloom_{Family}_Crystal", "intensity_driver": "infection_intensity"},
+        {"id": "tendrils_roots", "system": "NS_Bloom_{Family}_TendrilRoots", "spline_follower": true},
+        {"id": "emissive_core_orbs", "system": "NS_Bloom_{Family}_CoreOrbs", "spawn_driver": "damage_or_attack"},
+        {"id": "smoke", "system": "NS_Bloom_{Family}_Smoke", "scalability": "optional below medium"},
+        {"id": "particles", "system": "NS_Bloom_{Family}_Particles", "scalability": "density scaled"}
+      ],
+      "intensity_states": [
+        {"value": 0, "name": "dormant", "emissive": 0.1, "growth_density": 0.0, "tendril_count_scale": 0.0},
+        {"value": 1, "name": "early", "emissive": 0.35, "growth_density": 0.3, "tendril_count_scale": 0.25},
+        {"value": 2, "name": "active", "emissive": 0.7, "growth_density": 0.65, "tendril_count_scale": 0.65},
+        {"value": 3, "name": "surge", "emissive": 1.0, "growth_density": 1.0, "tendril_count_scale": 1.0}
+      ],
+      "requirements": [{"id": "VFX-001", "requirement": "Enemy VFX communicates enemy state only. It never reveals genuine or false truth for a player Bloom warning."}]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Bloom_Crawler_Tendril_{NN}", "points": ["root", "mid", "tip"], "attachment": "growth socket", "collision": "query-only"},
+        {"id": "SP_Bloom_Reanimated_Tendril_{NN}", "points": ["root", "mid", "tip"], "attachment": "growth socket", "collision": "query-only"},
+        {"id": "SP_Bloom_Mechanized_Tendril_{NN}", "points": ["root", "mid", "tip"], "attachment": "growth socket", "collision": "query-only"},
+        {"id": "SP_Bloom_Brute_Tendril_{NN}", "points": ["root", "mid", "tip"], "attachment": "growth socket", "collision": "query-only"}
+      ],
+      "requirements": [{"id": "SP-001", "requirement": "Every spline exports root socket, point transforms, rest length, radius, stiffness, damping, and target mode."}]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "beauty", "usage": "final shaded output"}, {"id": "emissive", "usage": "core and crystal isolation"},
+        {"id": "normal", "usage": "surface QA"}, {"id": "world_position", "usage": "procedural growth and VFX anchoring"},
+        {"id": "depth", "usage": "soft intersections and fog"}, {"id": "velocity", "usage": "temporal and motion effects"},
+        {"id": "custom_depth", "usage": "outline or scan only"}, {"id": "stencil_id", "usage": "family and damage zones"},
+        {"id": "tendril_mask", "usage": "tendril separation"}, {"id": "core_mask", "usage": "weak-point isolation"},
+        {"id": "growth_mask", "usage": "infection overlay separation"}, {"id": "occlusion", "usage": "contact and grounding QA"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "growth density"}, {"name": "vertex_color.g", "usage": "wetness"},
+        {"name": "vertex_color.b", "usage": "damage reveal"}, {"name": "vertex_color.a", "usage": "emissive eligibility"}
+      ],
+      "lods": [
+        {"id": "LOD0", "screen_size": ">0.5", "strategy": "full geometry and tendril chains"},
+        {"id": "LOD1", "screen_size": "0.5-0.2", "strategy": "reduced growth and chain count"},
+        {"id": "LOD2", "screen_size": "0.2-0.08", "strategy": "silhouette growth cards and simplified rig"},
+        {"id": "LOD3", "screen_size": "<0.08", "strategy": "core silhouette and emissive only"}
+      ]
+    },
+    "implementation": {
+      "collision_zones": ["critical_vital", "major_limb", "minor_growth", "physical_collision"],
+      "requirements": [
+        {"id": "IMP-001", "requirement": "One family data asset defines rig, sockets, clips, damage zones, VFX layers, LOD policy, and audio cues."},
+        {"id": "IMP-002", "requirement": "Animation notifies drive damage, VFX, decal, sound, and camera effects from one event source."},
+        {"id": "IMP-003", "requirement": "Player Bloom warning presentation consumes only normalized severity and never receives hidden truth."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "BLOOM-IMPL-001", "status": "pending", "requirement": "All four families have the eight mapped animation states with synchronized notifies."},
+    {"id": "BLOOM-IMPL-002", "status": "pending", "requirement": "Tendril splines remain stable under locomotion, attack correction, hit reaction, and LOD transition."},
+    {"id": "BLOOM-IMPL-003", "status": "pending", "requirement": "Material and Niagara intensity 0-3 is driven from one replicated parameter."},
+    {"id": "BLOOM-IMPL-004", "status": "pending", "requirement": "Genuine and false player Bloom warnings are indistinguishable across visual, audio, timing, pulse, copy, icon, opacity, and motion channels."}
+  ],
+  "build_questions": ["Confirm final damage multipliers per family and zone.", "Confirm whether detached crystal growths become gameplay pickups or visual debris only."]
+}

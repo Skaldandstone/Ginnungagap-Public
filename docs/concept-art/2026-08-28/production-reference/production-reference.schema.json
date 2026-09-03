@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ginnungagap.local/schemas/production-reference.schema.json",
+  "title": "Ginnungagap Production Reference",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "asset_id",
+    "title",
+    "category",
+    "status",
+    "production_ready",
+    "source_sheet",
+    "authority",
+    "build",
+    "acceptance_checks"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "1.0.0" },
+    "asset_id": { "type": "string", "pattern": "^GGP\\.[A-Za-z0-9.]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "category": {
+      "enum": ["ship", "environment-kit", "character", "robot", "enemy", "interactive-prop", "prop-kit", "ui-system"]
+    },
+    "status": {
+      "enum": ["blocked", "design-review", "technical-review", "ready-for-graybox", "production-ready"]
+    },
+    "production_ready": { "type": "boolean" },
+    "implementation_profile": { "enum": ["core", "expanded"] },
+    "companion_to": { "type": "string", "pattern": "^GGP\\.[A-Za-z0-9.]+$" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "purpose": { "type": "string" },
+        "authoritative_sidecar": { "type": "boolean" },
+        "engine_targets": { "type": "array", "items": { "type": "string" } },
+        "export_targets": { "type": "array", "items": { "type": "string" } },
+        "naming_prefixes": { "type": "object" },
+        "source_preservation": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "owners": { "type": "array", "items": { "type": "string" } },
+    "source_sheet": {
+      "type": "object",
+      "required": ["path", "sha256", "width_px", "height_px", "role"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "width_px": { "type": "integer", "minimum": 1 },
+        "height_px": { "type": "integer", "minimum": 1 },
+        "role": {
+          "description": "How much weight this sheet carries. The first three are generic kinds. A value ending in '-authority' beyond those is a specialised design authority: narrower than 'design-authority' about a named subject, carrying the same weight. Only roles actually emitted into source_sheet belong here -- supplemental_sheets is unconstrained, so its wider vocabulary does not.",
+          "enum": ["design-authority", "visual-reference", "exploration", "enlarged-room-traversal-authority"]
+        },
+        "generated_on": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "concept_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "properties": {
+          "path": { "type": "string" },
+          "role": { "type": "string" },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "concept_source_sets": {
+      "type": "array",
+      "description": "Recursive visual lineage roots. The inventory expands each root to exact per-file packet links.",
+      "items": {
+        "type": "object",
+        "required": ["root", "role"],
+        "properties": {
+          "root": { "type": "string" },
+          "role": { "type": "string" },
+          "required": { "type": "boolean" },
+          "lifecycle": { "type": "string" }
+        }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["approved", "provisional", "conflicts"],
+      "properties": {
+        "approved": { "type": "array", "items": { "$ref": "#/$defs/assertion" } },
+        "provisional": { "type": "array", "items": { "$ref": "#/$defs/assertion" } },
+        "conflicts": { "type": "array", "items": { "$ref": "#/$defs/conflict" } }
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["coordinate_system", "parts", "materials", "sockets", "states", "blender", "unreal"],
+      "properties": {
+        "coordinate_system": {
+          "type": "object",
+          "required": ["units", "forward", "up", "unreal_units_per_meter"],
+          "properties": {
+            "units": { "enum": ["meters", "centimeters", "millimeters", "logical-pixels"] },
+            "forward": { "enum": ["+X", "-X", "+Y", "-Y"] },
+            "up": { "enum": ["+Z", "-Z", "+Y", "-Y"] },
+            "unreal_units_per_meter": { "type": "number", "const": 100 }
+          }
+        },
+        "dimensions_m": {
+          "type": ["array", "null"],
+          "items": { "type": "number", "exclusiveMinimum": 0 },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "current_bounds_cm": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        },
+        "pivot": { "type": "object", "additionalProperties": true },
+        "parts": { "type": "array", "items": { "type": "object" } },
+        "materials": { "type": "array", "items": { "type": "object" } },
+        "sockets": { "type": "array", "items": { "type": "object" } },
+        "states": { "type": "array", "items": { "type": "object" } },
+        "blender": { "type": "object", "required": ["root_collection"] },
+        "unreal": { "type": "object", "required": ["asset_type", "destination_root"] },
+        "rig": { "$ref": "#/$defs/implementationMap" },
+        "animation": { "$ref": "#/$defs/implementationMap" },
+        "vfx": { "$ref": "#/$defs/implementationMap" },
+        "spline_mapping": { "$ref": "#/$defs/implementationMap" },
+        "render_mapping": { "$ref": "#/$defs/implementationMap" },
+        "implementation": { "$ref": "#/$defs/implementationMap" }
+      }
+    },
+    "acceptance_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "requirement"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["pass", "pending", "blocked", "not-applicable"] },
+          "requirement": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "build_questions": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "assertion": {
+      "type": "object",
+      "required": ["field", "value", "source"],
+      "properties": {
+        "field": { "type": "string" },
+        "value": {},
+        "source": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "required": ["id", "severity", "description", "resolution"],
+      "properties": {
+        "id": { "type": "string" },
+        "severity": { "enum": ["warning", "blocker"] },
+        "description": { "type": "string" },
+        "resolution": { "type": "string" }
+      }
+    },
+    "implementationMap": {
+      "type": "object",
+      "description": "Authoritative machine-readable implementation data. Use an explicit not_applicable reason when a domain does not apply.",
+      "properties": {
+        "not_applicable": { "type": "boolean" },
+        "reason": { "type": "string" },
+        "controls": { "type": "array", "items": { "type": "object" } },
+        "layers": { "type": "array", "items": { "type": "object" } },
+        "states": { "type": "array", "items": { "type": "object" } },
+        "channels": { "type": "array", "items": { "type": "object" } },
+        "splines": { "type": "array", "items": { "type": "object" } },
+        "passes": { "type": "array", "items": { "type": "object" } },
+        "requirements": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

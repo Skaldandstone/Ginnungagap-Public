@@ -1,0 +1,379 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.Science.ReferenceV1",
+  "title": "GGP-01 Science Pressure Suit",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "owners": [
+    "character-art",
+    "technical-art",
+    "animation",
+    "gameplay",
+    "ui-vfx"
+  ],
+  "metadata": {
+    "canonical_enum": "EPressureSuitRole::Scientist",
+    "display_name": "Science",
+    "replaces": "obsolete Standard Crew role",
+    "legacy_art_slot": "Scientist mapped to former Crew slot",
+    "class_purpose": "Survey, analyze, collect, and secure evidence in hazardous environments."
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-science-pressure-suit-production-reference-v1.png",
+    "sha256": "005fdef6d4c263ba538cf2a5482313ba2c52d4ea3a637374944209ee4c9d5854",
+    "width_px": 1534,
+    "height_px": 1025,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Science kit modules are removable and do not alter the V25 base pressure envelope."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+      "role": "strict base suit authority",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/suits/player-suit-role-lineup.png",
+      "role": "science palette and equipment density",
+      "required": true
+    },
+    {
+      "path": "Art/Characters/PlayerSuits/PrimaryOversuits/Previews_v23/PlayerOversuit_Scientist_v23_Front.png",
+      "role": "legacy module placement evidence",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Public/Meta/CharacterProfile.h",
+      "role": "canonical role enum and display name",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "role",
+        "value": "Scientist / Science",
+        "source": "EPressureSuitRole"
+      },
+      {
+        "field": "modules",
+        "value": [
+          "sensor_fairing",
+          "analysis_display",
+          "scanner",
+          "data_comms_pod",
+          "sample_case_l",
+          "sample_case_r",
+          "contamination_kit"
+        ],
+        "source": "source sheet and PlayerSuitAssets.md"
+      },
+      {
+        "field": "bloom_signal_rule",
+        "value": "genuine and false signals use identical color, icon, timing, animation, sound, opacity, pulse, and copy",
+        "source": "player deception rule"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "science_accent",
+        "value": "restrained cool cyan-blue markings",
+        "source": "role lineup"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "parts": [
+      {
+        "id": "base_suit",
+        "type": "inherit",
+        "source": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2"
+      },
+      {
+        "id": "sensor_fairing",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "analysis_display",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "scanner",
+        "type": "handheld_or_stowed"
+      },
+      {
+        "id": "data_comms_pod",
+        "type": "rigid_removable"
+      },
+      {
+        "id": "sample_case_l",
+        "type": "sealed_removable"
+      },
+      {
+        "id": "sample_case_r",
+        "type": "sealed_removable"
+      },
+      {
+        "id": "contamination_kit",
+        "type": "removable_tool_set"
+      }
+    ],
+    "materials": [
+      {
+        "id": "science_modules",
+        "channels": [
+          "base_color",
+          "normal",
+          "ORM",
+          "science_id",
+          "wear"
+        ]
+      },
+      {
+        "id": "analysis_display",
+        "channels": [
+          "emissive",
+          "screen_mask",
+          "damage_flicker"
+        ]
+      },
+      {
+        "id": "sample_cases",
+        "channels": [
+          "sealed_state",
+          "contamination",
+          "label_id"
+        ]
+      }
+    ],
+    "sockets": [
+      {
+        "name": "SOCKET_SENSOR_POD"
+      },
+      {
+        "name": "SOCKET_ANALYSIS_DISPLAY"
+      },
+      {
+        "name": "SOCKET_SCANNER"
+      },
+      {
+        "name": "SOCKET_DATA_COMMS"
+      },
+      {
+        "name": "SOCKET_SAMPLE_CASE_L"
+      },
+      {
+        "name": "SOCKET_SAMPLE_CASE_R"
+      },
+      {
+        "name": "SOCKET_CONTAMINATION_KIT"
+      }
+    ],
+    "states": [
+      {
+        "id": "stowed"
+      },
+      {
+        "id": "scan_active"
+      },
+      {
+        "id": "sample_open"
+      },
+      {
+        "id": "sample_sealed"
+      },
+      {
+        "id": "analysis_active"
+      },
+      {
+        "id": "contaminated"
+      },
+      {
+        "id": "damaged"
+      }
+    ],
+    "blender": {
+      "root_collection": "PR_GGP01_Suit_Science",
+      "module_collection": "KIT_Science",
+      "shared_base_link": "PR_GGP01_SharedPressureSuit_V2"
+    },
+    "unreal": {
+      "asset_type": "Modular SkeletalMesh and StaticMesh kit",
+      "destination_root": "/Game/Characters/Player/Suit/Roles/Science",
+      "role_enum": "Scientist"
+    },
+    "rig": {
+      "requirements": [
+        {
+          "id": "SCI-RIG-001",
+          "requirement": "Science modules mount to shared sockets without modifying base bones or silhouette."
+        },
+        {
+          "id": "SCI-RIG-002",
+          "requirement": "Scanner supports left or right hand IK and chest, forearm, or belt stow."
+        }
+      ]
+    },
+    "animation": {
+      "clips": [
+        "full_spectrum_scan",
+        "evidence_mark",
+        "sample_acquisition",
+        "sealed_sample_stow",
+        "anomaly_analysis",
+        "navigation_survey",
+        "zero_g_sensor_deploy",
+        "vent_crawl_samples_secured"
+      ],
+      "requirements": [
+        {
+          "id": "SCI-AN-001",
+          "requirement": "Sample cases, scanner, and sensor fairing clear all nine body profiles in crouch, vent crawl, and sideways squeeze."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "scanner_beam",
+          "attachment": "SOCKET_SCANNER"
+        },
+        {
+          "id": "analysis_display",
+          "attachment": "SOCKET_ANALYSIS_DISPLAY"
+        },
+        {
+          "id": "bloom_warning",
+          "attachment": "HUD",
+          "truth_independent": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "SCI-VFX-001",
+          "requirement": "False Bloom signal presentation is exactly identical to genuine signal presentation."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {
+          "id": "hose_left",
+          "inherit": "SP_Hose_Left"
+        },
+        {
+          "id": "hose_right",
+          "inherit": "SP_Hose_Right"
+        },
+        {
+          "id": "sensor_tether",
+          "root_socket": "SOCKET_SENSOR_POD",
+          "end_socket": "SOCKET_SCANNER",
+          "optional": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "SCI-SP-001",
+          "requirement": "Optional sensor tether stows without changing the two life-support hose count."
+        }
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "beauty"
+        },
+        {
+          "id": "base_suit_id"
+        },
+        {
+          "id": "science_module_id"
+        },
+        {
+          "id": "sample_case_id"
+        },
+        {
+          "id": "display_emissive"
+        },
+        {
+          "id": "scanner_vfx"
+        },
+        {
+          "id": "velocity"
+        }
+      ],
+      "channels": [
+        {
+          "name": "vertex_r",
+          "usage": "wear"
+        },
+        {
+          "name": "vertex_g",
+          "usage": "science_marking"
+        },
+        {
+          "name": "vertex_b",
+          "usage": "contamination"
+        },
+        {
+          "name": "vertex_a",
+          "usage": "damage"
+        }
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {
+          "id": "SCI-IMP-001",
+          "requirement": "Register the role as EPressureSuitRole::Scientist with display name Science."
+        },
+        {
+          "id": "SCI-IMP-002",
+          "requirement": "Do not expose Crew as a selectable class label."
+        },
+        {
+          "id": "SCI-IMP-003",
+          "requirement": "Gameplay truth for Bloom signals never reaches presentation materials, audio, icons, timing, or copy."
+        },
+        {
+          "id": "SCI-IMP-004",
+          "requirement": "Test all modules and actions on all nine exact body profiles."
+        }
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "SCI-001",
+      "status": "pending",
+      "requirement": "Science modules match named sockets and preserve the shared suit envelope."
+    },
+    {
+      "id": "SCI-002",
+      "status": "pending",
+      "requirement": "Scanner, sample handling, and analysis actions pass first-person, third-person, zero-g, crawl, and squeeze QA."
+    },
+    {
+      "id": "SCI-003",
+      "status": "pending",
+      "requirement": "Genuine and false Bloom presentation parameters are byte-identical."
+    }
+  ],
+  "build_questions": [
+    "Confirm final scanner hand preference and whether the optional tether ships."
+  ]
+}

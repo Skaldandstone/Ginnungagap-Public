@@ -1,0 +1,386 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Enemy.Bloom.MechanizedHost.ReferenceV2",
+  "title": "Bloom Mechanized Host Production System V2",
+  "category": "enemy",
+  "status": "design-review",
+  "production_ready": false,
+  "implementation_profile": "core",
+  "companion_to": "GGP.Enemy.Bloom.ThreatFamily.ReferenceV1",
+  "supersedes": "GGP.Enemy.Bloom.MechanizedHost.ReferenceV1",
+  "owners": ["enemy-art", "character-art", "technical-art", "animation", "vfx", "gameplay"],
+  "metadata": {
+    "purpose": "Master production-system direction for the implemented Bloom mechanized host, including measured-view gates, scale, removable layers, materials, sockets, damage zones, progression, motion coverage, export structure, and implementation blockers.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.x"],
+    "export_targets": ["FBX rigid-part assembly", "FBX Control Rig animation", "JSON socket and spline map", "Unreal material and Niagara layers"],
+    "source_preservation": "The selected hero concept and existing runtime prototype remain unchanged. This packet is additive and does not authorize replacement of the current host.",
+    "naming_prefixes": {
+      "static_mesh": "SM_Bloom_MechanizedHost_",
+      "control_rig": "CR_Bloom_MechanizedHost_",
+      "animation": "AN_Bloom_MechanizedHost_",
+      "material_instance": "MI_Bloom_MechanizedHost_",
+      "niagara_system": "NS_Bloom_MechanizedHost_",
+      "data_asset": "DA_Bloom_MechanizedHost_"
+    }
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-31/production-reference/bloom-mechanized-host-production-system-v2.png",
+    "sha256": "9259497dba652e9039e3d5bd4449a56192d83d437d13364b91f53a739d16b104",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-31",
+    "notes": "Master visual authority for the selected identity, neutral view set, scale reference, asymmetric infection language, removable layers, sockets, material and mesh zones, collision and damage zones, progression, motion silhouettes, Blender collections, Unreal destination, and blocking gates. Generated views remain visual proposals, not measured orthography. This JSON remains authoritative for implementation facts and unresolved conflicts."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/concept-art/2026-08-31/production-reference/bloom-mechanized-host-hero-concept-v1.png",
+      "role": "user-selected hero concept and primary appearance source",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/bloom/infested-drones-and-robots.png",
+      "role": "existing mechanized Bloom design lineage",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Trailer/Bloom_Robotics.png",
+      "role": "primary Unreal concept-library robotics source",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/bloom-threat-family-production-system-v1.png",
+      "role": "shared Bloom host, growth, and progression system",
+      "required": true
+    },
+    {
+      "path": "Art/Characters/BloomEnemies/RealityScan/BloomMechanizedHost/CaptureManifest.json",
+      "role": "current rigid-part host, capture, and gameplay mapping authority",
+      "required": true
+    },
+    {
+      "path": "docs/BloomFabRealityScanPrototypes.md",
+      "role": "runtime prototype, progression, combat, and scan policy",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Public/Bloom/BloomEnemyArchetypes.h",
+      "role": "gameplay class and component contract",
+      "required": true
+    },
+    {
+      "path": "Source/Ginnungagap/Private/Bloom/BloomEnemyArchetypes.cpp",
+      "role": "implemented mesh, progression, tuning, and native motion authority",
+      "required": true
+    }
+  ],
+  "concept_source_sets": [
+    {
+      "root": "Art/Characters/BloomEnemies/RealityScan/BloomMechanizedHost",
+      "role": "mechanized-host capture and quarantined reconstruction lineage",
+      "required": true,
+      "lifecycle": "production-review"
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "gameplay_class",
+        "value": "/Script/Ginnungagap.BloomMechanizedEnemy",
+        "source": "Art/Characters/BloomEnemies/RealityScan/BloomMechanizedHost/CaptureManifest.json"
+      },
+      {
+        "field": "runtime_host_parts",
+        "value": ["SM_JACK_BODY", "SM_JACK_HEAD", "SM_JACK_ARM", "SM_JACK_LEG"],
+        "source": "Source/Ginnungagap/Private/Bloom/BloomEnemyArchetypes.cpp"
+      },
+      {
+        "field": "rig_style",
+        "value": "independently articulated rigid parts under a shared native motion pivot",
+        "source": "docs/BloomFabRealityScanPrototypes.md"
+      },
+      {
+        "field": "infection_phase_progress",
+        "value": [0.0, 0.05, 0.22, 0.48, 0.76, 1.0],
+        "source": "Source/Ginnungagap/Private/Bloom/BloomEnemyArchetypes.cpp"
+      },
+      {
+        "field": "growth_reveal_thresholds",
+        "value": {"core": 0.08, "arm": 0.42, "crown": 0.68},
+        "source": "Source/Ginnungagap/Private/Bloom/BloomEnemyArchetypes.cpp"
+      },
+      {
+        "field": "implemented_tuning_ranges",
+        "value": {"health": [180, 320], "damage": [10, 22], "attack_range_cm": [155, 220], "speed_cm_s": [105, 225], "attack_interval_s": [2.4, 1.25], "contact_exposure": [1.0, 14.0]},
+        "source": "Source/Ginnungagap/Private/Bloom/BloomEnemyArchetypes.cpp"
+      },
+      {
+        "field": "realityscan_role",
+        "value": "surface and retopology reference; never the animation source",
+        "source": "Art/Characters/BloomEnemies/RealityScan/BloomMechanizedHost/CaptureManifest.json"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "visual_identity",
+        "value": "massive off-white industrial pressure shell with a small recessed human face behind curved glass and one-sided Bloom takeover",
+        "source": "bloom-mechanized-host-hero-concept-v1.png"
+      },
+      {
+        "field": "infection_layout",
+        "value": "clean image-left host structure opposed by Bloom-dominant image-right shoulder, torso, arm, and leg",
+        "source": "bloom-mechanized-host-production-system-v2.png"
+      },
+      {
+        "field": "late_state_tendrils",
+        "value": {"count": 5, "layout": "five unequal one-sided spline-driven appendages"},
+        "source": "bloom-mechanized-host-production-system-v2.png"
+      },
+      {
+        "field": "material_language",
+        "value": ["warm off-white ceramic", "graphite mechanisms", "smoked glass", "wet black-violet fibers", "cool cyan nodes"],
+        "source": "bloom-mechanized-host-production-system-v2.png"
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "host-head-lineage",
+        "severity": "blocker",
+        "description": "The selected concept contains a recessed human face and pressure-shell canopy, while the implemented prototype uses the JACK robot head with no human occupant contract.",
+        "resolution": "Approve either a human-occupied mechanized host variant with a new canopy assembly or retain the JACK robot identity and revise the face treatment before modeling."
+      },
+      {
+        "id": "unmeasured-generated-views",
+        "severity": "blocker",
+        "description": "The generated front, side, rear, and three-quarter views are visually coherent but are not measured orthographic projections of one modeled asset.",
+        "resolution": "Build a measured rigid-part graybox from runtime source bounds, then regenerate controlled orthographic captures from that single model."
+      },
+      {
+        "id": "tendril-runtime-budget",
+        "severity": "warning",
+        "description": "Five late-state tendrils are visually approved for this concept, but spline, collision, replication, shadow, and encounter-density budgets are not established.",
+        "resolution": "Prototype one five-chain host under representative enemy density and approve the LOD and simulation policy."
+      }
+    ]
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "current_bounds_cm": {
+      "collision_capsule_radius": 68.0,
+      "collision_capsule_half_height": 145.0,
+      "authority": "approved",
+      "note": "Current gameplay collision only. This is not final visual mesh bounds."
+    },
+    "pivot": {
+      "name": "PIVOT_HostRoot",
+      "rule": "Use the current capsule and AttackPoseRoot ground-centered contract. Rigid host parts and growth overlays remain children of that motion hierarchy.",
+      "authority": "approved"
+    },
+    "parts": [
+      {"name": "HOST_Body", "role": "current JACK rigid torso", "authority": "approved"},
+      {"name": "HOST_Head", "role": "current JACK rigid head or approved replacement canopy", "authority": "conflict"},
+      {"name": "HOST_Arm_L", "role": "independently articulated rigid arm", "authority": "approved"},
+      {"name": "HOST_Arm_R", "role": "independently articulated rigid striking arm", "authority": "approved"},
+      {"name": "HOST_Leg_L", "role": "independently articulated rigid leg", "authority": "approved"},
+      {"name": "HOST_Leg_R", "role": "independently articulated rigid leg", "authority": "approved"},
+      {"name": "HOST_VisorFaceAssembly", "role": "recessed occupant and curved canopy visual layer", "authority": "provisional"},
+      {"name": "GROWTH_Core", "role": "early infection mesh and emissive anchor", "authority": "approved"},
+      {"name": "GROWTH_Arm", "role": "mid-stage arm growth", "authority": "approved"},
+      {"name": "GROWTH_Crown", "role": "late-stage head growth", "authority": "approved"},
+      {"name": "GROWTH_Tendril_01_05", "role": "five late-state secondary-motion tendrils", "authority": "provisional"},
+      {"name": "VFX_BloomGlow", "role": "progression, telegraph, and death-burst light", "authority": "approved"}
+    ],
+    "materials": [
+      {"slot": "host_ceramic", "family": "warm-off-white-maintained-ceramic", "authority": "provisional"},
+      {"slot": "host_mechanisms", "family": "graphite-rigid-mechanism", "authority": "provisional"},
+      {"slot": "visor_glass", "family": "smoked-curved-glass", "authority": "provisional"},
+      {"slot": "occupant", "family": "human-host-skin", "authority": "conflict"},
+      {"slot": "bloom_surface", "family": "/Game/Assets/Materials/Production/Instances/MI_Surface_Bloom", "authority": "approved"},
+      {"slot": "bloom_core", "family": "cool-cyan-emissive-node", "authority": "provisional"},
+      {"slot": "tendrils", "family": "wet-black-violet-fiber", "authority": "provisional"}
+    ],
+    "sockets": [
+      {"name": "SCK_Bloom_Core", "parent": "HOST_Body", "authority": "approved-component-attachment"},
+      {"name": "SCK_Bloom_Crown", "parent": "HOST_Head", "authority": "approved-component-attachment"},
+      {"name": "SCK_Bloom_Arm", "parent": "HOST_Arm_L", "authority": "approved-component-attachment"},
+      {"name": "SCK_Bloom_Tendril_01", "parent": "infection_shell", "authority": "provisional"},
+      {"name": "SCK_Bloom_Tendril_02", "parent": "infection_shell", "authority": "provisional"},
+      {"name": "SCK_Bloom_Tendril_03", "parent": "infection_shell", "authority": "provisional"},
+      {"name": "SCK_Bloom_Tendril_04", "parent": "infection_shell", "authority": "provisional"},
+      {"name": "SCK_Bloom_Tendril_05", "parent": "infection_shell", "authority": "provisional"},
+      {"name": "SCK_Bloom_VFX_Core", "parent": "GROWTH_Core", "authority": "provisional"},
+      {"name": "SCK_Bloom_VFX_Death", "parent": "PIVOT_HostRoot", "authority": "provisional"}
+    ],
+    "states": [
+      {"id": "seeded", "infection_phase": "Seeded", "authority": "approved"},
+      {"id": "colonizing", "infection_phase": "Colonizing", "authority": "approved"},
+      {"id": "puppeteered", "infection_phase": "Puppeteered", "authority": "approved"},
+      {"id": "overgrown", "infection_phase": "Overgrown", "authority": "approved"},
+      {"id": "attack_telegraph", "duration_s": 0.35, "authority": "approved"},
+      {"id": "attack_commit", "authority": "approved"},
+      {"id": "death_burst", "duration_s": 1.25, "authority": "approved"}
+    ],
+    "blender": {
+      "root_collection": "PR_BloomMechanizedHost",
+      "collections": ["00_GUIDES", "10_HOST_RIGID", "20_CANOPY_HOST", "30_INFECTION", "40_TENDRILS", "50_SOCKETS", "60_COLLISION", "70_VFX_GUIDES", "80_LOD", "90_EXPORT"],
+      "source_files": [],
+      "export_files": [],
+      "export_policy": "Export rigid host parts, infection overlays, tendril chains, sockets, and collision as independently addressable objects with one shared root."
+    },
+    "unreal": {
+      "asset_type": "RigidPartEnemyAssembly",
+      "destination_root": "/Game/Assets/Models/Bloom/MechanizedHost",
+      "gameplay_class": "/Script/Ginnungagap.BloomMechanizedEnemy",
+      "existing_assets": [
+        "/Game/Modular_Scifi_Mechanic_Base/Mesh/SM/PROP/MACHINE/SM_JACK_BODY",
+        "/Game/Modular_Scifi_Mechanic_Base/Mesh/SM/PROP/MACHINE/SM_JACK_HEAD",
+        "/Game/Modular_Scifi_Mechanic_Base/Mesh/SM/PROP/MACHINE/SM_JACK_ARM",
+        "/Game/Modular_Scifi_Mechanic_Base/Mesh/SM/PROP/MACHINE/SM_JACK_LEG",
+        "/Game/Alien_Biomass/Meshes/Alien_organism/SM_alien_organism_13",
+        "/Game/SF_White_desert/Meshes/Crystals/SM_crystal_01",
+        "/Game/SF_White_desert/Meshes/Crystals/SM_crystal_02"
+      ],
+      "collision": "Retain the approved 68 cm radius by 145 cm half-height gameplay capsule until measured replacement bounds pass navigation and combat tests.",
+      "import_policy": "Do not replace the runtime prototype, gameplay class, or current Fab sources until the host-head conflict, measured bounds, rigid hierarchy, and performance gates pass."
+    },
+    "rig": {
+      "controls": [
+        {"id": "host_root", "drives": ["PIVOT_HostRoot", "center_of_mass"]},
+        {"id": "rigid_body", "drives": ["HOST_Body", "HOST_Head"]},
+        {"id": "rigid_limbs", "drives": ["HOST_Arm_L", "HOST_Arm_R", "HOST_Leg_L", "HOST_Leg_R"]},
+        {"id": "growth_modules", "drives": ["GROWTH_Core", "GROWTH_Arm", "GROWTH_Crown"]},
+        {"id": "tendril_chains", "drives": ["GROWTH_Tendril_01_05"], "authority": "provisional"}
+      ],
+      "requirements": [
+        {"id": "RIG-001", "requirement": "Rigid host parts preserve the current independent articulation and shared motion pivot."},
+        {"id": "RIG-002", "requirement": "Growth modules remain independently hideable and do not require deformation of the clean host."},
+        {"id": "RIG-003", "requirement": "Each tendril exposes root, mid, and tip controls with rest length, stiffness, damping, and collision radius."},
+        {"id": "RIG-004", "requirement": "The approved head lineage decision is applied consistently to the model, Control Rig, collision, and all views."}
+      ]
+    },
+    "animation": {
+      "states": [
+        {"id": "idle", "source": "native rigid-part pose"},
+        {"id": "attack_windup", "source": "native body shift and striking-arm rotation"},
+        {"id": "attack_recovery", "source": "native blend to idle"},
+        {"id": "death_slump", "source": "native root drop and arm slump"}
+      ],
+      "requirements": [
+        {"id": "AN-001", "requirement": "The heavy bruiser silhouette remains readable at 105 to 225 cm/s."},
+        {"id": "AN-002", "requirement": "The 0.35 second attack telegraph remains visible with reduced VFX quality."},
+        {"id": "AN-003", "requirement": "Five tendrils do not penetrate the canopy, clean limbs, floor, or each other in representative motion."}
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "progression_glow", "driver": "InfectionProgress squared", "current_color": [0.32, 0.04, 1.0], "mature_intensity": 1450.0, "mature_radius_cm": 410.0},
+        {"id": "attack_telegraph", "driver": "AttackTelegraphDuration", "shadow_casting": false},
+        {"id": "death_burst", "duration_s": 1.25, "driver": "DeathBurstExposure"},
+        {"id": "cyan_core_nodes", "driver": "infection and damage state", "authority": "provisional"}
+      ],
+      "requirements": [
+        {"id": "VFX-001", "requirement": "Core, telegraph, death burst, tendril emission, and ambient particles remain independently scalable."},
+        {"id": "VFX-002", "requirement": "Enemy-state VFX never reveal whether a player-facing Bloom warning is genuine or false."}
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Bloom_Mechanized_Tendril_01", "points": ["root", "mid", "tip"], "authority": "provisional"},
+        {"id": "SP_Bloom_Mechanized_Tendril_02", "points": ["root", "mid", "tip"], "authority": "provisional"},
+        {"id": "SP_Bloom_Mechanized_Tendril_03", "points": ["root", "mid", "tip"], "authority": "provisional"},
+        {"id": "SP_Bloom_Mechanized_Tendril_04", "points": ["root", "mid", "tip"], "authority": "provisional"},
+        {"id": "SP_Bloom_Mechanized_Tendril_05", "points": ["root", "mid", "tip"], "authority": "provisional"}
+      ],
+      "requirements": [
+        {"id": "SP-001", "requirement": "Export root socket, rest length, radius, stiffness, damping, target mode, collision mode, shadow mode, and LOD visibility for each tendril."}
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "beauty", "usage": "final shaded output"},
+        {"id": "host_mask", "usage": "clean rigid host isolation"},
+        {"id": "infection_mask", "usage": "Bloom overlay isolation"},
+        {"id": "tendril_mask", "usage": "five-chain separation"},
+        {"id": "core_mask", "usage": "weak-point and emissive isolation"},
+        {"id": "custom_depth", "usage": "scan and outline support only"},
+        {"id": "velocity", "usage": "rigid motion and tendril temporal QA"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "growth density"},
+        {"name": "vertex_color.g", "usage": "wetness"},
+        {"name": "vertex_color.b", "usage": "damage reveal"},
+        {"name": "vertex_color.a", "usage": "emissive eligibility"}
+      ],
+      "requirements": [
+        {"id": "RENDER-001", "requirement": "Host, infection, tendrils, cores, glass, and occupant are independently selectable and maskable."},
+        {"id": "RENDER-002", "requirement": "LOD transitions preserve the one-sided mass and five-tendril late-state silhouette."}
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {"id": "IMP-001", "requirement": "One data asset maps infection phase to growth visibility, tuning, materials, VFX, tendril count, and collision policy."},
+        {"id": "IMP-002", "requirement": "The clean host remains reusable beneath separately controlled infection, core, tendril, and VFX layers."},
+        {"id": "IMP-003", "requirement": "The current runtime class and Fab prototype remain available until a measured replacement passes parity tests."},
+        {"id": "IMP-004", "requirement": "A production model is captured from one asset for front, side, rear, and three-quarter verification before visual promotion."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "runtime-class-identity",
+      "status": "pass",
+      "requirement": "The packet maps to the implemented ABloomMechanizedEnemy class.",
+      "evidence": "Art/Characters/BloomEnemies/RealityScan/BloomMechanizedHost/CaptureManifest.json"
+    },
+    {
+      "id": "source-preservation",
+      "status": "pass",
+      "requirement": "The user-selected hero concept is preserved as a separate exact-hash source.",
+      "evidence": "docs/concept-art/2026-08-31/production-reference/bloom-mechanized-host-hero-concept-v1.png"
+    },
+    {
+      "id": "head-lineage",
+      "status": "blocked",
+      "requirement": "Approve the recessed human canopy or the existing JACK robot head as the production host identity."
+    },
+    {
+      "id": "measured-orthography",
+      "status": "blocked",
+      "requirement": "Replace generated view proposals with orthographic captures from one measured graybox."
+    },
+    {
+      "id": "layer-separation",
+      "status": "pending",
+      "requirement": "Clean host, canopy, occupant, infection, cores, five tendrils, collision, and VFX can be controlled independently."
+    },
+    {
+      "id": "rigid-motion-parity",
+      "status": "pending",
+      "requirement": "Idle, attack windup, recovery, death slump, and progression preserve current gameplay timing and collision."
+    },
+    {
+      "id": "tendril-budget",
+      "status": "pending",
+      "requirement": "Five chains pass collision, replication, shadow, LOD, and encounter-density budgets."
+    },
+    {
+      "id": "visual-acceptance",
+      "status": "pending",
+      "requirement": "Character art and gameplay approve the final modeled silhouette, materials, face treatment, and progression read."
+    }
+  ],
+  "build_questions": [
+    "Is this a human-occupied mechanized host variant or a visual replacement for the current JACK robot host?",
+    "Which of the five tendrils are cosmetic, query-only, or gameplay-active?",
+    "Should the cyan core nodes remain visible through every phase or only during telegraph and damage windows?",
+    "What measured visual bounds and mass should replace the current collision-only capsule record?"
+  ]
+}

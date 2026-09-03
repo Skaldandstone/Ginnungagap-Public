@@ -1,0 +1,67 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Rooms.ModularMaster.ReferenceV1",
+  "title": "GGP-01 Modular Interior Room Kit",
+  "category": "environment-kit",
+  "status": "ready-for-graybox",
+  "production_ready": false,
+  "owners": ["environment-art", "level-design", "technical-art", "lighting"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-modular-interior-room-kit-v1.png", "sha256": "4b59574fecd486273ec285d25bc3608929ee5d2c7357a806ebc38a990dd30493", "width_px": 1024, "height_px": 1536, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Normalizes the existing room catalog into one shared shell and role-dressing system."},
+  "concept_sources": [
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/MANIFEST.md", "role": "quadrant and room-family mapping", "required": true},
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_CIC_Sheet05.png", "role": "CIC dressing source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_BridgeEngineering_Sheet04.png", "role": "engineering dressing source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_CryoQuarters_Sheet11.png", "role": "cryo and quarters source", "required": true},
+    {"path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_WorkshopMess_Sheet14.png", "role": "workshop and mess source", "required": true},
+    {"path": "docs/InteriorMaps.md", "role": "room grid and clear-height authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "planning_bay_m", "value": [6.0, 6.0], "source": "docs/InteriorMaps.md"},
+      {"field": "clear_occupied_height_m", "value": 3.2, "source": "docs/InteriorMaps.md"},
+      {"field": "deck_spacing_m", "value": 4.3, "source": "docs/InteriorMaps.md"},
+      {"field": "room_families", "value": ["cic", "engineering", "cryo", "workshop", "mess", "medical", "habitat", "security", "hygiene"], "source": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/MANIFEST.md"}
+    ],
+    "provisional": [
+      {"field": "build.parts", "value": ["bay_shell", "ceiling", "floor", "wall_solid", "wall_service", "pressure_door", "bulkhead_column", "utility_spine", "light_module", "console_rail", "storage_rail", "prop_socket"], "source": "ggp01-modular-interior-room-kit-v1.png"},
+      {"field": "role_dressing_density", "value": "concept-derived", "source": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": [6.0, 6.0, 4.3],
+    "current_bounds_cm": {"planning_bay": [600, 600], "clear_height": 320, "deck_spacing": 430},
+    "pivot": {"name": "PIVOT_RoomBayFloorCenter", "rule": "Floor center on the 6 m planning grid; vertical origin at finished floor.", "authority": "approved"},
+    "parts": [
+      {"id": "01", "name": "SM_Room_BayShell"}, {"id": "02", "name": "SM_Room_Ceiling"}, {"id": "03", "name": "SM_Room_Floor"},
+      {"id": "04", "name": "SM_Room_WallSolid"}, {"id": "05", "name": "SM_Room_WallService"}, {"id": "06", "name": "SM_Room_PressureDoor"},
+      {"id": "07", "name": "SM_Room_BulkheadColumn"}, {"id": "08", "name": "SM_Room_UtilitySpine"}, {"id": "09", "name": "SM_Room_LightModule"},
+      {"id": "10", "name": "SM_Room_ConsoleRail"}, {"id": "11", "name": "SM_Room_StorageRail"}, {"id": "12", "name": "SM_Room_PropSocket"}
+    ],
+    "materials": [
+      {"slot": "frame", "family": "black-gunmetal"}, {"slot": "wall_panel", "family": "dark-metal"}, {"slot": "floor_grate", "family": "steel"},
+      {"slot": "pipework", "family": "steel-copper"}, {"slot": "screen", "family": "cyan-emissive"}, {"slot": "safety_marking", "family": "muted-orange"},
+      {"slot": "damage_overlay", "family": "damage"}, {"slot": "bloom_overlay", "family": "bloom-violet"}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Door_North"}, {"name": "SOCKET_Door_South"}, {"name": "SOCKET_Door_East"}, {"name": "SOCKET_Door_West"},
+      {"name": "SOCKET_ConsoleRail"}, {"name": "SOCKET_StorageRail"}, {"name": "SOCKET_Utility"}, {"name": "SOCKET_Prop"}, {"name": "SOCKET_BloomGrowth"}
+    ],
+    "states": [
+      {"id": "nominal", "base_geometry": true}, {"id": "damaged", "separate_overlays": true}, {"id": "unpowered", "lighting_only": true},
+      {"id": "depressurized", "vfx_only": true}, {"id": "bloom_overlay", "separate_overlays": true}
+    ],
+    "blender": {"root_collection": "PR_GGP01_ModularRooms", "collections": ["00_GUIDES", "10_SHELL", "20_SHARED_MODULES", "30_ROLE_DRESSING", "40_COLLISION", "50_SOCKETS", "60_STATES", "90_EXPORT"], "export_files": ["Art/ShipRooms/Production/GGP01_ModularRoomKit.glb"]},
+    "unreal": {"asset_type": "StaticMeshSet", "destination_root": "/Game/Assets/Ships/Production/Rooms/ModularMaster", "collision": "simple collision per shared module and dressing prop", "nanite": "review per module", "import_policy": "Validate one empty bay and three role-dressed rooms before full family production."}
+  },
+  "acceptance_checks": [
+    {"id": "bay-bounds", "status": "pending", "requirement": "Shared shell fits the 600 x 600 cm planning bay and preserves 320 cm clear occupied height."},
+    {"id": "role-swap", "status": "pending", "requirement": "CIC, engineering, cryo, workshop, and mess dressing can be exchanged without altering the pressure shell."},
+    {"id": "door-clearance", "status": "pending", "requirement": "Every door configuration preserves traversal, interaction, and seal clearances."},
+    {"id": "state-separation", "status": "pending", "requirement": "Nominal, damaged, unpowered, depressurized, and Bloom layers remain independently controllable."},
+    {"id": "palette-reconciliation", "status": "pending", "requirement": "Cold concept palette is reconciled with gameplay room-identity colors without losing faction coherence."}
+  ],
+  "build_questions": ["Which room families require unique shell extensions rather than dressing-only variants?", "Which role colors are mandatory for navigation and accessibility?"]
+}

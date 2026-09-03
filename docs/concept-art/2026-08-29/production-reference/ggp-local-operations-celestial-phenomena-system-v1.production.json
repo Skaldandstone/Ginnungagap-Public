@@ -1,0 +1,67 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.LocalOperationsCelestialPhenomena.ReferenceV1",
+  "title": "GGP Local Operations Celestial and Phenomena System V1",
+  "category": "environment-kit",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["space-art", "technical-art", "world-design", "gameplay", "lighting", "audio", "vfx"],
+  "metadata": {"purpose": "Broader celestial-body, anomaly, debris, route, POI, sensor, material, lighting, streaming, and performance contract outside the dedicated Pelagos arrival packet.", "authoritative_sidecar": true, "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"], "export_targets": ["Static Meshes", "planet and sky materials", "Niagara", "World Partition actors", "Data Assets", "system-map records"], "source_preservation": "All preview, phase, checkpoint, material, gameplay, artist, and texture sources remain unchanged and are retained as lineage.", "naming_prefixes": {"mesh": "SM_Space_", "material": "M_Space_", "texture": "T_Space_", "niagara": "NS_Space_", "data_asset": "DA_Space_"}},
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp-local-operations-celestial-phenomena-system-v1.png", "sha256": "bbfcbcf5f236bc0f845e4389bca506433feb928afcf679ca168cb7f9a4b1054e", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "All diagrams are not to scale. AU system-map and 60 km local-operations coordinate spaces are separate."},
+  "concept_sources": [
+    {"path": "docs/concept-art/reference/space/blue-white-radiation-system.png", "role": "radiation star and nebula authority", "required": true},
+    {"path": "docs/concept-art/reference/space/fractured-ring-world.png", "role": "fractured ice and ring-world authority", "required": true},
+    {"path": "docs/concept-art/reference/space/gravity-anomaly-bridge.png", "role": "gravity anomaly visual and route authority", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_RadiationSystem_Hero.png", "role": "radiation-system hero target", "required": true},
+    {"path": "Art/SpaceSystems/SpaceSystems_Phase15_OperationalMap.png", "role": "operational route and POI topology", "required": true},
+    {"path": "docs/SystemMapScaleArchitecture.md", "role": "AU and local-space separation authority", "required": true},
+    {"path": "docs/PRD.md", "role": "local operations, phenomena, POI, sensor, and gameplay authority", "required": true}
+  ],
+  "concept_source_sets": [
+    {"root": "Art/SpaceSystems", "role": "complete space-system production and lineage set", "required": true, "lifecycle": "mixed-lineage"},
+    {"root": "docs/concept-art/reference/space", "role": "phenomena design references", "required": true, "lifecycle": "design-reference"}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "local_operations_diameter_km", "value": 60, "source": "PRD and SystemMapScaleArchitecture.md"},
+      {"field": "coordinate_space_separation", "value": "AU system map is separate from high-precision local operations", "source": "SystemMapScaleArchitecture.md"},
+      {"field": "planet_material_families", "value": ["fractured_ice", "gas_bands", "ocean_clouds", "volcanic_lava"], "source": "checked-in textures"},
+      {"field": "phenomena_families", "value": ["blue_white_radiation", "gravity_anomaly", "debris_field", "mission_site", "navigation_beacon", "traffic_anchor"], "source": "concepts and PRD"},
+      {"field": "readability_rule", "value": "physical gameplay readability before spectacle", "source": "art and gameplay direction"}
+    ],
+    "provisional": [{"field": "individual_body_scale", "value": "derive per Data Asset and never from sheet pixels", "source": "not-to-scale production rule"}],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"local_volume": "high-precision local origin", "system_map": "AU-scale strategic origin", "celestial_body": "body center", "phenomenon": "Data Asset transform"},
+    "parts": [{"id": "ocean_cloud_planet"}, {"id": "fractured_ice_ring_world"}, {"id": "gas_band_planet"}, {"id": "volcanic_lava_planet"}, {"id": "radiation_star_nebula"}, {"id": "gravity_anomaly"}, {"id": "debris_fields"}, {"id": "mission_sites"}, {"id": "navigation_beacons"}, {"id": "traffic_anchors"}, {"id": "safe_routes"}, {"id": "hazard_routes"}],
+    "materials": [
+      {"id": "fractured_ice", "textures": ["T_Planet_FracturedIce"], "channels": ["surface", "fracture", "atmosphere", "night"]},
+      {"id": "gas_bands", "textures": ["T_Planet_GasBands"], "channels": ["bands", "turbulence", "haze", "storm"]},
+      {"id": "ocean_clouds", "textures": ["T_Planet_OceanClouds"], "channels": ["ocean", "cloud", "atmosphere", "city_lights"]},
+      {"id": "volcanic_lava", "textures": ["T_Planet_VolcanicLava"], "channels": ["crust", "lava", "ash", "heat"]},
+      {"id": "radiation_nebula", "textures": ["T_RadiationNebula_Backplate_v1"], "channels": ["energy", "filaments", "radiation", "depth"]}
+    ],
+    "sockets": [{"name": "SOCKET_LocalOrigin"}, {"name": "SOCKET_SystemMapOrigin"}, {"name": "SOCKET_POI"}, {"name": "SOCKET_NavBeacon"}, {"name": "SOCKET_Traffic"}, {"name": "SOCKET_DockApproach"}, {"name": "SOCKET_Cinematic"}, {"name": "SOCKET_AudioZone"}],
+    "states": [{"id": "background"}, {"id": "distant"}, {"id": "local_operations"}, {"id": "sensor_contact"}, {"id": "hazard_active"}, {"id": "mission_active"}, {"id": "cinematic"}],
+    "blender": {"root_collection": "PR_GGP_LocalOperationsCelestial", "collections": ["00_SYSTEM_BASE", "10_PLANETS", "20_RINGS", "30_ASTEROIDS", "40_MISSION_SITES", "50_BEACONS", "60_VFX", "70_LIGHTING", "80_DEBUG"], "unit_scale": 1.0},
+    "unreal": {"asset_type": "World Partition local-space actors plus AU-scale system-map records", "destination_root": "/Game/System/Celestial", "subroots": ["/Planets", "/Rings", "/Asteroids", "/MissionSites", "/BeaconAnchors", "/VFX", "/Lighting"], "coordinate_policy": "Never merge AU and local transforms."},
+    "rig": {"not_applicable": true, "reason": "Celestial and phenomena assets use transforms, material parameters, splines, volumes, HISM, and Niagara rather than skeletal rigs."},
+    "animation": {"states": [{"id": "planet_rotation"}, {"id": "cloud_motion"}, {"id": "ring_drift"}, {"id": "anomaly_pulse"}, {"id": "beacon_cycle"}, {"id": "traffic_flow"}], "requirements": [{"id": "AN-CEL-001", "requirement": "Motion is deterministic, origin-rebase safe, scalable, and does not imply false physical scale."}]},
+    "vfx": {"layers": [{"id": "tier0_low"}, {"id": "tier1_medium"}, {"id": "tier2_high"}, {"id": "tier3_extreme"}], "requirements": [{"id": "VFX-CEL-001", "requirement": "Every phenomenon defines particle density, light count, post-process intensity, visibility distance, bounds, culling, and gameplay readability per tier."}]},
+    "spline_mapping": {"splines": [{"id": "SP_SafeRoute"}, {"id": "SP_HazardRoute"}, {"id": "SP_DockingApproach"}, {"id": "SP_CinematicRail"}, {"id": "SP_GravityField"}], "requirements": [{"id": "SP-CEL-001", "requirement": "Splines declare local coordinate space, origin-rebase behavior, speed, clearance, hazard, POI, and sensor representation."}]},
+    "render_mapping": {"passes": [{"id": "beauty"}, {"id": "albedo"}, {"id": "normal"}, {"id": "roughness"}, {"id": "emissive"}, {"id": "atmosphere"}, {"id": "cloud"}, {"id": "night_side"}, {"id": "depth"}, {"id": "velocity"}, {"id": "occlusion"}, {"id": "ID_masks"}], "channels": [{"name": "Atmosphere"}, {"name": "Cloud"}, {"name": "Night"}, {"name": "Hazard"}, {"name": "SensorVisibility"}]},
+    "implementation": {"spaces": [{"id": "system_map", "scale": "AU", "precision": "strategic"}, {"id": "local_operations", "diameter_km": 60, "precision": "high"}], "volumes": ["exclusion", "damage", "docking_approach", "gameplay_POI", "audio_zone"], "pipeline": ["DCC_export", "validation_and_naming", "automated_import", "material_instances", "HLOD_and_collision", "Data_Assets_and_tags", "cook_and_publish"], "performance_guides": {"dynamic_lights_max": 64, "audio_voices_max": 128}}
+  },
+  "acceptance_checks": [
+    {"id": "CEL-001", "status": "pending", "requirement": "AU-scale and local-operations coordinate spaces remain separate in data, transforms, rendering, and UI."},
+    {"id": "CEL-002", "status": "pending", "requirement": "Every visual source under the declared lineage roots is inventoried and linked to this packet without implying shipping approval."},
+    {"id": "CEL-003", "status": "pending", "requirement": "Planet materials, phenomena tiers, routes, POIs, volumes, sensors, collision, streaming, lighting, audio, VFX, and render passes pass local-space validation."},
+    {"id": "CEL-004", "status": "pending", "requirement": "Silhouette, route, hazard, objective, and warning readability survive combat distance, colorblind review, and performance scalability."}
+  ],
+  "build_questions": ["Capture final Data Asset dimensions, orbit or rotation rates, hazard extents, and sensor signatures for each selected body or phenomenon.", "Set target-platform budgets after representative local-operations playtests rather than from beauty renders alone."]
+}

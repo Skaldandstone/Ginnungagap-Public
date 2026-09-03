@@ -1,0 +1,116 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.Cryopod.UnitProduction.ReferenceV2",
+  "title": "GGP-01 Cryopod Unit Production System V2",
+  "category": "interactive-prop",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["environment-art", "technical-art", "animation", "gameplay", "audio", "vfx"],
+  "metadata": {
+    "purpose": "Source-grounded build contract for the individual GGP-01 cryopod, its replicated lid, repair interaction, occupant clearance, animation, VFX, audio, collision, and export mapping.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"],
+    "export_targets": ["FBX or GLB", "Static Meshes", "Skeletal Mesh or Blueprint pivots", "Data Asset", "Niagara systems", "MetaSounds"],
+    "source_preservation": "Additive packet. Concept V4, turnaround inputs, Blender files, and runtime code remain unchanged.",
+    "naming_prefixes": {"static_mesh": "SM_CryoPod_", "skeletal_mesh": "SK_CryoPod_", "blueprint": "BP_CryoPod_", "material": "M_CryoPod_", "data_asset": "DA_CryoPod_", "niagara": "NS_CryoPod_", "sound": "MS_CryoPod_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-cryopod-unit-production-system-v2.png",
+    "sha256": "85e84f054df7ee2d66e05dcde4ef2c3f95c25fdfeb0b4083df16947dbe8b5811",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "JSON values override any small printed-label ambiguity. Dimensions remain provisional until imported bounds are captured."
+  },
+  "concept_sources": [
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_ArtistPass_Unreal.png", "role": "primary appearance and material authority", "required": true},
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_ClosedFit_Framed.png", "role": "closed silhouette and occupant fit authority", "required": true},
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_ClosedFit.png", "role": "closed occupant clearance", "required": true},
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_ClosedPreview.png", "role": "closed-state visual reference", "required": true},
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_Preview.png", "role": "open-state visual reference", "required": true},
+    {"path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_Unreal.png", "role": "Unreal presentation reference", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/01_front_three_quarter.png", "role": "turnaround front three-quarter", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/02_strict_side.png", "role": "strict side proportion", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/03_rear_three_quarter.png", "role": "rear service geometry", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/04_front_elevation.png", "role": "front elevation", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/05_rear_elevation.png", "role": "rear elevation", "required": true},
+    {"path": "Build/RealityScan/CryoTurnaround/InputViews/06_top_three_quarter.png", "role": "top and lid geometry", "required": true},
+    {"path": "Source/Ginnungagap/Public/Ship/CryoPodSystem.h", "role": "runtime behavior and constant authority", "required": true}
+  ],
+  "concept_source_sets": [
+    {"root": "Content/Assets/ConceptArt/Cryopods", "role": "wake animatic lineage", "required": true, "lifecycle": "animation-reference"},
+    {"root": "docs/concept-art/reference/rooms", "role": "cryo awakening, turnaround, and first-person psychosis room concepts", "required": true, "lifecycle": "design-reference"}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "repair_duration_s", "value": 4.0, "source": "ACryoPodSystem::RepairDuration"},
+      {"field": "lid_animation_duration_s", "value": 1.25, "source": "ACryoPodSystem::LidAnimationDuration"},
+      {"field": "lid_open_angle_deg", "value": -24.0, "source": "ACryoPodSystem::LidOpenAngle"},
+      {"field": "lid_replication", "value": "bLidOpen replicated using OnRep_LidOpen", "source": "CryoPodSystem.h"},
+      {"field": "occupant_fit", "value": "all nine body profiles in unarmored and pressure-suit states", "source": "player body-profile production contract"}
+    ],
+    "provisional": [
+      {"field": "shipping_dimensions_m", "value": [2.75, 1.2, 1.45], "source": "concept-derived guide only", "note": "Replace with imported bounds."},
+      {"field": "lid_clearance_radius_m", "value": 1.1, "source": "animation clearance proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {"root": "floor center beneath occupant pelvis", "lid": "mechanical hinge axis", "bed": "rail origin at closed position"},
+    "parts": [
+      {"id": "base_frame", "type": "static_mesh", "collision": "simple convex"},
+      {"id": "rake_pivot", "type": "scene_component"},
+      {"id": "lid_pivot", "type": "scene_component", "rotation_axis": "local Y"},
+      {"id": "bed", "type": "moving_static_mesh", "occupant_socket": "SOCKET_OccupantRoot"},
+      {"id": "detail_shell", "type": "static_mesh"},
+      {"id": "hinge", "type": "static_mesh"},
+      {"id": "restraints", "type": "skeletal_or_spline_mesh"},
+      {"id": "status_lights", "type": "emissive_mesh"},
+      {"id": "lid_frame", "type": "moving_static_mesh"},
+      {"id": "lid_glass", "type": "moving_translucent_mesh"}
+    ],
+    "materials": [
+      {"id": "M_CryoPod_PaintedMetal", "channels": ["base_color", "normal", "ORM", "wear_mask"]},
+      {"id": "M_CryoPod_DarkMetal", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M_CryoPod_Rubber", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M_CryoPod_Glass", "channels": ["transmission", "roughness", "frost", "condensation", "damage"]},
+      {"id": "M_CryoPod_Display", "channels": ["emissive", "state_index", "flicker"]},
+      {"id": "M_CryoPod_Interior", "channels": ["base_color", "normal", "ORM", "contamination"]}
+    ],
+    "sockets": [
+      {"name": "SOCKET_OccupantRoot", "owner": "bed"}, {"name": "SOCKET_Head", "owner": "bed"},
+      {"name": "SOCKET_Hand_L", "owner": "bed"}, {"name": "SOCKET_Hand_R", "owner": "bed"},
+      {"name": "SOCKET_Foot_L", "owner": "bed"}, {"name": "SOCKET_Foot_R", "owner": "bed"},
+      {"name": "SOCKET_Interact", "owner": "base_frame"}, {"name": "SOCKET_Repair", "owner": "service_panel"},
+      {"name": "SOCKET_VFX_Vent_L", "owner": "base_frame"}, {"name": "SOCKET_VFX_Vent_R", "owner": "base_frame"},
+      {"name": "SOCKET_Audio_Hinge", "owner": "lid_pivot"}, {"name": "SOCKET_Audio_Alarm", "owner": "status_lights"}
+    ],
+    "states": [
+      {"id": "closed_dormant"}, {"id": "wake_sequence"}, {"id": "opening"}, {"id": "open"},
+      {"id": "closing"}, {"id": "occupied_nominal"}, {"id": "occupied_fault"}, {"id": "repairing"},
+      {"id": "repaired"}, {"id": "unpowered"}, {"id": "contaminated"}
+    ],
+    "blender": {"root_collection": "PR_GGP01_CryoPod_V2", "collections": ["00_REF", "01_BASE", "02_LID", "03_BED", "04_RESTRAINTS", "05_LIGHTS", "06_COLLISION", "07_SOCKETS", "08_LOD"], "unit_scale": 1.0, "apply_transforms": true},
+    "unreal": {"asset_type": "Actor Blueprint with modular Static Mesh components", "destination_root": "/Game/Ship/Rooms/Cryo/Pod/Production/V2", "class": "ACryoPodSystem", "blueprint": "BP_CryoPod_GGP01_V2", "data_asset": "DA_CryoPod_GGP01_V2", "replication": "server-authoritative lid and repair state"},
+    "rig": {"controls": [{"id": "CTRL_Lid", "owner": "lid_pivot"}, {"id": "CTRL_Bed", "owner": "bed"}, {"id": "CTRL_Restraint_L"}, {"id": "CTRL_Restraint_R"}], "requirements": [{"id": "RIG-CRYO-001", "requirement": "The occupant is constrained to SOCKET_OccupantRoot and never drives pod transforms."}]},
+    "animation": {"states": [{"id": "open", "duration_s": 1.25, "rotation_deg": -24.0}, {"id": "close", "duration_s": 1.25, "rotation_deg": 0.0}, {"id": "repair", "duration_s": 4.0}], "requirements": [{"id": "AN-CRYO-001", "requirement": "Provide closed, opening, open, closing, wake, restraint-release, occupant-exit, repair, and fault loops."}, {"id": "AN-CRYO-002", "requirement": "Validate exit animation against nine body profiles and pressure-suit bulk."}]},
+    "vfx": {"layers": [{"id": "interior_fog", "socket": "SOCKET_OccupantRoot"}, {"id": "vent_left", "socket": "SOCKET_VFX_Vent_L"}, {"id": "vent_right", "socket": "SOCKET_VFX_Vent_R"}, {"id": "condensation", "material": "M_CryoPod_Glass"}, {"id": "fault_sparks", "socket": "SOCKET_Repair"}], "requirements": [{"id": "VFX-CRYO-001", "requirement": "Fog and condensation clear enough to preserve wake readability and do not obscure interaction prompts."}]},
+    "spline_mapping": {"splines": [{"id": "SP_Restraint_L", "purpose": "left restraint deformation"}, {"id": "SP_Restraint_R", "purpose": "right restraint deformation"}, {"id": "SP_ServiceCable", "purpose": "rear service cable"}], "requirements": [{"id": "SP-CRYO-001", "requirement": "All flexible paths expose endpoints and rest length in the Data Asset."}]},
+    "render_mapping": {"passes": [{"id": "base"}, {"id": "glass"}, {"id": "emissive"}, {"id": "interior_fog"}, {"id": "damage"}, {"id": "contamination"}], "channels": [{"name": "StateIndex", "range": [0, 10]}, {"name": "Fault", "range": [0, 1]}, {"name": "Condensation", "range": [0, 1]}, {"name": "Contamination", "range": [0, 1]}], "requirements": [{"id": "REN-CRYO-001", "requirement": "Glass, fog, emissive, and opaque shell remain separable for Lumen and cinematic output."}]},
+    "implementation": {"collision_profiles": [{"id": "closed", "player": "block", "interaction": "overlap"}, {"id": "open", "player": "block shell, ignore lid sweep after clearance validation"}], "audio_events": ["lid_motor_start", "lid_motor_loop", "lid_latch", "pressure_equalize", "alarm", "repair_loop", "repair_complete"], "requirements": [{"id": "IMP-CRYO-001", "requirement": "Lid sweep must not intersect a standing player, adjacent pod, wall, or ceiling in authored bay layouts."}, {"id": "IMP-CRYO-002", "requirement": "Repair progress and lid state replicate and late joiners resolve the current pose deterministically."}]}
+  },
+  "acceptance_checks": [
+    {"id": "CRYO-001", "status": "pending", "requirement": "Imported bounds, pivots, and proportions match Concept V4 and all six turnaround views."},
+    {"id": "CRYO-002", "status": "pending", "requirement": "Open and close complete in 1.25 seconds and terminate at 0 and -24 degrees without collision tunneling."},
+    {"id": "CRYO-003", "status": "pending", "requirement": "Repair interaction completes in 4.0 seconds and replicates correctly."},
+    {"id": "CRYO-004", "status": "pending", "requirement": "All nine body profiles, unsuited and suited, pass containment, wake, restraint release, and exit clearance."},
+    {"id": "CRYO-005", "status": "pending", "requirement": "LOD, Nanite choice, translucent glass cost, VFX, audio attenuation, and multiplayer late-join state pass runtime QA."}
+  ],
+  "build_questions": ["Capture final imported bounds and minimum pod-to-pod service spacing.", "Confirm whether restraints ship as bones, Chaos cloth, or spline meshes after runtime profiling."]
+}

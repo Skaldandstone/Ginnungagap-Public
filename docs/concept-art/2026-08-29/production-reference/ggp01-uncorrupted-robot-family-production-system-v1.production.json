@@ -1,0 +1,172 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Robot.Uncorrupted.FamilySystem.ReferenceV1",
+  "title": "GGP-01 Uncorrupted Robot Family Production System",
+  "category": "robot",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["robot-art", "technical-animation", "gameplay-ai", "vfx", "audio"],
+  "metadata": {
+    "purpose": "Authoritative family-wide construction, rig, socket, spline, animation, damage, render, and export reference for uncorrupted shipboard robots.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 4.x"],
+    "export_targets": ["FBX skeletal meshes", "FBX animations", "glTF review", "JSON rig, socket, and bounds map"],
+    "source_preservation": "Additive packet. RealityScan inputs and outputs remain unchanged.",
+    "naming_prefixes": {"skeletal_mesh": "SK_GGP01_", "skeleton": "SKEL_GGP01_Robot", "animation": "AN_GGP01_", "anim_blueprint": "ABP_GGP01_", "physics": "PHYS_GGP01_", "data_asset": "DA_GGP01_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-uncorrupted-robot-family-production-system-v1.png",
+    "sha256": "e8a4af5c39fb2e87acf14517a91150bbb3e6594aa8e3f7bf88114b05552e5dc9",
+    "width_px": 1586,
+    "height_px": 992,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "All numeric dimensions shown or implied on the visual sheet are non-authoritative until imported bounds are captured."
+  },
+  "concept_sources": [
+    {"path": "docs/concept-art/reference/bloom/uncorrupted-enemy-family-lineup.png", "role": "family scale and design-language reference", "required": true},
+    {"path": "Art/Robots/Uncorrupted/RealityScan/CompactMaintenanceRobot/InputFrames/CompactMaintenanceRobot_RS_000_A000_E-20.png", "role": "compact maintenance appearance reference", "required": true},
+    {"path": "Art/Robots/Uncorrupted/RealityScan/HeavyCargoRobot/InputFrames/HeavyCargoRobot_RS_000_A000_E-20.png", "role": "heavy cargo appearance reference", "required": true},
+    {"path": "Art/Robots/Uncorrupted/RealityScan/SecuritySentryRobot/InputFrames/SecuritySentryRobot_RS_000_A000_E-20.png", "role": "security sentry appearance reference", "required": true},
+    {"path": "Art/Robots/Uncorrupted/RealityScan/TallUtilityRobot/InputFrames/TallUtilityRobot_RS_000_A000_E-20.png", "role": "tall utility appearance reference", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "classes", "value": ["compact_maintenance", "heavy_cargo", "security_sentry", "tall_utility"], "source": "RealityScan collection"},
+      {"field": "design_language", "value": ["industrial hard-surface", "white and charcoal shell", "pale-green accents", "cyan sensors", "exposed actuators", "serviceable panels", "non-hostile practical forms"], "source": "concept sources"},
+      {"field": "corruption_state", "value": "uncorrupted baseline only", "source": "collection classification"}
+    ],
+    "provisional": [
+      {"field": "all_dimensions", "value": "verify from imported bounds", "source": "visual board and current source limitation"},
+      {"field": "shared_skeleton", "value": "shared logical control schema with class-specific bone chains", "source": "implementation proposal"},
+      {"field": "lod_count", "value": 5, "source": "implementation proposal"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {"location": "center of support polygon on ground plane", "orientation": "+X forward, +Y right, +Z up", "status": "verify per imported mesh"},
+    "parts": [
+      {"id": "chassis_core", "type": "shared_role_module_host", "required": true},
+      {"id": "sensor_head", "type": "aimable_module", "required": true},
+      {"id": "shoulder_arm_units", "type": "class_specific_pair", "required": true},
+      {"id": "forearm_tools", "type": "socketed_class_modules", "required": true},
+      {"id": "pelvis_suspension", "type": "class_specific", "required": true},
+      {"id": "legs", "type": "class_specific_kinematic_chains", "required": true},
+      {"id": "feet_or_wheels", "type": "contact_modules", "required": true},
+      {"id": "batteries", "type": "replaceable_modules", "required": true},
+      {"id": "service_panels", "type": "openable_or_replaceable", "required": true},
+      {"id": "role_modules", "type": "socketed_class_modules", "required": true}
+    ],
+    "materials": [
+      {"id": "MAT01_PaintedWhite", "usage": "primary shell"}, {"id": "MAT02_Charcoal", "usage": "secondary shell"},
+      {"id": "MAT03_PaleGreen", "usage": "role accents"}, {"id": "MAT04_CyanSensor", "usage": "sensor emissive"},
+      {"id": "MAT05_DarkMetal", "usage": "actuators and frame"}, {"id": "MAT06_Rubber", "usage": "feet, wheels, and isolators"},
+      {"id": "MAT07_WarningAmber", "usage": "status and hazard"}, {"id": "MAT08_GlassLens", "usage": "sensors"}
+    ],
+    "sockets": [
+      {"name": "SCK_Tool_L", "usage": "standard tool or manipulator"}, {"name": "SCK_Tool_R", "usage": "standard tool or manipulator"},
+      {"name": "SCK_Cargo_Front", "usage": "cargo frame"}, {"name": "SCK_Cargo_Rear", "usage": "cargo frame"},
+      {"name": "SCK_Cargo_Top", "usage": "cargo frame"}, {"name": "SCK_Sensor_Primary", "usage": "main sensor"},
+      {"name": "SCK_Sensor_Secondary_L", "usage": "secondary sensor"}, {"name": "SCK_Sensor_Secondary_R", "usage": "secondary sensor"},
+      {"name": "SCK_VFX_Status_L", "usage": "status VFX"}, {"name": "SCK_VFX_Status_R", "usage": "status VFX"},
+      {"name": "SCK_VFX_Impact", "usage": "runtime impact"}, {"name": "SCK_PowerData", "usage": "role-module pass-through"}
+    ],
+    "states": [
+      {"id": "idle", "loop": true}, {"id": "walk_forward", "loop": true}, {"id": "walk_back", "loop": true},
+      {"id": "turn_in_place", "loop": false}, {"id": "interact_low", "loop": false}, {"id": "interact_high", "loop": false},
+      {"id": "carry_or_transport", "loop": true}, {"id": "diagnostic_repair", "loop": true}
+    ],
+    "blender": {"root_collection": "GGP01_UncorruptedRobots", "class_collections": ["CMPR_CompactMaintenance", "HCRG_HeavyCargo", "SSNT_SecuritySentry", "TUTL_TallUtility"], "armature_pattern": "RIG_GGP01_{Class}", "bounds_empty_pattern": "BOUNDS_GGP01_{Class}"},
+    "unreal": {"asset_type": "SkeletalMesh, AnimationSequence, AnimBlueprint, PhysicsAsset, and DataAsset", "destination_root": "/Game/Robots/Uncorrupted/Production", "class_blueprint_pattern": "BP_GGP01_{Class}", "data_asset_pattern": "DA_GGP01_{Class}"},
+    "rig": {
+      "controls": [
+        {"id": "global_root", "joints": ["root", "chassis"], "required_all_classes": true},
+        {"id": "sensor_aim", "joints": ["sensor_yaw", "sensor_pitch"], "required_all_classes": true},
+        {"id": "arm_l", "joints": ["shoulder_l", "upperarm_l", "elbow_l", "forearm_l", "tool_l"], "mode": "IK/FK"},
+        {"id": "arm_r", "joints": ["shoulder_r", "upperarm_r", "elbow_r", "forearm_r", "tool_r"], "mode": "IK/FK"},
+        {"id": "leg_l", "joints": ["hip_l", "knee_l", "ankle_l", "contact_l"], "mode": "IK/FK or wheel suspension"},
+        {"id": "leg_r", "joints": ["hip_r", "knee_r", "ankle_r", "contact_r"], "mode": "IK/FK or wheel suspension"},
+        {"id": "cargo_or_role", "joints": ["role_module", "cargo_tilt", "service_panels"], "mode": "class-specific FK"}
+      ],
+      "requirements": [
+        {"id": "RIG-001", "requirement": "All classes expose the same logical control IDs even when the underlying bone count differs."},
+        {"id": "RIG-002", "requirement": "Foot or wheel contacts expose primary and secondary contact points plus suspension compression."},
+        {"id": "RIG-003", "requirement": "Tool sockets retain identical axis conventions across every class."}
+      ]
+    },
+    "animation": {
+      "clip_pattern": "AN_GGP01_{Class}_{Action}_{Variant}",
+      "shared_actions": ["Idle", "WalkFwd", "WalkBack", "TurnInPlace", "InteractLow", "InteractHigh", "CarryTransport", "DiagnosticRepair"],
+      "notifies": ["Contact_L", "Contact_R", "ToolEngage_L", "ToolEngage_R", "CargoAttach", "CargoDetach", "SensorAcquire", "StatusChange"],
+      "requirements": [
+        {"id": "AN-001", "requirement": "Locomotion preserves each class silhouette and center-of-mass behavior."},
+        {"id": "AN-002", "requirement": "Cargo and tool interactions use socket-driven IK and never rely on hand-authored prop offsets alone."},
+        {"id": "AN-003", "requirement": "Security sentry animations read as safety and containment behavior until gameplay explicitly changes allegiance."}
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {"id": "sensor_primary", "socket": "SCK_Sensor_Primary", "system": "NS_GGP01_Robot_Sensor"},
+        {"id": "status", "socket": "SCK_VFX_Status_*", "system": "NS_GGP01_Robot_Status"},
+        {"id": "tool", "socket": "SCK_Tool_*", "system": "class tool-specific"},
+        {"id": "impact", "socket": "SCK_VFX_Impact", "system": "NS_GGP01_Robot_Impact"},
+        {"id": "damage", "socket": "runtime damage zone", "system": "NS_GGP01_Robot_Damage"}
+      ],
+      "requirements": [{"id": "VFX-001", "requirement": "Uncorrupted baseline uses cyan and amber status channels only. Bloom purple is reserved for an explicit corruption overlay system."}]
+    },
+    "spline_mapping": {
+      "splines": [
+        {"id": "SP_Power_{NN}", "purpose": "power cable route", "coordinate_space": "component local", "export": ["root", "mid", "tip", "radius", "slack"]},
+        {"id": "SP_Data_{NN}", "purpose": "data cable route", "coordinate_space": "component local", "export": ["root", "mid", "tip", "radius", "slack"]},
+        {"id": "SP_Flex_{NN}", "purpose": "hydraulic or flexible conduit", "coordinate_space": "component local", "export": ["root", "mid", "tip", "radius", "slack", "pressure"]}
+      ],
+      "requirements": [{"id": "SP-001", "requirement": "Spline routes do not cross service-panel hinges, joint sweep volumes, or module removal paths."}]
+    },
+    "render_mapping": {
+      "passes": [
+        {"id": "beauty", "usage": "final output"}, {"id": "base_color", "usage": "albedo QA"},
+        {"id": "metallic", "usage": "PBR QA"}, {"id": "roughness", "usage": "PBR QA"},
+        {"id": "normal", "usage": "surface QA"}, {"id": "emissive", "usage": "sensor and status isolation"},
+        {"id": "ambient_occlusion", "usage": "contact QA"}, {"id": "depth", "usage": "VFX and occlusion"},
+        {"id": "id_mask", "usage": "module and damage zones"}, {"id": "velocity", "usage": "motion effects"}
+      ],
+      "channels": [
+        {"name": "vertex_color.r", "usage": "wear and dirt"}, {"name": "vertex_color.g", "usage": "edge and accent eligibility"},
+        {"name": "vertex_color.b", "usage": "cable or flexible-material mask"}, {"name": "vertex_color.a", "usage": "AO and microdirt"}
+      ],
+      "lods": [
+        {"id": "LOD0", "strategy": "full modules, cables, and controls"}, {"id": "LOD1", "strategy": "reduced cable and service detail"},
+        {"id": "LOD2", "strategy": "simplified joint and tool geometry"}, {"id": "LOD3", "strategy": "silhouette proxy with emissive sensors"},
+        {"id": "LOD4", "strategy": "minimal distant proxy"}
+      ]
+    },
+    "implementation": {
+      "classes": [
+        {"id": "CMPR", "name": "CompactMaintenanceRobot", "role": "tight-space inspection and repair", "bounds_status": "required"},
+        {"id": "HCRG", "name": "HeavyCargoRobot", "role": "cargo transport and lift support", "bounds_status": "required"},
+        {"id": "SSNT", "name": "SecuritySentryRobot", "role": "safety, containment, and security support", "bounds_status": "required"},
+        {"id": "TUTL", "name": "TallUtilityRobot", "role": "high-reach utility and general service", "bounds_status": "required"}
+      ],
+      "collision_zones": ["critical_sensor_or_compute", "major_actuator", "minor_tool_or_panel", "structural_chassis", "noncritical_shell"],
+      "requirements": [
+        {"id": "IMP-001", "requirement": "Capture imported bounds, pivots, joint limits, module transforms, and collision before accepting any visual scale callout."},
+        {"id": "IMP-002", "requirement": "Role modules, tools, batteries, and service panels are independently addressable components."},
+        {"id": "IMP-003", "requirement": "Each class data asset maps controls, sockets, splines, clips, collision, materials, render passes, LODs, audio, and VFX."},
+        {"id": "IMP-004", "requirement": "Keep uncorrupted materials and VFX separate from any future Bloom overlay so the baseline remains reusable."}
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {"id": "ROBOT-001", "status": "pending", "requirement": "Imported bounds, pivot, forward axis, and ground contacts are recorded for all four classes."},
+    {"id": "ROBOT-002", "status": "pending", "requirement": "All shared logical controls, tool sockets, cargo sockets, sensor sockets, and cable splines resolve per class."},
+    {"id": "ROBOT-003", "status": "pending", "requirement": "Eight shared animation states play without module, cable, chassis, or floor penetration."},
+    {"id": "ROBOT-004", "status": "pending", "requirement": "LOD transitions preserve class silhouette, contact type, primary sensor, and role module."},
+    {"id": "ROBOT-005", "status": "pending", "requirement": "Uncorrupted materials contain no Bloom-purple crystal or organic corruption layers."}
+  ],
+  "build_questions": ["Record authoritative imported bounds for each class.", "Confirm whether security sentry has any deployable nonlethal containment tool in the baseline role kit.", "Confirm wheel versus foot contact configuration for each final mesh after RealityScan cleanup."]
+}

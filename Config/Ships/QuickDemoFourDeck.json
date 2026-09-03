@@ -1,0 +1,73 @@
+{
+  "seed": 241077,
+  "map": "/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck",
+  "decks": 4,
+  "rooms_per_deck": 24,
+  "grid": [12, 2],
+  "room_size_cm": [1100, 1000, 430],
+  "corridor_width_cm": 360,
+  "column_spacing_cm": 1200,
+  "deck_spacing_cm": 520,
+  "escape_pod_sites": 6,
+  "airlocks_per_deck": 2,
+  "hatches_per_deck_pair": 2,
+  "room_blockers_per_deck": 6,
+  "corridor_blockers_per_deck": 2,
+  "mission_room_types": {
+    "cryo": "Cryo bay",
+    "workshop": "Player workshop",
+    "engine": "Main engine room",
+    "power": "Power control",
+    "cic": "Emergency CIC",
+    "breach": "Life-support access"
+  },
+  "deck_room_type_pools": {
+    "1": [
+      {"name": "Cargo hold", "kind": "cargo"},
+      {"name": "Bulk-cargo hold", "kind": "cargo"},
+      {"name": "Tankage compartment", "kind": "engineering"},
+      {"name": "Water-recovery room", "kind": "engineering"},
+      {"name": "Waste-processing room", "kind": "engineering"},
+      {"name": "Waste-recovery room", "kind": "engineering"},
+      {"name": "Fabrication-feedstock store", "kind": "cargo"},
+      {"name": "General stores", "kind": "cargo"},
+      {"name": "Landing-equipment room", "kind": "engineering"},
+      {"name": "Handling-equipment room", "kind": "cargo"},
+      {"name": "Utility junction", "kind": "engineering"},
+      {"name": "Cargo-handling rail corridor", "kind": "companionway"}
+    ],
+    "2": [
+      {"name": "Reactor-transfer trunk", "kind": "reactor"},
+      {"name": "Drive control", "kind": "engineering"},
+      {"name": "Coolant-pump room", "kind": "engineering"},
+      {"name": "Power-converter room", "kind": "reactor"},
+      {"name": "Fuel-conditioning room", "kind": "engineering"},
+      {"name": "Machine shop", "kind": "damage"},
+      {"name": "Battery room", "kind": "reactor"},
+      {"name": "Damage-control center", "kind": "damage"},
+      {"name": "Engine-access space", "kind": "engineering"}
+    ],
+    "3": [
+      {"name": "Crew cabin", "kind": "crew"},
+      {"name": "Bunkroom", "kind": "crew"},
+      {"name": "Galley", "kind": "crew"},
+      {"name": "Medical bay", "kind": "medical"},
+      {"name": "Washroom", "kind": "crew"},
+      {"name": "Commons", "kind": "crew"},
+      {"name": "Hydroponics", "kind": "crew"},
+      {"name": "General stores", "kind": "cargo"}
+    ],
+    "4": [
+      {"name": "Sensor analysis", "kind": "sensors"},
+      {"name": "Briefing room", "kind": "bridge"},
+      {"name": "Secure-records archive", "kind": "bridge"},
+      {"name": "Redundant flight control", "kind": "bridge"},
+      {"name": "Officer cabin", "kind": "crew"},
+      {"name": "Chart room", "kind": "sensors"},
+      {"name": "Encrypted archive", "kind": "bridge"},
+      {"name": "Communications repair", "kind": "sensors"},
+      {"name": "Drone control", "kind": "sensors"},
+      {"name": "Secure storage", "kind": "cargo"}
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.PropKit.SecuritySalvageXenoToolFamily51To80.ReferenceV1",
+  "title": "GGP-01 Security, Salvage, and Xeno Tool Family 51-80",
+  "category": "prop-kit",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["weapon-art", "prop-art", "enemy-art", "technical-art", "animation", "gameplay", "audio", "vfx"],
+  "metadata": {
+    "purpose": "Authoritative selection, lifecycle, safety, modular build, animation, spline, VFX, render, and engine mapping contract for concepts 51 through 80.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"],
+    "export_targets": ["Static Mesh", "Skeletal Mesh", "Data Assets", "Niagara", "MetaSounds"],
+    "source_preservation": "All exploration boards and mapping documents remain unchanged. Clean, salvaged, unsafe, and xeno layers must remain separately removable.",
+    "naming_prefixes": {"mesh": "SM_Tool_", "skeletal_mesh": "SK_Tool_", "blueprint": "BP_Tool_", "data_asset": "DA_Tool_", "xeno_overlay": "SK_XenoOverlay_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-security-salvage-xeno-tool-family-51-80-v1.png",
+    "sha256": "2adef69390c5c246827334cb164f4629600c8264f0357fbda8fe0c5e417f664c",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "The corrected sheet marks 62 and 64-70 as exploration only. JSON mapping records remain authoritative. Xeno-hybrid concepts 71-80 are quarantine references, not automatic player equipment."
+  },
+  "concept_sources": [
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_51-60_SecurityEmergency.png", "role": "security and emergency appearance and naming", "required": true},
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_61-70_SalvagedTools.png", "role": "salvaged survival-tool appearance and naming", "required": true},
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_71-80_XenoHybrids.png", "role": "xeno-hybrid exploration appearance and naming", "required": true},
+    {"path": "Art/Weapons/ConceptMappings/EarlyProjectileWeapons.json", "role": "mapping authority for 60, 61, and 63", "required": true},
+    {"path": "Art/Weapons/ConceptMappings/EmergencySupportWeapons.json", "role": "mapping authority for 54, 55, 56, and 58", "required": true},
+    {"path": "Art/Weapons/ConceptMappings/SecurityControlProjectileWeapons.json", "role": "mapping authority for 51, 52, 53, 57, and 59", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "mapped_concepts", "value": [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 63], "source": "three checked-in ConceptMappings JSON files"},
+      {"field": "exploration_only", "value": [62, 64, 65, 66, 67, 68, 69, 70], "source": "mapping audit"},
+      {"field": "bloom_xeno_quarantine", "value": [71, 72, 73, 74, 75, 76, 77, 78, 79, 80], "source": "narrative and gameplay approval boundary"},
+      {"field": "false_bloom_presentation", "value": "identical to genuine warning at every player-facing layer", "source": "HUD deception contract"},
+      {"field": "xeno_layer_rule", "value": "host, biomass, crystal, contamination, and seal are separate from the clean tool", "source": "production safety contract"}
+    ],
+    "provisional": [
+      {"field": "final_asset_dimensions", "value": "capture from selected imported bounds", "source": "production workflow"},
+      {"field": "xeno_player_use", "value": "not approved", "source": "requires narrative and gameplay review"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"root": "primary grip centerline", "working_axis": "+X", "xeno_overlay": "identical root and scale to clean host"},
+    "parts": [
+      {"id": "factory_clean_host", "type": "base mesh", "required": true},
+      {"id": "salvaged_wear_overlay", "type": "material and optional geometry layer", "required": false},
+      {"id": "unsafe_conversion", "type": "removable module", "required": false},
+      {"id": "authorization_lock", "type": "removable module and state", "required": true},
+      {"id": "payload_module", "type": "removable module", "required": true},
+      {"id": "tool_grip", "type": "player interface", "required": true},
+      {"id": "shoulder_brace", "type": "optional player interface", "required": false},
+      {"id": "aerial_drone_mount", "type": "optional mount", "required": false},
+      {"id": "ground_robot_mount", "type": "optional mount", "required": false},
+      {"id": "xeno_biomass_overlay", "type": "quarantined removable geometry", "required": false},
+      {"id": "xeno_crystal_growth", "type": "quarantined removable geometry", "required": false},
+      {"id": "containment_seal", "type": "quarantine prop", "required": false}
+    ],
+    "materials": [
+      {"id": "M01_FactoryMetal", "channels": ["base_color", "normal", "ORM", "wear"]},
+      {"id": "M02_Polymer", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M03_SalvageWear", "channels": ["rust", "edge_wear", "soot", "repair_patch"]},
+      {"id": "M04_Payload", "channels": ["fill", "authorization", "hazard"]},
+      {"id": "M05_Emissive", "channels": ["state", "heat", "authorization"]},
+      {"id": "M06_XenoBiomass", "channels": ["pulse", "wetness", "infection"]},
+      {"id": "M07_XenoCrystal", "channels": ["emissive", "subsurface", "fracture"]}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Grip_Main"}, {"name": "SOCKET_Grip_Support"}, {"name": "SOCKET_ShoulderBrace"},
+      {"name": "SOCKET_Muzzle"}, {"name": "SOCKET_Payload_A"}, {"name": "SOCKET_Payload_B"},
+      {"name": "SOCKET_UnsafeConversion"}, {"name": "SOCKET_AuthorizationLock"}, {"name": "SOCKET_Drone_Aerial"},
+      {"name": "SOCKET_Drone_Ground"}, {"name": "SOCKET_XenoRoot"}, {"name": "SOCKET_VFX_Impact"}
+    ],
+    "states": [{"id": "factory_clean"}, {"id": "salvaged_worn"}, {"id": "authorized"}, {"id": "locked"}, {"id": "unsafe_conversion_installed"}, {"id": "fault"}, {"id": "xeno_quarantined"}, {"id": "xeno_contained"}, {"id": "xeno_active"}],
+    "blender": {"root_collection": "PR_GGP01_Tools_51_80", "per_asset_collections": ["00_REF", "01_CLEAN_HOST", "02_SALVAGE", "03_MODULES", "04_UNSAFE", "05_XENO", "06_RIG", "07_COLLISION", "08_SOCKETS", "09_LOD"], "unit_scale": 1.0},
+    "unreal": {"asset_type": "modular tool family with clean host, removable modules, and quarantined overlays", "destination_root": "/Game/Weapons/ShipboardTools/ConceptFamilies/51_80", "base_class": "AShipboardWeapon", "mapping_source_root": "Art/Weapons/ConceptMappings", "approval_policy": "Only exact concepts listed in mapped_concepts are mapping candidates. Mapping does not equal final gameplay approval."},
+    "rig": {"controls": [{"id": "CTRL_Trigger"}, {"id": "CTRL_Payload"}, {"id": "CTRL_ModuleRelease"}, {"id": "CTRL_Restraint"}, {"id": "CTRL_XenoPulse"}], "requirements": [{"id": "RIG-T51-001", "requirement": "Clean and xeno meshes share root scale and socket names but never merge into one irreversible source mesh."}]},
+    "animation": {"states": [{"id": "equip"}, {"id": "idle"}, {"id": "activate"}, {"id": "sustain"}, {"id": "release"}, {"id": "reload_or_payload_swap"}, {"id": "conversion_install"}, {"id": "conversion_remove"}, {"id": "xeno_dormant"}, {"id": "xeno_active"}], "requirements": [{"id": "AN-T51-001", "requirement": "Mapped tools ship first-person, third-person, and supported drone states."}, {"id": "AN-T51-002", "requirement": "Every player-usable tool passes all-nine-body-profile, corridor, crawl, squeeze, ladder, and zero-g tests."}, {"id": "AN-T51-003", "requirement": "Xeno motion cannot silently imply that an exploration concept is approved player equipment."}]},
+    "vfx": {"layers": [{"id": "clean_operation"}, {"id": "payload"}, {"id": "impact"}, {"id": "unsafe_conversion_warning"}, {"id": "xeno_biomass"}, {"id": "xeno_crystal"}, {"id": "xeno_contamination"}], "requirements": [{"id": "VFX-T51-001", "requirement": "Bloom contamination remains a separate mask and effect layer from the clean tool."}, {"id": "VFX-T51-002", "requirement": "False and genuine Bloom warnings use the same player-facing color, icon, copy, severity, pulse, sound, opacity, timing, animation, and motion."}]},
+    "spline_mapping": {"splines": [{"id": "SP_ProjectileTrace"}, {"id": "SP_NetOrBola"}, {"id": "SP_Restraint"}, {"id": "SP_Tendon"}, {"id": "SP_XenoGrowth"}], "requirements": [{"id": "SP-T51-001", "requirement": "Every spline declares origin, terminal, maximum length, collision, replication owner, rest length, and retract behavior."}]},
+    "render_mapping": {"passes": [{"id": "clean_base"}, {"id": "salvage_wear"}, {"id": "unsafe_conversion"}, {"id": "payload"}, {"id": "emissive"}, {"id": "xeno_biomass"}, {"id": "xeno_crystal"}, {"id": "contamination"}], "channels": [{"name": "Wear", "range": [0, 1]}, {"name": "Authorization", "range": [0, 2]}, {"name": "UnsafeConversion", "range": [0, 1]}, {"name": "XenoIntensity", "range": [0, 1]}, {"name": "Contamination", "range": [0, 1]}], "requirements": [{"id": "REN-T51-001", "requirement": "Clean, salvage, unsafe, biomass, crystal, and contamination layers remain independently hideable and renderable."}]},
+    "implementation": {
+      "mappings": [
+        {"concept": 51, "id": "FrangibleBatonLauncher", "confidence": "high"}, {"concept": 52, "id": "InflatableRestraintBagProjector", "confidence": "medium"},
+        {"concept": 53, "id": "ConductiveNetCaster", "confidence": "high"}, {"concept": 54, "id": "AcousticComplianceEmitter", "confidence": "high"},
+        {"concept": 55, "id": "DoorBreachRam", "confidence": "medium"}, {"concept": 56, "id": "RescueShield", "confidence": "medium"},
+        {"concept": 57, "id": "MarkerDyeCapsuleLauncher", "confidence": "high"}, {"concept": 58, "id": "FlashDazzleArray", "confidence": "high"},
+        {"concept": 59, "id": "AdhesiveBolaThrower", "confidence": "high"}, {"concept": 60, "id": "SmartSoftProjectileCarbine", "confidence": "high"},
+        {"concept": 61, "id": "BearingDispenser", "confidence": "high"}, {"concept": 63, "id": "PressureBottleFastenerTool", "confidence": "medium"}
+      ],
+      "exploration_only": [62, 64, 65, 66, 67, 68, 69, 70],
+      "xeno_quarantine": [71, 72, 73, 74, 75, 76, 77, 78, 79, 80],
+      "safety_envelope": {"oriented_sweep_deg": 120, "minimum_corridor_clearance_m": 1.0, "minimum_retreat_path_m": 2.5, "all_body_profiles": true}
+    }
+  },
+  "acceptance_checks": [
+    {"id": "TOOL-51-001", "status": "pending", "requirement": "Mapped concepts and confidence values exactly match checked-in ConceptMappings JSON."},
+    {"id": "TOOL-51-002", "status": "pending", "requirement": "62 and 64-70 remain exploration only until a mapping file is approved."},
+    {"id": "TOOL-51-003", "status": "pending", "requirement": "71-80 remain Bloom or xeno quarantine references and cannot become player equipment without narrative and gameplay approval."},
+    {"id": "TOOL-51-004", "status": "pending", "requirement": "Clean, salvaged, unsafe, and xeno layers are independently removable and retain identical roots and sockets."},
+    {"id": "TOOL-51-005", "status": "pending", "requirement": "All selected tools pass bounds, collision, socket, first-person, third-person, drone, corridor, and body-profile validation."}
+  ],
+  "build_questions": ["Confirm whether concepts 62 and 64-70 need mappings or remain archive exploration.", "Treat every 71-80 promotion as a separate narrative, gameplay, and production approval decision."]
+}

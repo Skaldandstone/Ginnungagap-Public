@@ -1,0 +1,386 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.BodyProfileClearance.ReferenceV1",
+  "title": "GGP-01 Suit Body Profile and Clearance Matrix",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "companion_to": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "owners": [
+    "character-art",
+    "technical-animation",
+    "gameplay",
+    "level-design"
+  ],
+  "metadata": {
+    "purpose": "Authoritative body-range, suit grading, exact collision-profile, and traversal-clearance companion.",
+    "engine_targets": [
+      "Unreal Engine 5.8",
+      "Blender 4.x"
+    ],
+    "profile_axes": {
+      "height": [
+        "compact",
+        "medium",
+        "tall"
+      ],
+      "width": [
+        "narrow",
+        "standard",
+        "broad"
+      ]
+    },
+    "authored_body_minimum": 9,
+    "collision_rule": "Gameplay uses the exact FCharacterBodyProfile dimensions even when the visual selects the closest authored body."
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-pressure-suit-body-profile-clearance-matrix-v1.png",
+    "sha256": "3abd525bf000e0a631cd0b7b6f3287783c1dd3c13804e54876d65c7ef16d5160",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "JSON ranges and traversal requirements are authoritative over abbreviated visual labels."
+  },
+  "concept_sources": [
+    {
+      "path": "docs/CharacterCreator.md",
+      "role": "body ranges, authored variants, and traversal contract",
+      "required": true
+    },
+    {
+      "path": "docs/PRD.md",
+      "role": "player action and remaining traversal requirements",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+      "role": "locked suit appearance",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "height_cm",
+        "value": {
+          "min": 150,
+          "max": 210
+        },
+        "source": "docs/CharacterCreator.md"
+      },
+      {
+        "field": "shoulder_width_cm",
+        "value": {
+          "min": 34,
+          "max": 58
+        },
+        "source": "docs/CharacterCreator.md"
+      },
+      {
+        "field": "body_depth_cm",
+        "value": {
+          "min": 18,
+          "max": 38
+        },
+        "source": "docs/CharacterCreator.md"
+      },
+      {
+        "field": "mass_kg",
+        "value": {
+          "min": 45,
+          "max": 160
+        },
+        "source": "docs/CharacterCreator.md"
+      },
+      {
+        "field": "arm_span_height_ratio",
+        "value": {
+          "min": 0.9,
+          "max": 1.1
+        },
+        "source": "docs/CharacterCreator.md"
+      },
+      {
+        "field": "authored_profiles",
+        "value": [
+          "compact-narrow",
+          "compact-standard",
+          "compact-broad",
+          "medium-narrow",
+          "medium-standard",
+          "medium-broad",
+          "tall-narrow",
+          "tall-standard",
+          "tall-broad"
+        ],
+        "source": "docs/CharacterCreator.md"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "rigid_shell_size_groups",
+        "value": [
+          "S",
+          "M",
+          "L"
+        ],
+        "source": "fit engineering proposal"
+      }
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "parts": [
+      {
+        "id": "soft_suit_grade",
+        "type": "per-authored-body garment"
+      },
+      {
+        "id": "rigid_shell_set",
+        "type": "discrete fitted sizes"
+      },
+      {
+        "id": "harness_adjustment",
+        "type": "skinned and parameterized"
+      },
+      {
+        "id": "collision_profile",
+        "type": "exact runtime dimensions"
+      },
+      {
+        "id": "clearance_envelopes",
+        "type": "standing crouched crawling squeeze"
+      }
+    ],
+    "materials": [
+      {
+        "id": "fit_debug",
+        "channels": [
+          "body_profile_id",
+          "penetration",
+          "clearance_margin"
+        ]
+      },
+      {
+        "id": "deformation_debug",
+        "channels": [
+          "stretch",
+          "compression",
+          "rigid_mask"
+        ]
+      }
+    ],
+    "sockets": [
+      {
+        "name": "SOCKET_PROFILE_CAMERA"
+      },
+      {
+        "name": "SOCKET_PROFILE_BACKPACK"
+      },
+      {
+        "name": "SOCKET_PROFILE_HAND_L"
+      },
+      {
+        "name": "SOCKET_PROFILE_HAND_R"
+      },
+      {
+        "name": "SOCKET_PROFILE_FOOT_L"
+      },
+      {
+        "name": "SOCKET_PROFILE_FOOT_R"
+      }
+    ],
+    "states": [
+      {
+        "id": "standing"
+      },
+      {
+        "id": "crouched"
+      },
+      {
+        "id": "crawling"
+      },
+      {
+        "id": "sideways_squeeze"
+      },
+      {
+        "id": "ladder"
+      },
+      {
+        "id": "zero_g"
+      }
+    ],
+    "blender": {
+      "root_collection": "PR_GGP01_SuitBodyProfiles",
+      "collections": [
+        "PROFILES_3X3",
+        "CLEARANCE_ENVELOPES",
+        "RIGID_SHELL_SIZES",
+        "EXPORT"
+      ]
+    },
+    "unreal": {
+      "asset_type": "SkeletalMeshProfileSet and DataAsset",
+      "destination_root": "/Game/Characters/Player/Suit/BodyProfiles",
+      "runtime_structs": [
+        "FCharacterBodyProfile",
+        "FTraversalRequirement"
+      ]
+    },
+    "rig": {
+      "requirements": [
+        {
+          "id": "FIT-RIG-001",
+          "requirement": "All authored bodies share semantic bone and socket names."
+        },
+        {
+          "id": "FIT-RIG-002",
+          "requirement": "Corrective morphs cover shoulder, chest, waist, seat, elbow, knee, and ankle extremes."
+        },
+        {
+          "id": "FIT-RIG-003",
+          "requirement": "Rigid visor, collar, chest frame, backpack, forearm modules, knee shells, and boots never squash."
+        }
+      ]
+    },
+    "animation": {
+      "required_clips": [
+        "wake",
+        "suit_up",
+        "stand",
+        "walk",
+        "sprint",
+        "crouch",
+        "prone_crawl",
+        "vent_crawl",
+        "squeeze_entry",
+        "squeeze_loop",
+        "squeeze_exit",
+        "ladder",
+        "mantle",
+        "zero_g_drift",
+        "zero_g_push_off"
+      ],
+      "requirements": [
+        {
+          "id": "FIT-AN-001",
+          "requirement": "Test every required clip on all nine authored bodies and exact collision profiles."
+        }
+      ]
+    },
+    "vfx": {
+      "layers": [
+        {
+          "id": "clearance_debug",
+          "usage": "editor-only overlap and margin visualization"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "FIT-VFX-001",
+          "requirement": "Debug colors never ship in player-facing presentation."
+        }
+      ]
+    },
+    "spline_mapping": {
+      "splines": [
+        {
+          "id": "hose_left",
+          "root": "collar_left",
+          "tip": "backpack_left",
+          "per_profile": true
+        },
+        {
+          "id": "hose_right",
+          "root": "collar_right",
+          "tip": "backpack_right",
+          "per_profile": true
+        }
+      ],
+      "requirements": [
+        {
+          "id": "FIT-SP-001",
+          "requirement": "Solve hose slack and collision independently for each authored body and crawl pose."
+        }
+      ]
+    },
+    "render_mapping": {
+      "passes": [
+        {
+          "id": "beauty"
+        },
+        {
+          "id": "body_profile_id"
+        },
+        {
+          "id": "rigid_part_id"
+        },
+        {
+          "id": "clearance_envelope"
+        },
+        {
+          "id": "penetration"
+        },
+        {
+          "id": "velocity"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "FIT-RM-001",
+          "requirement": "Blender and Unreal profile IDs remain stable across LODs."
+        }
+      ]
+    },
+    "implementation": {
+      "requirements": [
+        {
+          "id": "FIT-IMP-001",
+          "requirement": "Standing, crouched, and crawling envelopes are stored on FCharacterBodyProfile."
+        },
+        {
+          "id": "FIT-IMP-002",
+          "requirement": "Gaps, damaged doors, crawlspaces, ladders, and fragile surfaces store FTraversalRequirement."
+        },
+        {
+          "id": "FIT-IMP-003",
+          "requirement": "Oversized tools use oriented sweeps and preserve a valid retreat or slide-out path."
+        },
+        {
+          "id": "FIT-IMP-004",
+          "requirement": "The exact collision profile always wins over the visual body approximation."
+        }
+      ]
+    }
+  },
+  "acceptance_checks": [
+    {
+      "id": "FIT-001",
+      "status": "pending",
+      "requirement": "Nine authored body variants exist and share the same semantic rig and sockets."
+    },
+    {
+      "id": "FIT-002",
+      "status": "pending",
+      "requirement": "All exact body profiles can retreat from any approved crawl or squeeze traversal."
+    },
+    {
+      "id": "FIT-003",
+      "status": "pending",
+      "requirement": "Helmet, chest frame, backpack, hoses, knees, boots, and role tools clear all required traversal clips."
+    }
+  ],
+  "build_questions": [
+    "Confirm final rigid shell grouping only after imported-bounds fit testing."
+  ]
+}

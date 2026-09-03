@@ -1,0 +1,97 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.SharedSystem.ReferenceV2",
+  "title": "GGP-01 Shared Pressure Suit System V2",
+  "category": "character",
+  "status": "technical-review",
+  "production_ready": false,
+  "implementation_profile": "core",
+  "supersedes": "GGP.Character.PressureSuit.SharedSystem.ReferenceV1",
+  "owners": ["character-art", "technical-art", "animation", "gameplay"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shared-pressure-suit-system-v2.png",
+    "sha256": "97d9306cdb729a8be57a427332015be1ce517e1cea019f49106f6c151ed848ba",
+    "width_px": 1533,
+    "height_px": 1026,
+    "role": "design-authority",
+    "generated_on": "2026-08-29",
+    "notes": "Corrected V25-based master. The first-person inset contains exactly one left and one right arm. Science replaces the obsolete Crew kit."
+  },
+  "concept_sources": [
+    {"path": "Art/Characters/PlayerSuits/RealityScan/V25_ConceptLock/Input/00_front.png", "role": "strict front appearance authority", "required": true},
+    {"path": "Art/Characters/PlayerSuits/RealityScan/V25_ConceptLock/Input/01_profile.png", "role": "strict profile appearance authority", "required": true},
+    {"path": "Art/Characters/PlayerSuits/RealityScan/V25_ConceptLock/Input/02_rear.png", "role": "strict rear appearance authority", "required": true},
+    {"path": "docs/concept-art/reference/suits/player-suit-role-lineup.png", "role": "role palette and module language", "required": true},
+    {"path": "docs/PlayerSuitAssets.md", "role": "asset architecture and legacy class mapping", "required": true},
+    {"path": "Source/Ginnungagap/Public/Meta/CharacterProfile.h", "role": "canonical gameplay role enum", "required": true}
+  ],
+  "concept_source_sets": [
+    {"root": "docs/concept-art/reference/suits", "role": "player head, suit multiview, role, equipment, suit-up, zero-g, and Unreal concept lineage", "required": true, "lifecycle": "mixed-lineage"},
+    {"root": "Content/Assets/ConceptArt/Trailer", "role": "player silhouette, run, cargo, and struggle action concepts", "required": true, "lifecycle": "performance-reference"}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "base_suit", "value": "V25 concept lock front, profile, and rear", "source": "RealityScan/V25_ConceptLock/Input"},
+      {"field": "roles", "value": ["Scientist", "Engineering", "Medical", "Security"], "source": "EPressureSuitRole"},
+      {"field": "player_display_names", "value": ["Science", "Engineering", "Medical", "Security / Recovery"], "source": "CharacterProfile.h"},
+      {"field": "legacy_art_aliases", "value": {"Scientist": "old Crew slot", "Technician": "Engineering", "Marine": "Security"}, "source": "docs/PlayerSuitAssets.md"},
+      {"field": "role_kit_rule", "value": "removable modules do not replace or bulk up the shared pressure envelope", "source": "source sheet"}
+    ],
+    "provisional": [
+      {"field": "rigid_shell_size_count", "value": "derive from nine body-profile fit tests", "source": "body profile companion"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "parts": [
+      {"id": "soft_suit", "type": "skeletal_mesh", "required": true},
+      {"id": "helmet_bubble", "type": "rigid_attachment", "required": true},
+      {"id": "collar", "type": "rigid_attachment", "required": true},
+      {"id": "chest_frame_display", "type": "rigid_attachment", "required": true},
+      {"id": "backpack", "type": "rigid_attachment", "required": true},
+      {"id": "hose_left", "type": "spline_mesh", "required": true},
+      {"id": "hose_right", "type": "spline_mesh", "required": true},
+      {"id": "forearm_modules", "type": "paired_rigid_attachments", "required": true},
+      {"id": "harness", "type": "skinned_and_secondary_motion", "required": true},
+      {"id": "gloves_knees_boots", "type": "skeletal_and_rigid_parts", "required": true},
+      {"id": "science_kit", "type": "removable_role_kit", "required": true},
+      {"id": "engineering_kit", "type": "removable_role_kit", "required": true},
+      {"id": "medical_kit", "type": "removable_role_kit", "required": true},
+      {"id": "security_recovery_kit", "type": "removable_role_kit", "required": true}
+    ],
+    "materials": [
+      {"id": "M01_Textile_Main", "channels": ["base_color", "normal", "ORM", "wear"]},
+      {"id": "M02_HardShell_OffWhite", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M03_HardShell_Graphite", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M04_Rubber_Seals", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M05_Straps_Webbing", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M06_Accents", "channels": ["base_color", "role_tint_mask"]},
+      {"id": "M07_Visor", "channels": ["transmission", "roughness", "frost", "damage", "HUD_mask"]}
+    ],
+    "sockets": [
+      {"name": "SOCKET_HELMET_SIDE_L"}, {"name": "SOCKET_HELMET_SIDE_R"},
+      {"name": "SOCKET_BACKPACK_TOP"}, {"name": "SOCKET_BACKPACK_SIDE_L"}, {"name": "SOCKET_BACKPACK_SIDE_R"},
+      {"name": "SOCKET_FOREARM_L"}, {"name": "SOCKET_FOREARM_R"},
+      {"name": "SOCKET_BELT_FRONT"}, {"name": "SOCKET_BELT_SIDE_L"}, {"name": "SOCKET_BELT_SIDE_R"},
+      {"name": "SOCKET_THIGH_LOOP_L"}, {"name": "SOCKET_THIGH_LOOP_R"},
+      {"name": "SOCKET_BOOT_TOP_L"}, {"name": "SOCKET_BOOT_TOP_R"},
+      {"name": "SOCKET_BOOT_SIDE_L"}, {"name": "SOCKET_BOOT_SIDE_R"}
+    ],
+    "states": [
+      {"id": "unsealed"}, {"id": "sealed_nominal"}, {"id": "damaged"},
+      {"id": "depressurized"}, {"id": "contaminated"}, {"id": "low_oxygen"}
+    ],
+    "blender": {"root_collection": "PR_GGP01_SharedPressureSuit_V2", "unit_scale": 1.0, "export_axis": {"forward": "+X", "up": "+Z"}},
+    "unreal": {"asset_type": "SkeletalMeshSet", "destination_root": "/Game/Characters/Player/Suit/Production/V25", "skeleton": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple", "import_policy": "Do not promote until all nine body profiles, first-person arms, crawl, squeeze, zero-g, and role-kit clearance pass."}
+  },
+  "acceptance_checks": [
+    {"id": "SUIT-V2-001", "status": "pending", "requirement": "Imported base silhouette matches V25 front, profile, and rear."},
+    {"id": "SUIT-V2-002", "status": "pending", "requirement": "First-person mesh contains exactly one left and one right arm and matches third-person proportions."},
+    {"id": "SUIT-V2-003", "status": "pending", "requirement": "All four role kits preserve the shared pressure envelope and exactly two collar-to-pack hoses."},
+    {"id": "SUIT-V2-004", "status": "pending", "requirement": "All nine body profiles pass authored standing, crouch, crawl, squeeze, ladder, mantle, and zero-g clips."}
+  ],
+  "build_questions": ["Lock final rigid-shell size groups after imported-bounds and deformation tests."]
+}

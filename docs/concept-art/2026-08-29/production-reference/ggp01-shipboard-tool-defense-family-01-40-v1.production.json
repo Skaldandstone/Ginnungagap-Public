@@ -1,0 +1,100 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.PropKit.ShipboardToolDefenseFamily01To40.ReferenceV1",
+  "title": "GGP-01 Shipboard Tool and Defense Family 01-40",
+  "category": "prop-kit",
+  "status": "design-review",
+  "production_ready": false,
+  "implementation_profile": "expanded",
+  "owners": ["weapon-art", "prop-art", "technical-art", "animation", "gameplay", "audio", "vfx"],
+  "metadata": {
+    "purpose": "Lifecycle, modular construction, ergonomic, gameplay-mapping, animation, VFX, spline, collision, export, and render contract for concept families 01 through 40.",
+    "authoritative_sidecar": true,
+    "engine_targets": ["Unreal Engine 5.8", "Blender 5.2"],
+    "export_targets": ["Static Mesh", "Skeletal Mesh", "Data Assets", "Niagara", "MetaSounds"],
+    "source_preservation": "All four exploration boards remain unchanged. Concepts are not automatically approved for gameplay or player equipment.",
+    "naming_prefixes": {"mesh": "SM_Tool_", "skeletal_mesh": "SK_Tool_", "blueprint": "BP_Tool_", "data_asset": "DA_Tool_", "material": "M_Tool_"}
+  },
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-29/production-reference/ggp01-shipboard-tool-defense-family-01-40-v1.png",
+    "sha256": "e37d3b22406c9204bc97d3e115a7e8703b352b25c641644ff31884a0f75d07e9",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "visual-reference",
+    "generated_on": "2026-08-29",
+    "notes": "Authoritative IDs are 01-40 in numeric order. The printed 31-40 row contains a known tiny-label rendering defect where concept 32 is shown as 22; JSON ID 32 is authoritative. Status colors are illustrative until a concept is present in mappings below."
+  },
+  "concept_sources": [
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_01-10_ShipboardTools.png", "role": "concept family 01-10 appearance and naming", "required": true},
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_11-20_AutonomousDefense.png", "role": "concept family 11-20 appearance and naming", "required": true},
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_21-30_ResearchMedical.png", "role": "concept family 21-30 appearance and naming", "required": true},
+    {"path": "Art/Weapons/Concepts/WeaponConcepts_31-40_FreighterColony.png", "role": "concept family 31-40 appearance and naming", "required": true},
+    {"path": "Source/Ginnungagap/Public/Weapons/CaptiveBoltDriver.h", "role": "current runtime captive-bolt implementation", "required": true},
+    {"path": "docs/ShipboardWeapons.md", "role": "weapon gameplay and upgrade authority", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "concept_id_range", "value": [1, 40], "source": "weapon concept boards"},
+      {"field": "current_runtime_family", "value": "ACaptiveBoltDriver", "source": "CoopSurvivalCharacter.cpp and ShipboardWeapons.md"},
+      {"field": "default_tool_rule", "value": "prioritize low hull risk and nonlethal shipboard function", "source": "shipboard weapon design"},
+      {"field": "hazardous_conversion_rule", "value": "physically removable, authorization-gated, explicit, and never silently equipped", "source": "unsafe conversion contract"}
+    ],
+    "provisional": [
+      {"field": "concept_selection", "value": "01-40 remain exploration unless separately mapped", "source": "current concept mapping audit"},
+      {"field": "dimensions", "value": "derive per selected concept from imported bounds and first-person clearance", "source": "production process"}
+    ],
+    "conflicts": []
+  },
+  "build": {
+    "coordinate_system": {"units": "meters", "forward": "+X", "up": "+Z", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "pivot": {"root": "primary grip centerline", "muzzle": "+X working axis", "holster": "grip-down neutral"},
+    "parts": [
+      {"id": "receiver_body", "required": true}, {"id": "quick_release_or_drone_collar", "required": false},
+      {"id": "player_grip", "required": false}, {"id": "aerial_drone_mount", "required": false},
+      {"id": "ground_robot_mount", "required": false}, {"id": "battery_or_fluid_module", "required": true},
+      {"id": "muzzle_or_working_head", "required": true}, {"id": "safety_interlock", "required": true},
+      {"id": "authorization_lock", "required": false}, {"id": "removable_hazardous_conversion", "required": false},
+      {"id": "holster_or_pack_interface", "required": true}
+    ],
+    "materials": [
+      {"id": "M01_Metal", "channels": ["base_color", "normal", "ORM", "wear"]},
+      {"id": "M02_Polymer", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M03_RubberGrip", "channels": ["base_color", "normal", "ORM"]},
+      {"id": "M04_Glass", "channels": ["transmission", "roughness"]},
+      {"id": "M05_Emissive", "channels": ["state", "intensity", "authorization"]},
+      {"id": "M06_Fluid", "channels": ["fill", "contamination"]}
+    ],
+    "sockets": [
+      {"name": "SOCKET_Grip_Main"}, {"name": "SOCKET_Grip_Support"}, {"name": "SOCKET_Muzzle"},
+      {"name": "SOCKET_WorkingHead"}, {"name": "SOCKET_Module_A"}, {"name": "SOCKET_Module_B"},
+      {"name": "SOCKET_Power"}, {"name": "SOCKET_Holster"}, {"name": "SOCKET_Drone_Aerial"},
+      {"name": "SOCKET_Drone_Ground"}, {"name": "SOCKET_VFX_Impact"}, {"name": "SOCKET_Audio_Mech"}
+    ],
+    "states": [{"id": "idle"}, {"id": "equip"}, {"id": "activate"}, {"id": "loop"}, {"id": "retract"}, {"id": "holster"}, {"id": "authorized"}, {"id": "conversion_installed"}, {"id": "fault"}],
+    "blender": {"root_collection": "PR_GGP01_Tools_01_40", "per_asset_collections": ["00_REF", "01_BODY", "02_GRIP", "03_HEAD", "04_MODULES", "05_RIG", "06_COLLISION", "07_SOCKETS", "08_LOD"], "unit_scale": 1.0},
+    "unreal": {"asset_type": "modular tool StaticMesh or SkeletalMesh family plus Data Assets", "destination_root": "/Game/Weapons/ShipboardTools/ConceptFamilies/01_40", "base_class": "AShipboardWeapon", "current_runtime_class": "ACaptiveBoltDriver", "approval_policy": "No concept becomes player equipment without explicit gameplay mapping."},
+    "rig": {"controls": [{"id": "CTRL_Trigger"}, {"id": "CTRL_WorkingHead"}, {"id": "CTRL_ModuleRelease"}, {"id": "CTRL_DroneCollar"}, {"id": "CTRL_CableRoot"}], "requirements": [{"id": "RIG-T01-001", "requirement": "Moving heads, clamps, cassettes, latches, and pivots use explicit mechanical axes and limit metadata."}]},
+    "animation": {"states": [{"id": "equip"}, {"id": "idle"}, {"id": "activate"}, {"id": "sustain"}, {"id": "release"}, {"id": "reload_or_module_swap"}, {"id": "inspect"}, {"id": "holster"}], "requirements": [{"id": "AN-T01-001", "requirement": "Every selected tool provides first-person and third-person states plus aerial and ground-drone poses where supported."}, {"id": "AN-T01-002", "requirement": "All nine player body profiles pass one-hand, two-hand, brace, crouch, crawl, squeeze, ladder, and zero-g clearance tests."}]},
+    "vfx": {"layers": [{"id": "muzzle_or_origin", "socket": "SOCKET_Muzzle"}, {"id": "working_head", "socket": "SOCKET_WorkingHead"}, {"id": "impact", "socket": "SOCKET_VFX_Impact"}, {"id": "overheat", "channel": "Heat"}, {"id": "conversion_warning", "channel": "Authorization"}], "requirements": [{"id": "VFX-T01-001", "requirement": "Effects originate from named sockets and never mask the working head, reticle, or target contact."}]},
+    "spline_mapping": {"splines": [{"id": "SP_EffectTrace", "purpose": "beam, tether, weld, or spray path"}, {"id": "SP_Hose", "purpose": "fluid or pneumatic line"}, {"id": "SP_Cable", "purpose": "power or control cable"}], "requirements": [{"id": "SP-T01-001", "requirement": "Spline tools define origin, terminal, maximum length, minimum bend radius, collision policy, and retract path."}]},
+    "render_mapping": {"passes": [{"id": "base"}, {"id": "metal"}, {"id": "polymer"}, {"id": "glass"}, {"id": "emissive"}, {"id": "damage"}, {"id": "wear"}, {"id": "adhesive_or_fluid"}], "channels": [{"name": "Damage", "range": [0, 1]}, {"name": "Wear", "range": [0, 1]}, {"name": "Heat", "range": [0, 1]}, {"name": "Authorization", "range": [0, 2]}], "requirements": [{"id": "REN-T01-001", "requirement": "Provide LOD0-LOD3 or justified Nanite policy, UCX collision, first-person material controls, and separate translucent or emissive passes."}]},
+    "implementation": {
+      "concept_lifecycle": [
+        {"ids": [1, 40], "status": "exploration", "meaning": "visual source only until explicitly mapped"},
+        {"runtime": "ACaptiveBoltDriver", "status": "implemented-family", "source": "runtime code", "concept_equivalence": "not asserted by this packet"}
+      ],
+      "required_data_fields": ["ConceptId", "LifecycleStatus", "DisplayName", "GripMode", "MassKg", "BoundsCm", "WorkingSweepDeg", "CorridorClearanceCm", "RetreatPathCm", "HullRisk", "Authorization", "ConversionId", "AnimationSet", "VfxSet", "AudioSet", "CollisionProfile", "SocketMap"],
+      "safety_envelope": {"oriented_sweep_deg": 120, "minimum_corridor_clearance_m": 1.0, "minimum_retreat_path_m": 2.5, "all_body_profiles": true}
+    }
+  },
+  "acceptance_checks": [
+    {"id": "TOOL-01-001", "status": "pending", "requirement": "Every selected concept has an explicit lifecycle and gameplay mapping record; visual status color alone is never treated as approval."},
+    {"id": "TOOL-01-002", "status": "pending", "requirement": "Imported bounds, grip transforms, effect origins, sockets, collision, and working sweep are captured per asset."},
+    {"id": "TOOL-01-003", "status": "pending", "requirement": "First-person, third-person, drone, zero-g, and all-nine-body-profile tests pass where applicable."},
+    {"id": "TOOL-01-004", "status": "pending", "requirement": "Hazardous conversions remain removable, authorization-gated, visually explicit, and server authoritative."},
+    {"id": "TOOL-01-005", "status": "pending", "requirement": "The printed concept 32 label is corrected in the next sheet revision without changing the concept art."}
+  ],
+  "build_questions": ["Select which 01-40 concepts advance to gameplay mapping after current runtime tool coverage is reconciled.", "Capture imported dimensions only after a specific concept is selected for production."]
+}

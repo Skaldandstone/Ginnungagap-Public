@@ -1,0 +1,149 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Ship.SmallUtilityEscort.ReferenceV1",
+  "title": "Small Utility Escort",
+  "category": "ship",
+  "status": "blocked",
+  "production_ready": false,
+  "owners": ["environment-art", "vehicle-art", "gameplay"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/small-utility-escort-production-sheet-v1.png",
+    "sha256": "77039588e870023be06f5931d3845225c81996325a36af99dfb6b6f9fa73c88f",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "exploration",
+    "generated_on": "2026-08-28",
+    "notes": "Useful for surface grammar and detachable-module ideas. The printed scale is not project canon."
+  },
+  "concept_sources": [
+    {
+      "path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_ModelSheet_v4.png",
+      "role": "primary Unreal concept-library model sheet for GGP-01 exterior lineage",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_CrossSections_v1.png",
+      "role": "primary Unreal concept-library cross-section source",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Ships/GGP01_Wayfarer_InteriorDeckPlans.svg",
+      "role": "primary Unreal concept-library deck-planning source",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/ships/small-utility-escort-exterior.png",
+      "role": "approved silhouette source",
+      "required": true
+    },
+    {
+      "path": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json",
+      "role": "current approved measured build manifest",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "build.dimensions_m",
+        "value": [1400.0, 260.0, 320.0],
+        "source": "Config/Ships/SmallUtilityEscortInterior.json",
+        "note": "Current gameplay and exterior production contract. Verified actor bounds are approximately 1399.9916 x 260 x 320 m."
+      },
+      {
+        "field": "build.blender.source_files",
+        "value": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/SmallUtilityEscort_ConceptMatch.blend"],
+        "source": "Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/ConceptMatch_Manifest.json"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "build.parts",
+        "value": ["propulsion_wings", "docking_collars", "sensor_module", "landing_system"],
+        "source": "small-utility-escort-production-sheet-v1.png",
+        "note": "Treat as a modular-detail vocabulary, not a locked decomposition."
+      },
+      {
+        "field": "build.states",
+        "value": ["clean", "bloom_contaminated"],
+        "source": "small-utility-escort-production-sheet-v1.png"
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "escort-scale-mismatch",
+        "severity": "blocker",
+        "description": "The generated sheet states 18.6 x 14.2 x 6.1 m, the superseded remaster V03 used 900 x 125 x 250 m, and the current approved contract is 1400 x 260 x 320 m. The generated sheet reads as a landing craft rather than the established capital-scale escort.",
+        "resolution": "Regenerate the sheet at canonical scale or reclassify the pictured craft as a separate shuttle asset with a new name and gameplay role."
+      },
+      {
+        "id": "wayfarer-scale-document-drift",
+        "severity": "warning",
+        "description": "Docs/ShipBuildQueue.md describes GGP-01 Wayfarer as roughly 1150 m, while the current config, concept-match manifest, and exterior production review approve 1400 x 260 x 320 m.",
+        "resolution": "Use the 1400 m production contract for builds and reconcile the older queue text before promoting a final GGP-01 master packet."
+      }
+    ]
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": [1400.0, 260.0, 320.0],
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "PIVOT_ShipRoot",
+      "rule": "Use the approved flight and streaming origin from the current remaster, not the printed sheet marker.",
+      "authority": "approved"
+    },
+    "parts": [
+      { "name": "HULL_Primary", "role": "primary pressure and armor silhouette", "authority": "approved" },
+      { "name": "MODULE_PropulsionWing_L", "role": "distributed propulsion", "authority": "approved" },
+      { "name": "MODULE_PropulsionWing_R", "role": "distributed propulsion", "authority": "approved" },
+      { "name": "MODULE_Docking", "role": "replaceable docking interfaces", "authority": "provisional" },
+      { "name": "OVERLAY_Bloom", "role": "separate contamination geometry", "authority": "provisional" }
+    ],
+    "materials": [
+      { "slot": "armor_light", "family": "hard-surface", "authority": "approved" },
+      { "slot": "structure_dark", "family": "hard-surface", "authority": "approved" },
+      { "slot": "safety_orange", "family": "hard-surface", "authority": "approved" },
+      { "slot": "glass", "family": "transparent", "authority": "approved" },
+      { "slot": "emissive", "family": "ship-lighting", "authority": "approved" },
+      { "slot": "bloom_overlay", "family": "bloom", "authority": "provisional" }
+    ],
+    "sockets": [],
+    "states": [
+      { "id": "clean", "base_geometry": true, "authority": "approved" },
+      { "id": "bloom_contaminated", "base_geometry": true, "separate_overlays": true, "authority": "provisional" }
+    ],
+    "blender": {
+      "root_collection": "PR_SmallUtilityEscort",
+      "source_files": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/SmallUtilityEscort_ConceptMatch.blend"],
+      "export_files": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/Exports/SM_Ship_SmallUtilityEscort_ConceptMatch.glb"],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "StaticMeshSet",
+      "destination_root": "/Game/Assets/Ships/Exterior/ConceptMatch/SmallUtilityEscort",
+      "existing_assets": [],
+      "source_files": ["Art/Ships/Exterior/ConceptMatch/SmallUtilityEscort/Exports/SM_Ship_SmallUtilityEscort_ConceptMatch.glb"],
+      "nanite": "review by module size and close-view use",
+      "collision": "authored simple collision per streamed module",
+      "import_policy": "Do not import from this packet while escort-scale-mismatch is unresolved."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "scale-authority", "status": "blocked", "requirement": "Every view and module breakdown must use the 1400 x 260 x 320 m ship contract." },
+    { "id": "orthographic-coherence", "status": "pending", "requirement": "Front, side, top, rear, and perspective views reconcile to one model." },
+    { "id": "streaming-decomposition", "status": "pending", "requirement": "Module seams support Unreal streaming, collision, and damage states." },
+    { "id": "bloom-layering", "status": "pending", "requirement": "Bloom geometry, materials, decals, and VFX remain separable from the clean hull." }
+  ],
+  "build_questions": [
+    "Should the 18.6 m generated design be preserved as a distinct shuttle instead of discarded?",
+    "Which concept-match pivots and module boundaries are approved for final ship streaming?",
+    "Should the older roughly 1150 m Wayfarer text be corrected to the 1400 m production contract?"
+  ]
+}

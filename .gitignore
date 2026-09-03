@@ -1,0 +1,10 @@
+/Binaries/
+/DerivedDataCache/
+/Intermediate/
+/Saved/
+/Build/
+*.sln
+*.suo
+*.user
+.vs/
+__pycache__/

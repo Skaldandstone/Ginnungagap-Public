@@ -1,0 +1,99 @@
+{
+  "ship_class": "Small Utility Escort",
+  "ship_dimensions_m": [1400, 260, 320],
+  "explorable_room_target": 164,
+  "streamed_districts": [
+    {"id": "command", "name": "Command Citadel", "room_target": 16},
+    {"id": "sensors", "name": "Sensor and Navigation Complex", "room_target": 12},
+    {"id": "hab_a", "name": "Forward Habitation", "room_target": 16},
+    {"id": "hab_b", "name": "Aft Habitation", "room_target": 16},
+    {"id": "medical", "name": "Medical, Quarantine, and Cryo", "room_target": 12},
+    {"id": "commons", "name": "Galley and Crew Commons", "room_target": 12},
+    {"id": "fabrication", "name": "Workshops and Fabrication", "room_target": 12},
+    {"id": "cargo", "name": "Cargo and Docking Spine", "room_target": 16},
+    {"id": "utilities", "name": "Life Support and Utilities", "room_target": 12},
+    {"id": "power", "name": "Power and Reactor Isolation", "room_target": 12},
+    {"id": "drive", "name": "Thermal Plant and Drive District", "room_target": 12},
+    {"id": "hangar", "name": "Service-Craft Hangar", "room_target": 16}
+  ],
+  "first_district": {
+    "id": "operations_deck",
+    "name": "Operations Decks 06-08",
+    "map": "/Game/Assets/Maps/ShipProduction/L_SmallEscort_OperationsDeck",
+    "ship_local_origin_cm": [-22000, 0, 1800],
+    "room_size_cm": [1500, 1400, 430],
+    "room_size_limits_cm": {"minimum":[1200,1100,400],"maximum":[1800,1600,460]},
+    "corridor_size_cm": [500, 360, 430],
+    "bulkheads_per_horizontal_link": 2,
+    "hardpoint_policy": {
+      "rooms": {"body":2, "obstacle":2, "bloom_growth":2, "activity":4, "damage_repair":2},
+      "corridors": {"doorway":2, "body":1, "obstacle":1, "bloom_growth":1, "activity":1, "damage_repair":1}
+    },
+    "room_placement_policy": {
+      "default_same_type_min_grid_distance": 3,
+      "deck_distance_weight": 2
+    },
+    "room_type_catalog": [
+      {"room_type_id":101,"key":"security_checkpoint"},
+      {"room_type_id":102,"key":"command_bridge"},
+      {"room_type_id":103,"key":"combat_information_center"},
+      {"room_type_id":104,"key":"navigation_plot"},
+      {"room_type_id":105,"key":"communications"},
+      {"room_type_id":106,"key":"long_range_sensors"},
+      {"room_type_id":107,"key":"armory"},
+      {"room_type_id":108,"key":"companionway"},
+      {"room_type_id":201,"key":"dormitory","allow_same_type_cluster_in_sections":["habitation"]},
+      {"room_type_id":202,"key":"crew_commons"},
+      {"room_type_id":203,"key":"galley"},
+      {"room_type_id":204,"key":"recreation"},
+      {"room_type_id":301,"key":"triage"},
+      {"room_type_id":302,"key":"surgery"},
+      {"room_type_id":303,"key":"quarantine"},
+      {"room_type_id":304,"key":"cryo_watch"},
+      {"room_type_id":401,"key":"damage_control"},
+      {"room_type_id":402,"key":"fabrication"},
+      {"room_type_id":403,"key":"life_support"},
+      {"room_type_id":404,"key":"water_reclamation"},
+      {"room_type_id":405,"key":"cargo_staging"},
+      {"room_type_id":406,"key":"eva_ready"},
+      {"room_type_id":407,"key":"drive_access"},
+      {"room_type_id":408,"key":"auxiliary_power"}
+    ],
+    "deck_spacing_cm": 520,
+    "rooms": [
+      {"room_id":8001,"room_type_id":101,"placement_section":"command","code":"OPS-08-01","name":"Forward Security Checkpoint","archetype":"companionway","section":"corridor","deck":8,"grid":[0,0],"size_cm":[1300,1200,400]},
+      {"room_id":8002,"room_type_id":102,"placement_section":"command","code":"BRG-08-01","name":"Command Bridge","archetype":"bridge","section":"bridge","deck":8,"grid":[1,0],"size_cm":[1700,1500,460]},
+      {"room_id":8003,"room_type_id":103,"placement_section":"command","code":"CIC-08-01","name":"Combat Information Center","archetype":"bridge","section":"bridge","deck":8,"grid":[2,0],"size_cm":[1700,1500,460]},
+      {"room_id":8004,"room_type_id":104,"placement_section":"command","code":"NAV-08-01","name":"Navigation Plot","archetype":"sensors","section":"bridge","deck":8,"grid":[3,0],"size_cm":[1400,1300,430]},
+      {"room_id":8005,"room_type_id":105,"placement_section":"command","code":"COM-08-01","name":"Communications","archetype":"sensors","section":"bridge","deck":8,"grid":[0,1],"size_cm":[1400,1300,430]},
+      {"room_id":8006,"room_type_id":106,"placement_section":"command","code":"SNS-08-01","name":"Long-Range Sensors","archetype":"sensors","section":"bridge","deck":8,"grid":[1,1],"size_cm":[1600,1400,440]},
+      {"room_id":8007,"room_type_id":107,"placement_section":"command","code":"ARM-08-01","name":"Command Armory","archetype":"armory","section":"cargo","deck":8,"grid":[2,1],"size_cm":[1200,1100,400]},
+      {"room_id":8008,"room_type_id":108,"placement_section":"command","code":"CMP-08-01","name":"Command Companionway","archetype":"companionway","section":"corridor","deck":8,"grid":[3,1],"size_cm":[1300,1200,400]},
+      {"room_id":7001,"room_type_id":201,"placement_section":"habitation","code":"CRW-07-01","name":"Duty Berthing","archetype":"crew","section":"crew","deck":7,"grid":[0,0],"size_cm":[1600,1500,430]},
+      {"room_id":7002,"room_type_id":202,"placement_section":"habitation","code":"CCM-07-01","name":"Crew Commons","archetype":"crew","section":"crew","deck":7,"grid":[1,0],"size_cm":[1800,1600,460]},
+      {"room_id":7003,"room_type_id":203,"placement_section":"habitation","code":"GAL-07-01","name":"Watch Galley","archetype":"crew","section":"crew","deck":7,"grid":[2,0],"size_cm":[1400,1300,420]},
+      {"room_id":7004,"room_type_id":204,"placement_section":"habitation","code":"REC-07-01","name":"Crew Recreation","archetype":"crew","section":"crew","deck":7,"grid":[3,0],"size_cm":[1700,1500,450]},
+      {"room_id":7005,"room_type_id":301,"placement_section":"medical","code":"MED-07-01","name":"Emergency Triage","archetype":"medical","section":"medical","deck":7,"grid":[0,1],"size_cm":[1500,1400,430]},
+      {"room_id":7006,"room_type_id":302,"placement_section":"medical","code":"SUR-07-01","name":"Surgical Suite","archetype":"medical","section":"medical","deck":7,"grid":[1,1],"size_cm":[1700,1500,450]},
+      {"room_id":7007,"room_type_id":303,"placement_section":"medical","code":"QRT-07-01","name":"Quarantine Ward","archetype":"medical","section":"medical","deck":7,"grid":[2,1],"size_cm":[1600,1400,430]},
+      {"room_id":7008,"room_type_id":304,"placement_section":"medical","code":"CRY-07-01","name":"Cryo Watch","archetype":"medical","section":"medical","deck":7,"grid":[3,1],"size_cm":[1400,1300,420]},
+      {"room_id":6001,"room_type_id":401,"placement_section":"engineering","code":"DCR-06-01","name":"Damage Control Central","archetype":"damage","section":"deck","deck":6,"grid":[0,0],"size_cm":[1700,1500,450]},
+      {"room_id":6002,"room_type_id":402,"placement_section":"engineering","code":"FAB-06-01","name":"Fabrication Shop","archetype":"damage","section":"deck","deck":6,"grid":[1,0],"size_cm":[1800,1600,460]},
+      {"room_id":6003,"room_type_id":403,"placement_section":"engineering","code":"LIF-06-01","name":"Life Support Control","archetype":"engineering","section":"engineering","deck":6,"grid":[2,0],"size_cm":[1600,1400,440]},
+      {"room_id":6004,"room_type_id":404,"placement_section":"engineering","code":"WTR-06-01","name":"Water Reclamation","archetype":"engineering","section":"engineering","deck":6,"grid":[3,0],"size_cm":[1500,1400,430]},
+      {"room_id":6005,"room_type_id":405,"placement_section":"logistics","code":"CGO-06-01","name":"Mission Cargo Staging","archetype":"cargo","section":"cargo","deck":6,"grid":[0,1],"size_cm":[1800,1600,460]},
+      {"room_id":6006,"room_type_id":406,"placement_section":"logistics","code":"EVA-06-01","name":"EVA Ready Room","archetype":"escape","section":"airlock","deck":6,"grid":[1,1],"size_cm":[1500,1300,430]},
+      {"room_id":6007,"room_type_id":407,"placement_section":"engineering","code":"ENG-06-01","name":"Drive Access Control","archetype":"engineering","section":"engineering","deck":6,"grid":[2,1],"size_cm":[1700,1500,450]},
+      {"room_id":6008,"room_type_id":408,"placement_section":"engineering","code":"AUX-06-01","name":"Auxiliary Power","archetype":"reactor","section":"engineering","deck":6,"grid":[3,1],"size_cm":[1600,1500,460]}
+    ],
+    "crosslinks": [
+      ["BRG-08-01","SNS-08-01"], ["NAV-08-01","CMP-08-01"],
+      ["CCM-07-01","SUR-07-01"], ["REC-07-01","CRY-07-01"],
+      ["FAB-06-01","EVA-06-01"], ["WTR-06-01","AUX-06-01"]
+    ],
+    "vertical_links": [
+      ["FAB-06-01","CCM-07-01"], ["CCM-07-01","BRG-08-01"],
+      ["AUX-06-01","CRY-07-01"], ["CRY-07-01","CMP-08-01"]
+    ]
+  }
+}

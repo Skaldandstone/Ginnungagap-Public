@@ -1,0 +1,175 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Environment.CryoBay.ModularKit.ReferenceV1",
+  "title": "Cryo Bay Modular Environment Kit",
+  "category": "environment-kit",
+  "status": "blocked",
+  "production_ready": false,
+  "owners": ["environment-art", "level-design", "gameplay"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/cryo-bay-modular-kit-v1.png",
+    "sha256": "798bc3763e00b05ddc3262b98c93b13079e84af6d5634f9a88dc22a291bc05a8",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "visual-reference",
+    "generated_on": "2026-08-28",
+    "notes": "Strong kit breakdown and state reference. Printed module sizes require reconciliation with the existing room shell."
+  },
+  "concept_sources": [
+    {
+      "path": "Content/Assets/ConceptArt/Rooms/Interiors_2026-08/GGP01_Interior_CryoQuarters_Sheet11.png",
+      "role": "primary Unreal concept-library cryo bay and quarters sheet",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Cryopods/CryopodWakeStoryboard.png",
+      "role": "primary Unreal concept-library wake sequence and staging source",
+      "required": true
+    },
+    {
+      "path": "Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4_ArtistPass_Unreal.png",
+      "role": "current cryopod visual source",
+      "required": true
+    },
+    {
+      "path": "tools/validate_cryo_room_assets.py",
+      "role": "current Unreal bounds gate",
+      "required": true
+    },
+    {
+      "path": "docs/ShipCoordinateSystem.md",
+      "role": "ship room grid authority",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "ship_room_grid_m",
+        "value": 6.0,
+        "source": "docs/ShipCoordinateSystem.md",
+        "note": "Detailed playable sectors use a 6 m room grid."
+      },
+      {
+        "field": "build.unreal.existing_assets",
+        "value": [
+          "/Game/Assets/ShipRooms/Cryo/SM_Room_CryoShell",
+          "/Game/Assets/ShipRooms/Cryo/SM_Room_CryoMachinery"
+        ],
+        "source": "Source/Ginnungagap/Public/LevelSetup/ProceduralShipBuilder.cpp"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "sheet_room_module_m",
+        "value": [6.0, 3.0, 3.0],
+        "source": "cryo-bay-modular-kit-v1.png"
+      },
+      {
+        "field": "sheet_snap_increment_m",
+        "value": 0.3,
+        "source": "cryo-bay-modular-kit-v1.png"
+      },
+      {
+        "field": "build.parts",
+        "value": ["wall", "corner", "floor", "ceiling", "door_frame", "cryo_pod", "rail", "light", "pipe_bundle", "clutter"],
+        "source": "cryo-bay-modular-kit-v1.png"
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "cryo-kit-envelope-mismatch",
+        "severity": "blocker",
+        "description": "The generated 6 x 3 x 3 m room module does not describe the current CryoShell validation envelope, which is approximately 10.7 to 11.4 m by 6.4 to 7.0 m by 3.9 to 4.3 m.",
+        "resolution": "Measure the current shell in Blender and Unreal, then approve whether the new kit is a half-cell replacement system or a visual dressing kit fitted inside the existing shell."
+      }
+    ]
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "current_bounds_cm": {
+      "shell_expected_ranges": [[1070.0, 1140.0], [640.0, 700.0], [390.0, 430.0]],
+      "source": "tools/validate_cryo_room_assets.py"
+    },
+    "pivot": {
+      "name": "PIVOT_RoomGrid",
+      "rule": "Approve after deciding whether the kit replaces or dresses the current shell.",
+      "authority": "provisional"
+    },
+    "parts": [
+      { "name": "SM_Room_CryoShell", "role": "current room shell", "authority": "approved" },
+      { "name": "SM_Room_CryoMachinery", "role": "current machinery dressing", "authority": "approved" },
+      { "name": "SM_CryoPod_Base", "role": "runtime cryopod base", "authority": "approved" },
+      { "name": "SM_CryoPod_RuntimeLid", "role": "animated lid", "authority": "approved" },
+      { "name": "KIT_Wall_A", "role": "modular clean and Bloom wall", "authority": "provisional" },
+      { "name": "KIT_Wall_B", "role": "modular clean and Bloom wall", "authority": "provisional" },
+      { "name": "KIT_Wall_Corner", "role": "modular clean and Bloom corner", "authority": "provisional" },
+      { "name": "KIT_Floor", "role": "modular clean and Bloom floor", "authority": "provisional" },
+      { "name": "KIT_Ceiling", "role": "modular clean and Bloom ceiling", "authority": "provisional" }
+    ],
+    "materials": [
+      { "slot": "core_metal", "family": "hard-surface", "authority": "provisional" },
+      { "slot": "painted_metal", "family": "hard-surface", "authority": "provisional" },
+      { "slot": "rubber", "family": "seal", "authority": "provisional" },
+      { "slot": "grate", "family": "hard-surface", "authority": "provisional" },
+      { "slot": "amber_light", "family": "emissive", "authority": "approved" },
+      { "slot": "clean_plastic", "family": "polymer", "authority": "provisional" },
+      { "slot": "bloom_growth", "family": "bloom-overlay", "authority": "approved" },
+      { "slot": "frosted_glass", "family": "transparent", "authority": "provisional" }
+    ],
+    "sockets": [],
+    "states": [
+      { "id": "clean", "base_geometry": true, "authority": "approved" },
+      { "id": "damaged", "base_geometry": true, "separate_overlays": true, "authority": "approved" },
+      { "id": "bloom_infected", "base_geometry": true, "separate_overlays": true, "authority": "approved" }
+    ],
+    "blender": {
+      "root_collection": "PR_CryoBay_ModularKit",
+      "source_files": ["Art/ShipRooms/CryoPodConceptV4/CryoPod_ConceptV4.blend"],
+      "export_files": [
+        "Build/Unreal/ShipRooms/Cryo/SM_Room_CryoShell.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_Room_CryoMachinery.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_CryoPod_Base.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_CryoPod_RuntimeLid.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SOCKETS_Room_Cryo.fbx"
+      ],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "ModularStaticMeshKit",
+      "destination_root": "/Game/Assets/ShipRooms/Cryo",
+      "existing_assets": [
+        "/Game/Assets/ShipRooms/Cryo/SM_Room_CryoShell",
+        "/Game/Assets/ShipRooms/Cryo/SM_Room_CryoMachinery",
+        "/Game/Assets/ShipRooms/Cryo/SM_CryoPod_Base",
+        "/Game/Assets/ShipRooms/Cryo/SM_CryoPod_RuntimeLid"
+      ],
+      "source_files": [
+        "Build/Unreal/ShipRooms/Cryo/SM_Room_CryoShell.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_Room_CryoMachinery.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_CryoPod_Base.fbx",
+        "Build/Unreal/ShipRooms/Cryo/SM_CryoPod_RuntimeLid.fbx"
+      ],
+      "nanite": "review per modular piece",
+      "collision": "simple authored collision plus gameplay socket mesh",
+      "import_policy": "Preserve current runtime assets until the replacement versus dressing decision is approved."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "grid-reconciliation", "status": "blocked", "requirement": "Approve how the sheet's 6 x 3 x 3 m kit maps to the existing room shell and 6 m ship grid." },
+    { "id": "graybox", "status": "pending", "requirement": "Assemble one playable clean cryo bay with player, door, pod, and interaction clearances." },
+    { "id": "state-reuse", "status": "pending", "requirement": "Clean, damaged, and Bloom states reuse the same base modules." },
+    { "id": "snap-test", "status": "pending", "requirement": "Validate snap points without visible gaps or z-fighting in Unreal." }
+  ],
+  "build_questions": [
+    "Is the generated kit a new room shell, a half-cell construction kit, or an interior dressing kit?",
+    "Should 300 mm remain the art snap increment beneath the 6 m gameplay grid?"
+  ]
+}

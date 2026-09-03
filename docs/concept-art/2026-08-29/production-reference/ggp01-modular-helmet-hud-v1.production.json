@@ -1,0 +1,72 @@
+{
+  "$schema": "../../2026-08-28/production-reference/production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.UI.HelmetHUD.ModularSystem.ReferenceV1",
+  "title": "GGP-01 Modular Helmet HUD",
+  "category": "ui-system",
+  "status": "blocked",
+  "production_ready": false,
+  "superseded_by": "GGP.UI.HelmetHUD.ModularSystem.ReferenceV2",
+  "owners": ["ui", "ux", "gameplay", "accessibility", "technical-art"],
+  "source_sheet": {"path": "docs/concept-art/2026-08-29/production-reference/ggp01-modular-helmet-hud-v1.png", "sha256": "89373507bc3a874264f777426fb09bbb3de5595b59aa835d38c812a156a70379", "width_px": 1536, "height_px": 1024, "role": "design-authority", "generated_on": "2026-08-29", "notes": "Defines the modular visor HUD, component library, state hierarchy, accessibility rules, and safe-area behavior."},
+  "concept_sources": [
+    {"path": "docs/concept-art/reference/ui/InHelmetHUD_Concept_v1.png", "role": "primary visor HUD layout", "required": true},
+    {"path": "Art/UI/HelmetHUD/T_HelmetVisorFrame_v2.png", "role": "visor frame and safe visual opening", "required": true},
+    {"path": "docs/concept-art/reference/versus/bloom-player-perspective-hud-concept.png", "role": "Bloom anomaly and false-signal language", "required": true},
+    {"path": "Docs/ArtStyleGuide.md", "role": "HUD hierarchy and color authority", "required": true},
+    {"path": "Source/Ginnungagap/Public/UI/SurvivalHUDWidget.h", "role": "runtime widget and data contract", "required": true},
+    {"path": "docs/PlayerSuitAssets.md", "role": "visor presentation boundary", "required": true}
+  ],
+  "authority": {
+    "approved": [
+      {"field": "layout", "value": {"upper_left": "body and suit", "upper_right": "navigation and urgent objective", "center": "minimal reticle and interaction", "lower_left": "life support", "lower_right": "equipment and contamination"}, "source": "Docs/ArtStyleGuide.md"},
+      {"field": "color_roles", "value": {"cyan": "information", "amber": "attention", "red": "critical", "violet": "anomaly"}, "source": "Docs/ArtStyleGuide.md"},
+      {"field": "runtime_class", "value": "/Script/Ginnungagap.SurvivalHUDWidget", "source": "Source/Ginnungagap/Public/UI/SurvivalHUDWidget.h"},
+      {"field": "persistent_scope", "value": "body and suit telemetry, restrained aiming reference, interaction context, and urgent warnings", "source": "docs/PlayerSuitAssets.md"}
+    ],
+    "provisional": [
+      {"field": "widget_zones", "value": ["suit_body", "navigation", "objective", "reticle", "interaction", "oxygen", "pressure", "co2", "power", "mag_boots", "equipment", "bloom_warning", "active_conditions"], "source": "ggp01-modular-helmet-hud-v1.png"},
+      {"field": "color_tokens", "value": {"info": "#66E0FF", "attention": "#FFC24D", "critical": "#FF404D", "anomaly": "#B779FF", "text": "#E6F1FF"}, "source": "ggp01-modular-helmet-hud-v1.png"}
+    ],
+    "conflicts": [
+      {"id": "pressure-co2-data-source", "severity": "warning", "description": "The visual concept includes pressure and CO2 widgets that are not direct named setters in USurvivalHUDWidget.", "resolution": "Bind them through the authoritative atmosphere or status snapshot rather than creating HUD-owned simulation values."},
+      {"id": "false-signal-truth-leak", "severity": "blocker", "description": "The v1 sheet gives fabricated Bloom telemetry a unique violet treatment and a false-signal label, revealing hidden truth to the player.", "resolution": "Use v2. Genuine and fabricated Bloom telemetry must use the same presentation path with no color, copy, icon, animation, audio, or dismissal tell."}
+    ]
+  },
+  "build": {
+    "coordinate_system": {"units": "logical-pixels", "forward": "+X", "up": "-Y", "unreal_units_per_meter": 100},
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "canvas": {"aspect": "16:9", "reference_resolution": [1920, 1080], "safe_area_percent": 5, "scale_range_percent": [80, 120], "opacity_range_percent": [60, 100]},
+    "pivot": {"name": "ANCHOR_Viewport", "rule": "All persistent widgets anchor inside the visor-safe area; center reticle remains viewport-centered.", "authority": "provisional"},
+    "parts": [
+      {"id": "01", "name": "W_HUD_SuitBody"}, {"id": "02", "name": "W_HUD_Navigation"}, {"id": "03", "name": "W_HUD_Objective"},
+      {"id": "04", "name": "W_HUD_Reticle"}, {"id": "05", "name": "W_HUD_Interaction"}, {"id": "06", "name": "W_HUD_Oxygen"},
+      {"id": "07", "name": "W_HUD_Pressure"}, {"id": "08", "name": "W_HUD_CO2"}, {"id": "09", "name": "W_HUD_Power"},
+      {"id": "10", "name": "W_HUD_MagBoots"}, {"id": "11", "name": "W_HUD_Equipment"}, {"id": "12", "name": "W_HUD_BloomWarning"},
+      {"id": "13", "name": "W_HUD_ActiveConditions"}, {"name": "W_HUD_CaptionArea"}
+    ],
+    "materials": [
+      {"slot": "info", "family": "ui-cyan"}, {"slot": "attention", "family": "ui-amber"}, {"slot": "critical", "family": "ui-red"},
+      {"slot": "anomaly", "family": "ui-violet"}, {"slot": "text", "family": "ui-white"}, {"slot": "backing", "family": "transparent-dark"}
+    ],
+    "sockets": [
+      {"name": "ANCHOR_UpperLeft"}, {"name": "ANCHOR_UpperRight"}, {"name": "ANCHOR_Center"},
+      {"name": "ANCHOR_LowerLeft"}, {"name": "ANCHOR_LowerRight"}, {"name": "ANCHOR_CaptionLeft"}, {"name": "ANCHOR_CaptionRight"}
+    ],
+    "states": [
+      {"id": "baseline"}, {"id": "interaction"}, {"id": "warning"}, {"id": "critical"}, {"id": "scan_active"}, {"id": "bloom_false_signal"}
+    ],
+    "blender": {"root_collection": "N_A_UI_HelmetHUD", "note": "No Blender geometry required; visor-frame texture remains a supporting raster asset."},
+    "unreal": {"asset_type": "UserWidgetSystem", "destination_root": "/Game/UI/HUD", "runtime_class": "/Script/Ginnungagap.SurvivalHUDWidget", "existing_assets": ["Art/UI/HelmetHUD/T_HelmetVisorFrame_v2.png"], "import_policy": "Implement as replaceable UMG components backed by existing native HUD setters; simulation state remains gameplay-owned."}
+  },
+  "acceptance_checks": [
+    {"id": "data-contract", "status": "pending", "requirement": "Every visible widget maps to an authoritative gameplay field or explicit presentation-only state."},
+    {"id": "safe-area", "status": "pending", "requirement": "All critical information remains readable across supported aspect ratios and platform safe areas."},
+    {"id": "accessibility", "status": "pending", "requirement": "Scale, opacity, captions, reduced motion, and color-independent warning shapes work without clipping."},
+    {"id": "center-visibility", "status": "pending", "requirement": "Persistent UI does not obscure traversal, interaction targets, or threat silhouettes."},
+    {"id": "false-signal", "status": "blocked", "requirement": "Fabricated Bloom telemetry must be visually indistinguishable from genuine telemetry. This v1 sheet violates that requirement."},
+    {"id": "runtime-smoke", "status": "pending", "requirement": "Native USurvivalHUDWidget and Blueprint presentation survive baseline, warning, critical, death, respawn, and run-outcome flows."}
+  ],
+  "build_questions": ["Which atmosphere snapshot supplies pressure and CO2 to the visor?", "Which HUD components must support ultrawide repositioning rather than uniform scaling?"]
+}

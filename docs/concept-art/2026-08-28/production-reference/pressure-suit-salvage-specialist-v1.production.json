@@ -1,0 +1,166 @@
+{
+  "$schema": "./production-reference.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "GGP.Character.PressureSuit.SalvageSpecialist.ReferenceV1",
+  "title": "Pressure Suit Salvage Specialist",
+  "category": "character",
+  "status": "blocked",
+  "production_ready": false,
+  "owners": ["character-art", "technical-art", "animation", "gameplay"],
+  "source_sheet": {
+    "path": "docs/concept-art/2026-08-28/production-reference/pressure-suit-salvage-specialist-v1.png",
+    "sha256": "15276482f27af3f3a8f9c8a7e0fa8a4e3416b7b939265faad02fdffccd31a095",
+    "width_px": 1536,
+    "height_px": 1024,
+    "role": "exploration",
+    "generated_on": "2026-08-28",
+    "notes": "Strong salvage-role equipment and material reference. The fixed face, body, and 190 cm scale are not player-character canon."
+  },
+  "concept_sources": [
+    {
+      "path": "Content/Assets/ConceptArt/Trailer/Player_Concept_Likeness_v2.png",
+      "role": "primary Unreal concept-library player identity and suit silhouette source",
+      "required": true
+    },
+    {
+      "path": "Content/Assets/ConceptArt/Trailer/Crew_Classes.png",
+      "role": "primary Unreal concept-library crew role differentiation source",
+      "required": true
+    },
+    {
+      "path": "docs/concept-art/reference/suits/standard-suit-turnaround.png",
+      "role": "base pressure-suit turnaround",
+      "required": true
+    },
+    {
+      "path": "docs/PRD.md",
+      "role": "player suit behavior authority",
+      "required": true
+    },
+    {
+      "path": "docs/PlayerSuitAssets.md",
+      "role": "current runtime skeleton and layer authority",
+      "required": true
+    }
+  ],
+  "authority": {
+    "approved": [
+      {
+        "field": "suit_architecture",
+        "value": "modular industrial life-support system with role-specific chest modules, tools, markings, and wear",
+        "source": "Docs/ArtStyleGuide.md"
+      },
+      {
+        "field": "runtime_animation_driver",
+        "value": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple",
+        "source": "docs/PlayerSuitAssets.md",
+        "note": "Current modular player-suit runtime uses Manny unless an approved MetaHuman body-specific garment is selected."
+      },
+      {
+        "field": "body_support",
+        "value": "character identity and body morphology are separate from the role suit",
+        "source": "docs/character-creator/metahuman-library.md"
+      }
+    ],
+    "provisional": [
+      {
+        "field": "role_module",
+        "value": "salvage specialist",
+        "source": "pressure-suit-salvage-specialist-v1.png"
+      },
+      {
+        "field": "height_m",
+        "value": 1.9,
+        "source": "pressure-suit-salvage-specialist-v1.png"
+      },
+      {
+        "field": "equipment",
+        "value": ["helmet", "life-support hoses", "upper harness", "tool clips", "chest utility pouch", "wrist device", "magnetic boots", "backpack"],
+        "source": "pressure-suit-salvage-specialist-v1.png"
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "salvage-suit-identity-scope",
+        "severity": "blocker",
+        "description": "The sheet presents one fixed 190 cm masculine character, while the player pipeline supports selectable identity and body morphology independent of role equipment.",
+        "resolution": "Approve this as a named NPC, or regenerate the sheet as a body-neutral modular salvage role kit fitted to the current player body and skeleton matrix."
+      }
+    ]
+  },
+  "build": {
+    "coordinate_system": {
+      "units": "meters",
+      "forward": "+X",
+      "up": "+Z",
+      "unreal_units_per_meter": 100
+    },
+    "dimensions_m": null,
+    "current_bounds_cm": null,
+    "pivot": {
+      "name": "root",
+      "rule": "Inherit the selected approved body skeleton and capsule contract.",
+      "authority": "approved"
+    },
+    "parts": [
+      { "name": "SK_Undersuit", "role": "body-conforming pressure layer", "authority": "approved" },
+      { "name": "SK_OversuitShared", "role": "shared protection and life-support shell", "authority": "approved" },
+      { "name": "SK_RoleModule_Salvage", "role": "salvage-specific harness and hard points", "authority": "provisional" },
+      { "name": "SK_Helmet", "role": "removable pressure helmet", "authority": "provisional" },
+      { "name": "SM_Backpack_Salvage", "role": "removable life-support and tool pack", "authority": "provisional" },
+      { "name": "SM_ChestModule_Salvage", "role": "removable chest utility module", "authority": "provisional" }
+    ],
+    "materials": [
+      { "slot": "fabric_suit", "family": "pressure-fabric", "authority": "approved" },
+      { "slot": "rubber_flex", "family": "seal", "authority": "approved" },
+      { "slot": "hard_surface", "family": "hard-surface", "authority": "approved" },
+      { "slot": "metal", "family": "hard-surface", "authority": "approved" },
+      { "slot": "visor", "family": "transparent", "authority": "approved" },
+      { "slot": "webbing", "family": "fabric", "authority": "approved" },
+      { "slot": "salvage_accent", "family": "role-marking", "authority": "provisional" },
+      { "slot": "display_emissive", "family": "emissive", "authority": "approved" }
+    ],
+    "sockets": [
+      { "name": "SOCKET_Helmet", "bone": "head", "authority": "approved" },
+      { "name": "SOCKET_Backpack", "bone": "spine_03", "authority": "provisional" },
+      { "name": "SOCKET_ChestModule", "bone": "spine_03", "authority": "provisional" },
+      { "name": "SOCKET_ToolRail_L", "bone": "pelvis", "authority": "provisional" },
+      { "name": "SOCKET_ToolRail_R", "bone": "pelvis", "authority": "provisional" },
+      { "name": "SOCKET_WristDevice", "bone": "lowerarm_l", "authority": "provisional" }
+    ],
+    "states": [
+      { "id": "helmet_on", "authority": "approved" },
+      { "id": "helmet_off", "authority": "approved" },
+      { "id": "visor_clear", "material_state": true, "authority": "provisional" },
+      { "id": "visor_tinted", "material_state": true, "authority": "provisional" },
+      { "id": "clean", "authority": "approved" },
+      { "id": "worn", "authority": "approved" }
+    ],
+    "blender": {
+      "root_collection": "PR_PressureSuit_SalvageSpecialist",
+      "source_files": [],
+      "export_files": [],
+      "collections": ["00_GUIDES", "10_BLOCKOUT", "20_HIGH", "30_LOW", "40_COLLISION", "50_SOCKETS", "60_VFX", "90_EXPORT"]
+    },
+    "unreal": {
+      "asset_type": "ModularSkeletalCharacter",
+      "destination_root": "/Game/Characters/PlayerSuits/RoleModules/Salvage",
+      "existing_assets": [],
+      "source_files": [],
+      "skeleton_policy": "share the exact selected runtime body skeleton before Leader Pose use",
+      "collision": "use the existing player capsule and physics-asset policy",
+      "import_policy": "Do not author final topology until salvage-suit-identity-scope is resolved."
+    }
+  },
+  "acceptance_checks": [
+    { "id": "identity-scope", "status": "blocked", "requirement": "Approve named NPC versus modular player role equipment." },
+    { "id": "skeleton-identity", "status": "pending", "requirement": "Every wearable layer shares the exact approved runtime skeleton." },
+    { "id": "body-matrix", "status": "pending", "requirement": "Validate the approved role kit on every supported player body silhouette." },
+    { "id": "first-person-read", "status": "pending", "requirement": "Gloves, wrist device, and held tools remain readable in clean and Bloom lighting." },
+    { "id": "deformation", "status": "pending", "requirement": "Shoulders, elbows, hips, knees, neck, gloves, and backpack clear representative animations." }
+  ],
+  "build_questions": [
+    "Is Salvage Specialist a player role module or a named NPC?",
+    "Which body and skeleton matrix must the role kit support at launch?"
+  ]
+}
