@@ -14,6 +14,7 @@ class GINNUNGAGAP_API USensorContactRowWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    virtual void NativeOnInitialized() override;
     virtual void NativeConstruct() override;
 
     void Configure(ASensorArraySystem* InSensorSource, const FSensorContact& InContact, bool bIsTracked);

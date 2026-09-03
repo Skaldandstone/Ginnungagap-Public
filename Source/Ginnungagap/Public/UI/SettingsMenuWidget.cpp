@@ -20,9 +20,9 @@ namespace
 	const FLinearColor Steel(0.48f, 0.58f, 0.62f, 1.0f);
 }
 
-void USettingsMenuWidget::NativeConstruct()
+void USettingsMenuWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 	if (QualitySlider) QualitySlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnQualityChanged);
 	if (ResolutionScaleSlider) ResolutionScaleSlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnResolutionScaleChanged);
@@ -34,6 +34,13 @@ void USettingsMenuWidget::NativeConstruct()
 	if (BackButton) BackButton->OnClicked.AddDynamic(this, &USettingsMenuWidget::OnBackClicked);
 	SetIsFocusable(true);
 	LoadCurrentSettings();
+	if (QualitySlider) QualitySlider->SetKeyboardFocus();
+}
+
+void USettingsMenuWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (QualitySlider) QualitySlider->SetKeyboardFocus();
 }
 

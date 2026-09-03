@@ -18,9 +18,9 @@
 #include "StarSystem/ProceduralStarSystemMap.h"
 #include "EngineUtils.h"
 
-void USensorSurveyWidget::NativeConstruct()
+void USensorSurveyWidget::NativeOnInitialized()
 {
-    Super::NativeConstruct();
+    Super::NativeOnInitialized();
     BuildWidgetTree();
     if (UGameInstance* GI = GetGameInstance())
     {
@@ -32,6 +32,12 @@ void USensorSurveyWidget::NativeConstruct()
     }
     RefreshInventoryDisplay();
     RefreshContacts();
+}
+
+void USensorSurveyWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+    // Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USensorSurveyWidget::NativeDestruct()

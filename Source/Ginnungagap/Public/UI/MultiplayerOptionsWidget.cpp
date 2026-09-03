@@ -8,9 +8,9 @@
 #include "UI/MenuVisualStyle.h"
 #include "Input/Reply.h"
 
-void UMultiplayerOptionsWidget::NativeConstruct()
+void UMultiplayerOptionsWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (TitleText)
@@ -62,6 +62,13 @@ void UMultiplayerOptionsWidget::NativeConstruct()
 	SetIsFocusable(true);
 	if (CreateLobbyButton) CreateLobbyButton->SetKeyboardFocus();
 	RefreshExpeditionSummary();
+}
+
+void UMultiplayerOptionsWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
+	if (CreateLobbyButton) CreateLobbyButton->SetKeyboardFocus();
 }
 
 FReply UMultiplayerOptionsWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)

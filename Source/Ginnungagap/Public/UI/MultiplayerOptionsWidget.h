@@ -17,6 +17,7 @@ class GINNUNGAGAP_API UMultiplayerOptionsWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 

@@ -269,7 +269,9 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
 
     WeaponMountComponent = CreateDefaultSubobject<UWeaponMountComponent>(TEXT("WeaponMountComponent"));
     WeaponMountComponent->SetupAttachment(FirstPersonCamera);
-    WeaponMountComponent->SetRelativeLocation(FVector(35.0f, 18.0f, -18.0f));
+    // Held a little further out and lower than a rifle stance: the tools are pistol-sized meshes
+    // whose grips sat inside the camera's near field and filled half the view.
+    WeaponMountComponent->SetRelativeLocation(FVector(50.0f, 22.0f, -26.0f));
     WeaponMountComponent->SetRelativeRotation(FRotator::ZeroRotator);
     WeaponMountComponent->OperatorType = EWeaponOperatorType::Player;
     WeaponMountComponent->bSpawnDefaultWeapon = true;

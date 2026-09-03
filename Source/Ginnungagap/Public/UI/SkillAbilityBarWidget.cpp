@@ -26,9 +26,9 @@ namespace
 	const FLinearColor TriggerFlashColor(0.30f, 0.86f, 1.0f, 0.98f);
 }
 
-void USkillAbilityBarWidget::NativeConstruct()
+void USkillAbilityBarWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -47,6 +47,12 @@ void USkillAbilityBarWidget::NativeConstruct()
 	}
 
 	RefreshSlots();
+}
+
+void USkillAbilityBarWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USkillAbilityBarWidget::NativeDestruct()

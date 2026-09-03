@@ -22,6 +22,7 @@ class GINNUNGAGAP_API UCharacterCreatorWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual FReply NativeOnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;

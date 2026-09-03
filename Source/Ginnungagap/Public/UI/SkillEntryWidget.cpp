@@ -11,9 +11,9 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 
-void USkillEntryWidget::NativeConstruct()
+void USkillEntryWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (UGameInstance* GI = GetGameInstance())
@@ -25,6 +25,12 @@ void USkillEntryWidget::NativeConstruct()
 	{
 		UnlockButton->OnClicked.AddDynamic(this, &USkillEntryWidget::OnUnlockButtonClicked);
 	}
+}
+
+void USkillEntryWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USkillEntryWidget::NativeDestruct()

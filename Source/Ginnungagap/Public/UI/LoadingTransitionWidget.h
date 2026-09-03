@@ -14,6 +14,7 @@ class GINNUNGAGAP_API ULoadingTransitionWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& Geometry, float DeltaSeconds) override;
 	void Configure(const FCharacterProfile& Character, const FGameCustomization& Customization, EGameMode GameMode);

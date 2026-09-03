@@ -36,9 +36,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--keep-frames", action="store_true")
+    parser.add_argument("--skip-lead-in", type=int, default=2,
+                        help="frames to drop from the start; the first two are the editor viewport before PIE has drawn")
     args = parser.parse_args()
 
-    frames = sorted(FRAMES.glob("Frame_*.png"))
+    frames = sorted(FRAMES.glob("Frame_*.png"))[args.skip_lead_in:]
     if not frames:
         raise SystemExit("No Frame_*.png under " + str(FRAMES) + "; record the walk first")
     # ffmpeg's image sequence demuxer wants contiguous numbering from a start index.

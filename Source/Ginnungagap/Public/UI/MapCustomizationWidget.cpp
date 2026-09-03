@@ -8,9 +8,9 @@
 #include "UI/MenuVisualStyle.h"
 #include "Input/Reply.h"
 
-void UMapCustomizationWidget::NativeConstruct()
+void UMapCustomizationWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	// Bind combo box events
@@ -47,6 +47,13 @@ void UMapCustomizationWidget::NativeConstruct()
 	PopulateDropdowns();
 	UpdateDescriptions();
 	SetIsFocusable(true);
+	if (ShipSizeCombo) ShipSizeCombo->SetKeyboardFocus();
+}
+
+void UMapCustomizationWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (ShipSizeCombo) ShipSizeCombo->SetKeyboardFocus();
 }
 

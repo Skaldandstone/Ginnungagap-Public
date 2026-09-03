@@ -15,6 +15,7 @@ class GINNUNGAGAP_API UJumpDestinationWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    virtual void NativeOnInitialized() override;
     virtual void NativeConstruct() override;
 
     void Configure(AJumpConsoleSystem* InConsole, const TArray<FJumpCandidate>& InCandidates);

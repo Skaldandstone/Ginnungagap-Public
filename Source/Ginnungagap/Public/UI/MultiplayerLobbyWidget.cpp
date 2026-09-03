@@ -14,13 +14,20 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
 
-void UMultiplayerLobbyWidget::NativeConstruct()
+void UMultiplayerLobbyWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct(); BuildFallbackLayout();
+	Super::NativeOnInitialized(); BuildFallbackLayout();
 	if(ReadyButton)ReadyButton->OnClicked.AddDynamic(this,&UMultiplayerLobbyWidget::OnReadyClicked);
 	if(LaunchButton)LaunchButton->OnClicked.AddDynamic(this,&UMultiplayerLobbyWidget::OnLaunchClicked);
 	if(BackButton)BackButton->OnClicked.AddDynamic(this,&UMultiplayerLobbyWidget::OnBackClicked);
 	SetIsFocusable(true); if(ReadyButton)ReadyButton->SetKeyboardFocus(); RefreshLobby();
+}
+
+void UMultiplayerLobbyWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
+	if(ReadyButton)ReadyButton->SetKeyboardFocus();
 }
 
 void UMultiplayerLobbyWidget::NativeDestruct()

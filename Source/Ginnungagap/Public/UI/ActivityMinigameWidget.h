@@ -17,6 +17,7 @@ class GINNUNGAGAP_API UActivityMinigameWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    virtual void NativeOnInitialized() override;
     virtual void NativeConstruct() override;
 
     UFUNCTION(BlueprintCallable, Category="Activity UI")

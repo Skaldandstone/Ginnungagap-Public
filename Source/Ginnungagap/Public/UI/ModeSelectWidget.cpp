@@ -9,9 +9,9 @@
 #include "UI/MenuVisualStyle.h"
 #include "Input/Reply.h"
 
-void UModeSelectWidget::NativeConstruct()
+void UModeSelectWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (SinglePlayerButton)
@@ -37,6 +37,13 @@ void UModeSelectWidget::NativeConstruct()
 	// Show default mode info
 	DisplayModeInfo(EGameMode::SinglePlayerSurvival);
 	SetIsFocusable(true);
+	if (SinglePlayerButton) SinglePlayerButton->SetKeyboardFocus();
+}
+
+void UModeSelectWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (SinglePlayerButton) SinglePlayerButton->SetKeyboardFocus();
 }
 

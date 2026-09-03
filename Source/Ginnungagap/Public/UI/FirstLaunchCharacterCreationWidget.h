@@ -24,6 +24,7 @@ class GINNUNGAGAP_API UFirstLaunchCharacterCreationWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	void SetCharacterDraft(const FCharacterProfile& InDraft) { CharacterDraft = InDraft; }

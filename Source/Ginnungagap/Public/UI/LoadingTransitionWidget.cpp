@@ -7,9 +7,15 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Components/SafeZone.h"
 
+void ULoadingTransitionWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized(); BuildFallbackLayout(); ElapsedSeconds = 0.0f; RefreshText();
+}
+
 void ULoadingTransitionWidget::NativeConstruct()
 {
-	Super::NativeConstruct(); BuildFallbackLayout(); ElapsedSeconds = 0.0f; RefreshText();
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void ULoadingTransitionWidget::Configure(const FCharacterProfile& Character, const FGameCustomization& Customization, EGameMode GameMode)

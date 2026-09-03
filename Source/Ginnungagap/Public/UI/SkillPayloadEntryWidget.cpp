@@ -11,9 +11,9 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 
-void USkillPayloadEntryWidget::NativeConstruct()
+void USkillPayloadEntryWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (ToggleButton)
@@ -22,6 +22,12 @@ void USkillPayloadEntryWidget::NativeConstruct()
 	}
 
 	UpdateUI();
+}
+
+void USkillPayloadEntryWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USkillPayloadEntryWidget::NativeDestruct()

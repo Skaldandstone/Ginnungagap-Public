@@ -18,9 +18,9 @@
 #include "UI/SkillTreeWidget.h"
 #include "UI/MenuWidgetResolution.h"
 
-void UPreGameLoadoutWidget::NativeConstruct()
+void UPreGameLoadoutWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 	if (UGameInstance* GI = GetGameInstance()) LoadoutSubsystem = GI->GetSubsystem<UExpeditionLoadoutSubsystem>();
 
@@ -48,6 +48,13 @@ void UPreGameLoadoutWidget::NativeConstruct()
 	}
 	RefreshEquipmentDisplay();
 	SetIsFocusable(true);
+	if (HelmetVisorButton) HelmetVisorButton->SetKeyboardFocus();
+}
+
+void UPreGameLoadoutWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (HelmetVisorButton) HelmetVisorButton->SetKeyboardFocus();
 }
 

@@ -31,11 +31,17 @@ void StyleAntagonistText(UTextBlock* Text, int32 Size, const FLinearColor& Color
 }
 }
 
+void UAntagonistActivityWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+	BuildWidgetTree();
+	SetVisibility(ESlateVisibility::Collapsed);
+}
+
 void UAntagonistActivityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	BuildWidgetTree();
-	SetVisibility(ESlateVisibility::Collapsed);
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void UAntagonistActivityWidget::BuildWidgetTree()

@@ -9,10 +9,16 @@
 #include "Ship/JumpConsoleSystem.h"
 #include "UI/JumpDestinationRowWidget.h"
 
+void UJumpDestinationWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+    BuildRows();
+}
+
 void UJumpDestinationWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-    BuildRows();
+    // Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void UJumpDestinationWidget::Configure(AJumpConsoleSystem* InConsole, const TArray<FJumpCandidate>& InCandidates)

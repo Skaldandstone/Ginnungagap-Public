@@ -21,9 +21,9 @@
 #include "UI/MenuVisualStyle.h"
 #include "Input/Reply.h"
 
-void UFirstLaunchCharacterCreationWidget::NativeConstruct()
+void UFirstLaunchCharacterCreationWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (ConfirmButton)
@@ -52,6 +52,13 @@ void UFirstLaunchCharacterCreationWidget::NativeConstruct()
 	CreateSuitPreview();
 	UpdateAppearanceUI();
 	SetIsFocusable(true);
+	if (CharacterNameInput) CharacterNameInput->SetKeyboardFocus();
+}
+
+void UFirstLaunchCharacterCreationWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (CharacterNameInput) CharacterNameInput->SetKeyboardFocus();
 }
 

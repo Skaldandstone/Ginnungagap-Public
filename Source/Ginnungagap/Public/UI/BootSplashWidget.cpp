@@ -9,14 +9,21 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Input/Reply.h"
 
-void UBootSplashWidget::NativeConstruct()
+void UBootSplashWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 	ElapsedSeconds = 0.0f;
 	bSkipRequested = false;
 	bCompleted = false;
 	SetIsFocusable(true);
+	SetKeyboardFocus();
+}
+
+void UBootSplashWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	SetKeyboardFocus();
 }
 

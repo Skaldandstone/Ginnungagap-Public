@@ -26,6 +26,7 @@ class GINNUNGAGAP_API USkillPayloadPickerWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
 	/** Re-reads the role and its owned skills, then rebuilds the list. */

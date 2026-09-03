@@ -16,6 +16,7 @@ class GINNUNGAGAP_API UAntagonistActivityWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category="Versus|Activities")

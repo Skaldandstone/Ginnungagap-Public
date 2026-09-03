@@ -12,9 +12,9 @@
 #include "Progression/ClassSkillTreeSubsystem.h"
 #include "UI/SkillPayloadEntryWidget.h"
 
-void USkillPayloadPickerWidget::NativeConstruct()
+void USkillPayloadPickerWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -29,6 +29,12 @@ void USkillPayloadPickerWidget::NativeConstruct()
 	}
 
 	RefreshPayload();
+}
+
+void USkillPayloadPickerWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USkillPayloadPickerWidget::BuildFallbackLayout()

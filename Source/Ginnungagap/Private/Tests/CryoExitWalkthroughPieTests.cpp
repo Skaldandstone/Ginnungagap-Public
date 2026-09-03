@@ -944,8 +944,10 @@ bool FWalkCryoExit::Update()
 		// ReachCIC completes before calling ShowStartScreen. A fixed margin here, rather than
 		// reading the property, keeps this test decoupled from that number's exact value.
 		constexpr double TitleCutMarginSeconds = 5.0;
-		static bool bHeldForLook = false; // TEMP-LIVE-LOOK
-		if (bHeldForLook) { return (Now - PhaseSince >= 30.0 || bExpired) ? Finish(true) : false; }
+		// A recording holds on the title card so the video ends on it rather than a cut to black.
+		constexpr double TitleHoldSeconds = 6.0;
+		static bool bHoldingOnTitle = false;
+		if (bHoldingOnTitle) { return (Now - PhaseSince >= TitleHoldSeconds || bExpired) ? Finish(true) : false; }
 		if (Now - PhaseSince < TitleCutMarginSeconds && !bExpired)
 		{
 			return false;
@@ -955,8 +957,13 @@ bool FWalkCryoExit::Update()
 		UObject* StartScreen = Menus ? CryoWalk::ReadObject(Menus, TEXT("CurrentStartScreen")) : nullptr;
 		Test->TestNotNull(TEXT("The demo's own MenuManagerSubsystem cut to the title screen after ReachCIC completed"), StartScreen);
 		CryoWalk::Capture(TEXT("Walk_10_title_screen"), true);
-		// TEMP-LIVE-LOOK: hold PIE so the title cut can be eyeballed on the desktop.
-		bHeldForLook = true; PhaseSince = Now; return false;
+		if (CryoWalk::IsRecording())
+		{
+			bHoldingOnTitle = true;
+			PhaseSince = Now;
+			return false;
+		}
+		return Finish(true);
 	}
 	}
 	return Finish(true);

@@ -22,6 +22,7 @@ class GINNUNGAGAP_API USkillPayloadEntryWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 

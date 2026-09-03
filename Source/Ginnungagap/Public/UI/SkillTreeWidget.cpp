@@ -12,9 +12,9 @@
 #include "Components/Spacer.h"
 #include "Components/VerticalBoxSlot.h"
 
-void USkillTreeWidget::NativeConstruct()
+void USkillTreeWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (UGameInstance* GI = GetGameInstance())
@@ -44,6 +44,12 @@ void USkillTreeWidget::NativeConstruct()
 	}
 
 	RefreshSkillTree();
+}
+
+void USkillTreeWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USkillTreeWidget::NativeDestruct()

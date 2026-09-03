@@ -4,9 +4,9 @@
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetTree.h"
 
-void USensorContactRowWidget::NativeConstruct()
+void USensorContactRowWidget::NativeOnInitialized()
 {
-    Super::NativeConstruct();
+    Super::NativeOnInitialized();
     if (WidgetTree && !WidgetTree->RootWidget)
     {
         SelectButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ContactButton"));
@@ -16,6 +16,12 @@ void USensorContactRowWidget::NativeConstruct()
         SelectButton->OnClicked.AddDynamic(this, &USensorContactRowWidget::HandleClicked);
     }
     RefreshLabel();
+}
+
+void USensorContactRowWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+    // Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USensorContactRowWidget::Configure(ASensorArraySystem* InSensorSource, const FSensorContact& InContact, bool bIsTracked)

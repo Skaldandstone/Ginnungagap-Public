@@ -61,9 +61,9 @@ namespace
     }
 }
 
-void USurvivalHUDWidget::NativeConstruct()
+void USurvivalHUDWidget::NativeOnInitialized()
 {
-    Super::NativeConstruct();
+    Super::NativeOnInitialized();
 
     BuildWidgetTree();
 
@@ -75,6 +75,12 @@ void USurvivalHUDWidget::NativeConstruct()
             ProfileSubsystem->OnCharacterProfileChanged.AddDynamic(this, &USurvivalHUDWidget::OnCharacterProfileChanged);
         }
     }
+}
+
+void USurvivalHUDWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+    // Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void USurvivalHUDWidget::BuildWidgetTree()

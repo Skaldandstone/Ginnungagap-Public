@@ -10,9 +10,9 @@
 #include "Input/Reply.h"
 #include "TimerManager.h"
 
-void UProgressionMenuWidget::NativeConstruct()
+void UProgressionMenuWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	BuildFallbackLayout();
 
 	if (CloseButton)
@@ -24,6 +24,12 @@ void UProgressionMenuWidget::NativeConstruct()
 
 	// Start with menu closed
 	CloseMenu();
+}
+
+void UProgressionMenuWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void UProgressionMenuWidget::NativeDestruct()

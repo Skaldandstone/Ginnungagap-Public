@@ -106,9 +106,11 @@ bool FAssertWorkshopBenchGrantsLive::Update()
 	// every pawn with a captive bolt driver via bSpawnDefaultWeapon. That is precisely why the
 	// bench's grant used to be a silent no-op.
 	AShipboardWeapon* Before = Mount ? Mount->GetMountedWeapon() : nullptr;
-	Test->TestNotNull(TEXT("Before the grant, the pawn is already auto-armed"), Before);
-	Test->TestTrue(TEXT("...with the constructor's default captive bolt driver"),
-		Before && Before->IsA<ACaptiveBoltDriver>());
+	// The mount auto-arms every pawn with a captive bolt driver at BeginPlay, and the demo's opening
+	// sequence empties the sleeper's hands again so the bench is where the tool first appears.
+	// Either state is fine here; what must not be true is that the bench's tool is already in hand.
+	Test->TestTrue(TEXT("Before the grant, whatever is mounted is not yet the bench's tool"),
+		!Before || !Before->IsA(GrantClass));
 
 	const int32 ItemsBefore = Inventory ? Inventory->GetStacks().Num() : 0;
 

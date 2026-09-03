@@ -20,9 +20,9 @@
 #include "Input/Reply.h"
 #include "UI/MenuVisualStyle.h"
 
-void UStartScreenWidget::NativeConstruct()
+void UStartScreenWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	// A designer tree that binds none of the widgets this class knows about is a tree with nothing
 	// in it: the widget existed, was added to the viewport, and showed the game underneath. WBP_
 	// StartScreen is exactly that -- an empty canvas over this class -- so the native layout is the
@@ -66,6 +66,18 @@ void UStartScreenWidget::NativeConstruct()
 		if (BackdropGlowImage) BackdropGlowImage->SetRenderOpacity(0.0f);
 		if (AccentRail) AccentRail->SetRenderOpacity(0.8f);
 	}
+	if (!bTitleGateActive && NewGameButton) NewGameButton->SetKeyboardFocus();
+}
+
+void UStartScreenWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// The menu manager sets the title gate between CreateWidget and AddToViewport, after the
+	// tree was built at initialisation; apply it here, where it is final.
+	bTitleGateActive = bRequireTitleGate;
+	if (MenuPanel) MenuPanel->SetVisibility(bTitleGateActive ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	if (TitleGate) TitleGate->SetVisibility(bTitleGateActive ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
 	if (!bTitleGateActive && NewGameButton) NewGameButton->SetKeyboardFocus();
 }
 

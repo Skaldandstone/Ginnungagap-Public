@@ -17,6 +17,7 @@
 #include "Ship/ModularShipRoom.h"
 #include "Sound/SoundBase.h"
 #include "UI/SurvivalHUDWidget.h"
+#include "Weapons/WeaponMountComponent.h"
 
 UShipStrikeCameraShake::UShipStrikeCameraShake(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -78,6 +79,17 @@ void AQuickDemoOpeningSequence::TryArm()
     }
     Player = PC;
     Crew = Character;
+
+    // Nobody wakes from cryo holding a bolt driver. The mount auto-arms every pawn at BeginPlay;
+    // the demo's crew find their tool at the workshop bench, which grants it, so empty their hands
+    // here. Server side, like the mount itself.
+    if (HasAuthority())
+    {
+        if (UWeaponMountComponent* Mount = Character->FindComponentByClass<UWeaponMountComponent>())
+        {
+            Mount->ReleaseWeapon();
+        }
+    }
 
     // The pod. Tagged by the placement script; otherwise the nearest one to where they spawned.
     ACryoPodSystem* Chosen = nullptr;

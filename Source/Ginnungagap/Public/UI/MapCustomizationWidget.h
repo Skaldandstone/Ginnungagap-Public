@@ -54,6 +54,7 @@ class GINNUNGAGAP_API UMapCustomizationWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 

@@ -46,11 +46,17 @@ UBorder* AddInset(UWidgetTree* Tree, UCanvasPanel* Root, const TCHAR* Name, floa
 }
 }
 
+void UActivityMinigameWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+    BuildWidgetTree();
+    SetVisibility(ESlateVisibility::Collapsed);
+}
+
 void UActivityMinigameWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-    BuildWidgetTree();
-    SetVisibility(ESlateVisibility::Collapsed);
+    // Focus needs the Slate tree, which exists only once the widget is constructed.
 }
 
 void UActivityMinigameWidget::BuildWidgetTree()

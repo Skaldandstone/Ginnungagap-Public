@@ -19,9 +19,9 @@
 #include "CoopSurvivalCharacter.h"
 #include "UI/MenuVisualStyle.h"
 
-void UCharacterCreatorWidget::NativeConstruct()
+void UCharacterCreatorWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct(); BuildFallbackLayout(); PopulateOptions();
+	Super::NativeOnInitialized(); BuildFallbackLayout(); PopulateOptions();
 	if (CharacterNameInput) CharacterNameInput->OnTextChanged.AddDynamic(this, &UCharacterCreatorWidget::OnNameChanged);
 	for (UComboBoxString* Combo : {BodyCombo.Get(), FaceCombo.Get(), SkinCombo.Get(), HairCombo.Get(), VoiceCombo.Get()})
 		if (Combo) Combo->OnSelectionChanged.AddDynamic(this, &UCharacterCreatorWidget::OnOptionChanged);
@@ -30,6 +30,13 @@ void UCharacterCreatorWidget::NativeConstruct()
 	if (RotateLeftButton) RotateLeftButton->OnClicked.AddDynamic(this, &UCharacterCreatorWidget::OnRotateLeftClicked);
 	if (RotateRightButton) RotateRightButton->OnClicked.AddDynamic(this, &UCharacterCreatorWidget::OnRotateRightClicked);
 	SetIsFocusable(true); if (CharacterNameInput) CharacterNameInput->SetKeyboardFocus(); RefreshDraft(); CreateCharacterPreview();
+}
+
+void UCharacterCreatorWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	// Focus needs the Slate tree, which exists only once the widget is constructed.
+	if (CharacterNameInput) CharacterNameInput->SetKeyboardFocus();
 }
 
 void UCharacterCreatorWidget::NativeDestruct()
