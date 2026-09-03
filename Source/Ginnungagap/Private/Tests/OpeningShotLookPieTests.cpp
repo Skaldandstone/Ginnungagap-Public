@@ -168,6 +168,25 @@ bool FCaptureToolInHand::Update()
 	return true;
 }
 
+namespace ToolboxShaders
+{
+	/**
+	 * The hand tool's materials are not referenced by the map, so their shaders first compile when
+	 * the workshop bench spawns it -- asynchronously, with the default material drawn meanwhile.
+	 * A capture a few seconds later shows a flat, untextured tool. Load them ahead of PIE so the
+	 * wait-for-shaders command below covers them.
+	 */
+	inline void Preload()
+	{
+		for (const TCHAR* Path : { TEXT("/Game/Frontier_EngineersToolbox/Materials/M_FrontierTools_1.M_FrontierTools_1"),
+			TEXT("/Game/Frontier_EngineersToolbox/Materials/M_FrontierTools_Toolbox1.M_FrontierTools_Toolbox1"),
+			TEXT("/Game/Frontier_EngineersToolbox/Tools/SM_Frontier_Powertool.SM_Frontier_Powertool") })
+		{
+			LoadObject<UObject>(nullptr, Path);
+		}
+	}
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGinnungagapOpeningShotLookTest,
 	"Ginnungagap.Look.OpeningShots",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -175,6 +194,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGinnungagapOpeningShotLookTest,
 bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 {
 	AutomationOpenMap(TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck"));
+	ToolboxShaders::Preload();
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitForShadersToFinishCompilingInGame());
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureOpeningPhases(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureToolInHand(this));

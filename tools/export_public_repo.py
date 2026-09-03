@@ -43,7 +43,7 @@ FAB_PACKS_NOTE = [
     "DeadBodies_Poses_nikoff", "FreeAnimationLibrary", "HorrorAmbientSFX", "Ice_Station", "MagmaSciFiPistol",
     "ModSci_EngiProps", "ModSci_Engineer", "Modular_Scifi_Mechanic_Base", "SF_Brutalist_city", "SF_White_desert",
     "Sci-Fi_Flying_Cargo_Ship", "SciFiUISFX", "SciFiWorld", "SciFi_ToiletMech", "Sci_Fi_city", "Scifi_Hideout",
-    "kb3d_missiontominerva",
+    "kb3d_missiontominerva", "Frontier_EngineersToolbox",
 ]
 
 

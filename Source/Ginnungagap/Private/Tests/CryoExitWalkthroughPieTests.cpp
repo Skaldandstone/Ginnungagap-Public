@@ -1044,6 +1044,14 @@ bool FGinnungagapCryoExitWalkthroughPieTest::RunTest(const FString& Parameters)
 	UGameplayStatics::DeleteGameInSlot(TEXT("GinnungagapShipCheckpoint"), 0);
 	const double Start = CryoWalk::IsRecording() ? 0.0 : FPlatformTime::Seconds();
 	AutomationOpenMap(TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck"));
+	// A recording must not show the hand tool untextured while its shaders compile (headless
+	// runs compile nothing and pass straight through).
+	for (const TCHAR* Path : { TEXT("/Game/Frontier_EngineersToolbox/Materials/M_FrontierTools_1.M_FrontierTools_1"),
+		TEXT("/Game/Frontier_EngineersToolbox/Tools/SM_Frontier_Powertool.SM_Frontier_Powertool") })
+	{
+		LoadObject<UObject>(nullptr, Path);
+	}
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitForShadersToFinishCompilingInGame());
 	if (CryoWalk::IsRecording())
 	{
 		ADD_LATENT_AUTOMATION_COMMAND(FStartFloatingPIECommand());
