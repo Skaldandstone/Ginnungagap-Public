@@ -2,8 +2,8 @@
 #
 # Runs Ginnungagap.Smoke.PlayerWalksOutOfCryo under a windowed editor with recording on: PIE in
 # its own 1920x1080 window, a fixed 30 Hz game step, one screenshot per frame of the player's own
-# view with the HUD, from the opening shot on the sleeper to the title card, with the engine's
-# on-screen debug messages (unbuilt reflection captures and the like) turned off first. Then
+# view with the HUD, from the opening shot on the sleeper to the title card; the test turns the
+# engine's on-screen debug messages off itself while recording. Then
 # tools/assemble_demo_video.py turns Saved/Screenshots/WindowsEditor/Frame_*.png into an MP4 in
 # Saved/Video/.
 #
@@ -23,7 +23,7 @@ if (Test-Path $Frames) { Get-ChildItem $Frames -Filter "Frame_*.png" | Remove-It
 
 $Args = @(
     "`"$Project`"",
-    "-ExecCmds=`"DisableAllScreenMessages; Automation RunTests Ginnungagap.Smoke.PlayerWalksOutOfCryo; Quit`"",
+    "-ExecCmds=`"Automation RunTests Ginnungagap.Smoke.PlayerWalksOutOfCryo; Quit`"",
     "-GinnungagapRecordWalk", "-UseFixedTimeStep", "-FPS=30",
     "-unattended", "-nopause", "-TestExit=`"Automation Test Queue Empty`"",
     "-ResX=1920", "-ResY=1080", "-WINDOWED"

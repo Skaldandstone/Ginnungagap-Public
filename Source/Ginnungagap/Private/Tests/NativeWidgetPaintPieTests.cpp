@@ -14,6 +14,8 @@
 #include "Widgets/SWidget.h"
 #include "Layout/Children.h"
 #include "Misc/App.h"
+#include "UnrealClient.h"
+#include "Components/Widget.h"
 
 #include "Meta/MenuManagerSubsystem.h"
 #include "Player/SurvivalPlayerController.h"
@@ -131,6 +133,21 @@ bool FAssertStartScreenPaints::Update()
 		StartScreen = Cast<UUserWidget>(Property->GetObjectPropertyValue_InContainer(Menus));
 	}
 	WidgetPaint::AssertMeasures(Test, TEXT("The start screen"), StartScreen);
+	// The layout as Slate resolved it, one line per widget, for reading against a capture.
+	if (StartScreen && StartScreen->WidgetTree)
+	{
+		const FGeometry Root = StartScreen->GetCachedGeometry();
+		UE_LOG(LogTemp, Display, TEXT("STARTLAYOUT root local %s abs %s scale %.3f"),
+			*Root.GetLocalSize().ToString(), *Root.GetAbsolutePosition().ToString(), Root.Scale);
+		StartScreen->WidgetTree->ForEachWidget([](UWidget* W)
+		{
+			const FGeometry G = W->GetCachedGeometry();
+			UE_LOG(LogTemp, Display, TEXT("STARTLAYOUT %-28s %-18s desired %s local %s abs %s vis %d"),
+				*W->GetName(), *W->GetClass()->GetName(), *W->GetDesiredSize().ToString(),
+				*G.GetLocalSize().ToString(), *G.GetAbsolutePosition().ToString(), W->IsVisible() ? 1 : 0);
+		});
+		FScreenshotRequest::RequestScreenshot(TEXT("TitleLook_paint"), true, false, false, FIntRect(), true);
+	}
 	return true;
 }
 

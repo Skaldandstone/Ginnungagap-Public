@@ -234,7 +234,7 @@ void UStartScreenWidget::BuildFallbackLayout()
 		ShadeSlot->SetAnchors(Anchors);
 		ShadeSlot->SetOffsets(FMargin(0.0f));
 	};
-	AddShade(TEXT("ShadeLeft"), FAnchors(0.0f, 0.0f, 0.42f, 1.0f), FLinearColor(0.008f, 0.014f, 0.018f, 0.52f));
+	AddShade(TEXT("ShadeLeft"), FAnchors(0.0f, 0.0f, 0.34f, 1.0f), FLinearColor(0.008f, 0.014f, 0.018f, 0.30f));
 	AddShade(TEXT("ShadeBottom"), FAnchors(0.0f, 0.72f, 1.0f, 1.0f), FLinearColor(0.008f, 0.014f, 0.018f, 0.55f));
 
 	// The emergency strip: the ship's readout along the floor of the frame, and the only red on
@@ -289,8 +289,10 @@ void UStartScreenWidget::BuildFallbackLayout()
 		// 2400 x 640 baked; shown at half, which is the size the type was drawn for at 1080p.
 		const FVector2D Shown(1200.0f, 320.0f);
 		TitlePlate = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("GateTitlePlate"));
-		TitlePlate->SetBrushFromTexture(PlateTexture, false);
-		TitlePlate->SetDesiredSizeOverride(Shown);
+		// Sized through the brush, which the widget keeps: SetDesiredSizeOverride only reaches a
+		// live SImage, and this tree is built before Slate exists, so it left the plate at 32x32.
+		TitlePlate->SetBrushFromTexture(PlateTexture, true);
+		{ FSlateBrush PlateBrush = TitlePlate->GetBrush(); PlateBrush.ImageSize = Shown; TitlePlate->SetBrush(PlateBrush); }
 		TitlePlate->SetRenderTransformPivot(FVector2D(0.5f, 0.7f));
 		UOverlaySlot* PlateSlot = TitleStack->AddChildToOverlay(TitlePlate);
 		PlateSlot->SetHorizontalAlignment(HAlign_Center);
@@ -298,8 +300,8 @@ void UStartScreenWidget::BuildFallbackLayout()
 		if (GlowTexture)
 		{
 			TitleGlow = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("GateTitleGlow"));
-			TitleGlow->SetBrushFromTexture(GlowTexture, false);
-			TitleGlow->SetDesiredSizeOverride(Shown);
+			TitleGlow->SetBrushFromTexture(GlowTexture, true);
+			{ FSlateBrush GlowBrush = TitleGlow->GetBrush(); GlowBrush.ImageSize = Shown; TitleGlow->SetBrush(GlowBrush); }
 			TitleGlow->SetRenderTransformPivot(FVector2D(0.5f, 0.7f));
 			TitleGlow->SetRenderOpacity(0.7f);
 			UOverlaySlot* TitleGlowSlot = TitleStack->AddChildToOverlay(TitleGlow);

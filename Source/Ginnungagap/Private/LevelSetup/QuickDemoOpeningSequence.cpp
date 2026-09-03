@@ -179,9 +179,11 @@ void AQuickDemoOpeningSequence::TryArm()
         }
     }
 
-    // The shot: from the room, a little high, looking down at the pod.
-    const FVector CameraLocation = PodLocation + Out * 430.0f + FVector(0.0f, 0.0f, 175.0f);
-    const FRotator CameraRotation = (PodLocation + FVector(0.0f, 0.0f, 55.0f) - CameraLocation).Rotation();
+    // The shot: high and close over the foot of the pod, looking down its length at the lid, so
+    // the sleeper's pod fills the frame and the neighbouring pods stay out of the foreground. A
+    // low, distant camera between the rows saw only the nearest lid's underside.
+    const FVector CameraLocation = PodLocation + Out * 300.0f + FVector(0.0f, 0.0f, 330.0f);
+    const FRotator CameraRotation = (PodLocation + FVector(0.0f, 0.0f, 75.0f) - CameraLocation).Rotation();
     FActorSpawnParameters Params;
     Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     ACameraActor* Camera = GetWorld()->SpawnActor<ACameraActor>(CameraLocation, CameraRotation, Params);

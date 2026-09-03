@@ -139,6 +139,10 @@ namespace CryoWalk
 	}
 	void RecordFrame()
 	{
+		// Unbuilt-reflection and light-overflow notices are debug text, not the game; keep them out
+		// of every frame. (A leading exec on -ExecCmds swallows the automation command, so it is
+		// done here rather than on the command line.)
+		GAreScreenMessagesEnabled = false;
 		static int32 FrameIndex = 0;
 		if (!IsRecording() || !FApp::CanEverRender() || !GEngine || !GEngine->GameViewport)
 		{
