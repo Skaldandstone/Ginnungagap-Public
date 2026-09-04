@@ -17,6 +17,7 @@
 #include "Interaction/InteractionComponent.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Ship/BulkheadDoor.h"
+#include "Obstructions/ObstructionBarrier.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "LevelSetup/QuickDemoPowerStation.h"
 #include "Player/SurvivalPlayerController.h"
@@ -95,7 +96,9 @@ namespace StationPath
 			float FloorZ = Target.Z;
 			{
 				FHitResult Floor;
-				if (World->LineTraceSingleByChannel(Floor, FVector(Feet.X, Feet.Y, Target.Z + 200.0f), FVector(Feet.X, Feet.Y, Target.Z - 400.0f), ECC_Visibility, Params))
+				// From just above the target: a barrier's origin is 160 up, and 200 above that is the
+				// deck's ceiling, whose top the trace would take for a floor.
+				if (World->LineTraceSingleByChannel(Floor, FVector(Feet.X, Feet.Y, Target.Z + 60.0f), FVector(Feet.X, Feet.Y, Target.Z - 400.0f), ECC_Visibility, Params))
 				{
 					FloorZ = Floor.ImpactPoint.Z;
 				}
@@ -171,6 +174,14 @@ bool FPlayEveryStation::Update()
 	{
 		for (TActorIterator<AQuickDemoOpeningSequence> It(World); It; ++It) { It->Skip(); }
 		Steps = StationPath::Steps();
+		// The ship's obstructions, worked the same way (interact starts the selected verb's
+		// activity); afterwards each must be cleared. They come before the side stations so the
+		// climb's barrier is met in chain order.
+		for (TActorIterator<AObstructionBarrier> It(World); It; ++It)
+		{
+			TWeakObjectPtr<AActor> Barrier = *It;
+			Steps.Add({ FString::Printf(TEXT("barrier %s"), *It->GetName()), [Barrier](UWorld*) -> AActor* { return Barrier.Get(); }, NAME_None, NAME_None });
+		}
 		// The optional work off the chain (the corvette's CorvetteSideStation actors): each is
 		// played the same way, with no objective expectations.
 		for (TActorIterator<AActor> It(World); It; ++It)
@@ -336,6 +347,11 @@ bool FPlayEveryStation::Update()
 		{
 			Test->TestFalse(TEXT("After the CIC console the chain is complete: ReachCIC is no longer active"),
 				AQuickDemoMissionDirector::IsObjectiveActive(World, TEXT("QD_ReachCIC")));
+		}
+		if (Step.Name.StartsWith(TEXT("barrier ")))
+		{
+			const AObstructionBarrier* Barrier = Cast<AObstructionBarrier>(Station);
+			Test->TestTrue(FString::Printf(TEXT("After working it, %s is cleared"), *Step.Name), Barrier && Barrier->bCleared);
 		}
 		if (Step.Name == TEXT("welded door"))
 		{
