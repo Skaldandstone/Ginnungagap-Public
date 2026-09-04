@@ -82,6 +82,19 @@ bool FAssertCorvetteRoutes::Update()
 	{
 		// Out of the pod and onto the deck: the opening holds the pawn inside the pod, off the mesh.
 		for (TActorIterator<AQuickDemoOpeningSequence> It(World); It; ++It) { It->Skip(); }
+		// First, with the security deck's barrier in place, the climb must be cut off: an
+		// obstacle the player can walk around is scenery. The breach station is four decks up.
+		{
+			FNavLocation From, To;
+			AActor* Breach = CorvetteRoute::First<AQuickDemoBreachStation>(World);
+			if (Breach && Nav->ProjectPointToNavigation(Pawn->GetActorLocation(), From, FVector(200.0f, 200.0f, 300.0f))
+				&& Nav->ProjectPointToNavigation(Breach->GetActorLocation(), To, FVector(250.0f, 250.0f, 300.0f)))
+			{
+				UNavigationPath* Blocked = Nav->FindPathToLocationSynchronously(World, From.Location, To.Location, Pawn);
+				const bool bComplete = Blocked && Blocked->IsValid() && !Blocked->IsPartial();
+				Test->TestFalse(TEXT("With the trunk barrier in place there is no complete path up to the breach station"), bComplete);
+			}
+		}
 		// Any gate on the way up is opened for the reachability question; the stations are the
 		// chain's business, this is the ship's.
 		for (TActorIterator<AObstructionBarrier> It(World); It; ++It)

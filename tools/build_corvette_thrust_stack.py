@@ -629,9 +629,13 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_beacon("QD_SuitUp", "SUIT STATIONS", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "security":
         # The trunk landing is buckled: cut or squeeze past to keep climbing.
-        # A collapsed ceiling frame section, dropped across the landing and leaning on the hull.
-        spawn_barrier(550.0, 450.0, z, 90.0, "TrunkBarrier", "Buckled trunk frame", False, 8.0, 6.0,
-                      visual=K.ceiling_frame, visual_offset=(40.0, 195.0, -160.0), visual_rotation=(0.0, -68.0, 0.0), visual_scale=(1.0, 0.82, 1.0))
+        # A collapsed ceiling frame section across the mouth of the ramp head, where the climb from
+        # deck 3 steps onto this landing: the one place on the trunk with no way round it.
+        # It also covers the top of the ramp's open edge (x 300..470), where the ramp is still within
+        # a step of the landing; further along it is a metre down and no step at all.
+        trunk = spawn_barrier(230.0, 345.0, z, 0.0, "TrunkBarrier", "Buckled trunk frame", False, 8.0, 6.0,
+                              visual=K.ceiling_frame, visual_offset=(40.0, 240.0, -160.0), visual_rotation=(0.0, -68.0, 0.0), visual_scale=(1.0, 1.0, 1.0))
+        trunk.get_editor_property("blocker").set_box_extent(unreal.Vector(60.0, 245.0, 160.0))
         for i, dx in enumerate((-350.0, 0.0, 350.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ArmoryLocker_{i}", collide=False)
         place(K.computer, (cx, cy - 100.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
@@ -790,7 +794,9 @@ def build():
     if not recast:
         recast = actors.spawn_actor_from_class(unreal.RecastNavMesh, unreal.Vector(0, 0, 0), unreal.Rotator())
     if recast:
-        recast.set_editor_property("runtime_generation", unreal.RuntimeGenerationType.STATIC)
+        # Dynamic: the baked mesh is the start, and clearing an obstruction (or a test hiding one)
+        # rebuilds the tiles around it so paths past it exist once it is gone.
+        recast.set_editor_property("runtime_generation", unreal.RuntimeGenerationType.DYNAMIC)
         # Eleven decks are eleven navmesh layers in every XY tile; the default fixed pool of
         # tiles filled at 27 and the generator dropped the rest ("27 tile limit reached").
         recast.set_editor_property("fixed_tile_pool_size", True)
