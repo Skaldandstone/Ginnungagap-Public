@@ -23,6 +23,7 @@ public:
     virtual void OnConstruction(const FTransform& Transform) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void OnInteract_Implementation(APawn* InteractingPawn) override;
+    virtual FText GetInteractionPrompt_Implementation(APawn* Viewer) const override;
 
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Pickup")
     void ConfigurePickup(UItemDefinition* NewItem, int32 NewQuantity);

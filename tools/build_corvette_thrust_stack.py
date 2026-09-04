@@ -505,8 +505,12 @@ def side_station(cls, deck, code, z, name, display, port=False, dy=0.0, conditio
     every deck has something to do besides walk through it."""
     cy = (MAIN[2] + MAIN[3]) * 0.5
     x = MAIN[0] + 120.0 if port else MAIN[1] - 120.0
-    return spawn_station(cls, x, cy + dy, z, 0.0 if port else 180.0, name, display=display, condition=condition, rarity=rarity, mount=mount,
-                         tags=("QuickDemoGameplay", "CorvetteSideStation", code))
+    station = spawn_station(cls, x, cy + dy, z, 0.0 if port else 180.0, name, display=display, condition=condition, rarity=rarity, mount=mount,
+                            tags=("QuickDemoGameplay", "CorvetteSideStation", code))
+    # A work light over each side station: they sit on the side walls, away from the room's
+    # practical, and read as black panels otherwise.
+    spawn_practical(f"{code}-{name}", x + (120.0 if port else -120.0), cy + dy, z, 140.0, radius=500.0, height=230.0)
+    return station
 
 
 ITEMS = "/Game/Assets/Gameplay/FieldSupplies/Data/Items"

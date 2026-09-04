@@ -21,7 +21,8 @@ field supplies in every main room, a fallen duct across the tactical corridor, a
 welded shut that the tool cuts free.
 
 Start it from the main menu (all three play modes open the corvette) or straight in with
-`tools/play_corvette.ps1`.
+`tools/play_corvette.ps1`; `tools/package_corvette.ps1` packages menu plus corvette as a
+standalone Windows build.
 
 The ship is verified by automation rather than by hand: the navmesh is baked in an editor world
 (`Ginnungagap.Tools.BakeNavmesh`), a route test proves the trunk barrier cuts the climb and that,

@@ -35,6 +35,8 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequenceBase.h"
 #include "Animation/MetaHumanCopyPoseAnimInstance.h"
+#include "Rendering/SkeletalMeshLODRenderData.h"
+#include "Rendering/SkeletalMeshRenderData.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -1582,6 +1584,35 @@ void ACoopSurvivalCharacter::UpdateFirstPersonHeadVisibility()
     // Both assembled-head paths can exist. Hide only head surfaces from their owner,
     // retaining body visibility, animation, and the view seen by other players.
     const bool bHideFromOwner = bFirstPersonView && !bCharacterCreatorPreviewMode;
+
+    // The oversuit carries its own head, helmet and visor, and the first-person camera sits
+    // inside them: without this the owner looks out through the back of their own face. A
+    // skeletal mesh cannot owner-hide a section, so on the locally controlled character the head
+    // sections are switched off in first person and back on in third; a remote copy of this
+    // character is not locally controlled and keeps its helmet.
+    if (PrimaryOversuitMesh && PrimaryOversuitMesh->GetSkeletalMeshAsset() && IsLocallyControlled())
+    {
+        static const TSet<FName> HeadSlots = { TEXT("Head"), TEXT("Eyelash"), TEXT("Tongue"), TEXT("Upper_Teeth"), TEXT("Lower_Teeth"),
+            TEXT("HeadCap"), TEXT("SM_Helm"), TEXT("MS_Visor"), TEXT("Helmet"), TEXT("Visor") };
+        USkeletalMesh* Oversuit = PrimaryOversuitMesh->GetSkeletalMeshAsset();
+        const TArray<FSkeletalMaterial>& Materials = Oversuit->GetMaterials();
+        if (const FSkeletalMeshRenderData* Render = Oversuit->GetResourceForRendering())
+        {
+            for (int32 LOD = 0; LOD < Render->LODRenderData.Num(); ++LOD)
+            {
+                const FSkeletalMeshLODRenderData& LODData = Render->LODRenderData[LOD];
+                for (int32 Section = 0; Section < LODData.RenderSections.Num(); ++Section)
+                {
+                    const int32 MaterialIndex = LODData.RenderSections[Section].MaterialIndex;
+                    if (!Materials.IsValidIndex(MaterialIndex)) continue;
+                    if (HeadSlots.Contains(Materials[MaterialIndex].MaterialSlotName))
+                    {
+                        PrimaryOversuitMesh->ShowMaterialSection(MaterialIndex, Section, !bHideFromOwner, LOD);
+                    }
+                }
+            }
+        }
+    }
     for (UChildActorComponent* HeadSource : {MetaHumanActorComponent.Get(), MetaHumanVisual.Get()})
     {
         AActor* HeadActor = HeadSource ? HeadSource->GetChildActor() : nullptr;

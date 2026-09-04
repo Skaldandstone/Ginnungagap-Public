@@ -82,8 +82,30 @@ bool AInventoryItemPickup::CanBeCollectedBy(const APawn* InteractingPawn) const
         return false;
     }
 
-    const float MaxDistance = InteractionRadiusCm + InteractingPawn->GetSimpleCollisionRadius();
-    return FVector::DistSquared(InteractingPawn->GetActorLocation(), GetActorLocation()) <= FMath::Square(MaxDistance);
+    // Measured across the deck, not to the pawn's centre: a supply lies on the floor a metre below
+    // the pawn's origin, and the straight-line check refused the E press silently at any distance
+    // the prompt was visible from. The prompt (the eye-line, 2.5 m) is the real reach.
+    const float MaxDistance = InteractionRadiusCm + InteractingPawn->GetSimpleCollisionRadius() + 120.0f;
+    return FVector::DistSquared2D(InteractingPawn->GetActorLocation(), GetActorLocation()) <= FMath::Square(MaxDistance);
+}
+
+FText AInventoryItemPickup::GetInteractionPrompt_Implementation(APawn* Viewer) const
+{
+    if (!ItemDefinition)
+    {
+        return FText::GetEmpty();
+    }
+    const FText Name = ItemDefinition->DisplayName.IsEmpty() ? FText::FromName(ItemDefinition->ItemId) : ItemDefinition->DisplayName;
+    const UInventoryComponent* Inventory = Viewer ? Viewer->FindComponentByClass<UInventoryComponent>() : nullptr;
+    if (Inventory && !Inventory->CanAddItem(ItemDefinition, Quantity))
+    {
+        return FText::Format(NSLOCTEXT("Pickup", "NoRoom", "{0} (no room)"), Name);
+    }
+    if (Quantity > 1)
+    {
+        return FText::Format(NSLOCTEXT("Pickup", "TakeMany", "Take {0} x{1}"), Name, FText::AsNumber(Quantity));
+    }
+    return FText::Format(NSLOCTEXT("Pickup", "Take", "Take {0}"), Name);
 }
 
 void AInventoryItemPickup::OnRep_PickupState()

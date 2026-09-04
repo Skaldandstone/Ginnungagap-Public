@@ -17,6 +17,8 @@
 #include "Interaction/InteractionComponent.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Ship/BulkheadDoor.h"
+#include "Inventory/InventoryComponent.h"
+#include "Inventory/InventoryItemPickup.h"
 #include "Obstructions/ObstructionBarrier.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "LevelSetup/QuickDemoPowerStation.h"
@@ -182,6 +184,15 @@ bool FPlayEveryStation::Update()
 			TWeakObjectPtr<AActor> Barrier = *It;
 			Steps.Add({ FString::Printf(TEXT("barrier %s"), *It->GetName()), [Barrier](UWorld*) -> AActor* { return Barrier.Get(); }, NAME_None, NAME_None });
 		}
+		// One supply off the deck, taken with the same E press: a pickup is not an activity, so
+		// its step ends when the actor is gone and the item is in the inventory.
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			if (!It->ActorHasTag(TEXT("CorvetteSupply")) || !Cast<AInventoryItemPickup>(*It)) continue;
+			TWeakObjectPtr<AActor> Supply = *It;
+			Steps.Add({ FString::Printf(TEXT("supply %s"), *It->GetName()), [Supply](UWorld*) -> AActor* { return Supply.Get(); }, NAME_None, NAME_None });
+			break;
+		}
 		// The optional work off the chain (the corvette's CorvetteSideStation actors): each is
 		// played the same way, with no objective expectations.
 		for (TActorIterator<AActor> It(World); It; ++It)
@@ -220,6 +231,15 @@ bool FPlayEveryStation::Update()
 	UPlayerActivityComponent* Activity = Pawn->GetPlayerActivityComponent();
 	UInteractionComponent* Interaction = Pawn->GetInteractionComponent();
 	AActor* Station = Step.Find(World);
+	if (!Station && Step.Name.StartsWith(TEXT("supply ")) && Phase >= 3)
+	{
+		// Taken: the pickup destroyed itself. The item must have landed in the inventory.
+		const UInventoryComponent* Inventory = Pawn->GetInventoryComponent();
+		Test->TestTrue(FString::Printf(TEXT("After taking %s the inventory holds something"), *Step.Name), Inventory && Inventory->GetUsedSlotCount() > 0);
+		Test->AddInfo(FString::Printf(TEXT("STATIONPATH %s: taken, %.1fs"), *Step.Name, Now - StartedAt));
+		++Index; Phase = 0; PhaseAt = -1.0; Presses = 0;
+		return false;
+	}
 	if (!Test->TestNotNull(FString::Printf(TEXT("The demo map has the %s"), *Step.Name), Station))
 	{
 		return Fail(TEXT("station missing"));
@@ -313,6 +333,13 @@ bool FPlayEveryStation::Update()
 		return false;
 
 	case 3:
+		if (Step.Name.StartsWith(TEXT("supply ")))
+		{
+			// A pickup either vanished on the press (handled above, once Find returns null) or did
+			// not take it; give it a moment, then say so.
+			if (Now - PhaseAt < 0.6) return false;
+			return Fail(FString::Printf(TEXT("%s was not taken by the E press (still at %s)"), *Step.Name, *Station->GetActorLocation().ToCompactString()));
+		}
 		if (Activity->IsActivityActive())
 		{
 			// Answer whatever the prompt asks for, at a human-ish cadence. Primary goes through the
