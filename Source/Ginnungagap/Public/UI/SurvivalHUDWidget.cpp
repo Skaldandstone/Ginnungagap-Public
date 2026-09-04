@@ -926,8 +926,13 @@ void USurvivalHUDWidget::RefreshAllStats()
             }
             else
             {
+                // What the thing says of itself first; then the ship system's name; the actor's
+                // placement label only as a last resort (it reads "CVT_CRYOPOD_01").
+                const FText Worded = Focused->Implements<UInteractable>()
+                    ? IInteractable::Execute_GetInteractionPrompt(Focused, Cast<APawn>(OwningCharacter)) : FText::GetEmpty();
                 const AShipSystemActor* System = Cast<AShipSystemActor>(Focused);
-                const FString Name = System && !System->SystemName.IsEmpty() ? System->SystemName : Focused->GetActorNameOrLabel();
+                const FString Name = !Worded.IsEmpty() ? Worded.ToString()
+                    : (System && !System->SystemName.IsEmpty() ? System->SystemName : Focused->GetActorNameOrLabel());
                 Prompt = FString::Printf(TEXT("[ E ]  %s"), *Name.ToUpper());
             }
         }

@@ -328,6 +328,23 @@ void ACryoPodSystem::OnInteract_Implementation(APawn* InteractingPawn)
     }
 }
 
+FText ACryoPodSystem::GetInteractionPrompt_Implementation(APawn* Viewer) const
+{
+    // What the pod offers, in words: the HUD otherwise falls back to the actor's label, and
+    // "CVT_CRYOPOD_01" is a placement name, not a thing a crew member reads off a tube.
+    if (bIsCorrupted)
+    {
+        return bIsRepairing ? NSLOCTEXT("CryoPod", "Repairing", "Repairing cryo pod...")
+                            : NSLOCTEXT("CryoPod", "Repair", "Repair cryo pod");
+    }
+    if (bIsOccupied)
+    {
+        return OccupyingCharacter.Get() == Viewer ? NSLOCTEXT("CryoPod", "Leave", "Leave cryo pod")
+                                                  : NSLOCTEXT("CryoPod", "Occupied", "Cryo pod (occupied)");
+    }
+    return NSLOCTEXT("CryoPod", "Enter", "Enter cryo pod");
+}
+
 void ACryoPodSystem::FinishRepair()
 {
     bIsRepairing = false;

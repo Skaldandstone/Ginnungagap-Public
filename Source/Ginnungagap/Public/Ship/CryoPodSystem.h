@@ -45,6 +45,7 @@ public:
     bool IsFunctioning() const { return !bIsCorrupted; }
 
     virtual void OnInteract_Implementation(APawn* InteractingPawn) override;
+    virtual FText GetInteractionPrompt_Implementation(APawn* Viewer) const override;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cryo Pod")
     float RepairDuration = 4.0f;

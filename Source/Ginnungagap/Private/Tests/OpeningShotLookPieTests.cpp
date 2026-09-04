@@ -24,19 +24,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
-namespace GinnungagapTestMap
-{
-	/** The demo map, or whatever -GinnungagapMap=<package path> names: the same tests serve every ship. */
-	inline FString Path()
-	{
-		FString Override;
-		if (FParse::Value(FCommandLine::Get(), TEXT("GinnungagapMap="), Override) && !Override.IsEmpty())
-		{
-			return Override;
-		}
-		return TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck");
-	}
-}
+#include "Tests/GinnungagapTestMap.h"
 
 /**
  * Stills of the opening, one per phase, captured on phase change from the player's own view.
