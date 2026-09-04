@@ -155,6 +155,8 @@ class Kit:
         self.oxygen = load(f"{ENGP}/SM_OxygenTank")
         self.nitrogen = load(f"{ENGP}/SM_NitrogenTank_Covered")
         self.toolbox = load(f"{ENGP}/SM_Toolbox")
+        self.ceiling_frame = load(f"{ENGI}/SM_Ceiling_HB_A")
+        self.duct_run = load(f"{ENGI}/SM_AirDuct_Mid")   # a 3.6 m duct section: fallen, it fills a corridor
         self.alarm = load(f"{ENGP}/SM_AlarmLight")
         self.portable_light = load(f"{ENGP}/SM_PortableLight")
         self.distrib = load(f"{ENGI}/SM_ElectricDistribBox")
@@ -530,10 +532,19 @@ def oxygen_canister(x, y, z_floor, code, amount=35.0):
     return pickup
 
 
-def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, squeeze_seconds, squeeze_entrapment=0.25):
-    """An obstruction across a passage: cut through with the tool, or squeeze past."""
-    barrier = actors.spawn_actor_from_class(unreal.ObstructionBarrier, unreal.Vector(x, y, z_floor), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
+def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, squeeze_seconds, squeeze_entrapment=0.25,
+                  visual=None, visual_offset=(0.0, 0.0, 0.0), visual_rotation=(0.0, 0.0, 0.0), visual_scale=(1.0, 1.0, 1.0)):
+    """An obstruction across a passage: cut through with the tool, or squeeze past. The blocker is
+    a box (depth x, width y, height z in the barrier's frame); the visual is a Fab mesh posed to
+    fill it, since an invisible box with a prompt is a bug, not an obstacle."""
+    barrier = actors.spawn_actor_from_class(unreal.ObstructionBarrier, unreal.Vector(x, y, z_floor + 160.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
     label(barrier, name)
+    if visual:
+        comp = barrier.get_editor_property("visual_mesh")
+        comp.set_static_mesh(visual)
+        comp.set_editor_property("relative_location", unreal.Vector(*visual_offset))
+        comp.set_editor_property("relative_rotation", unreal.Rotator(roll=visual_rotation[0], pitch=visual_rotation[1], yaw=visual_rotation[2]))
+        comp.set_editor_property("relative_scale3d", unreal.Vector(*visual_scale))
     barrier.set_editor_property("display_name", display)
     barrier.set_editor_property("bypassable", bypassable)
     cut = unreal.ObstructionVerbOption(); cut.set_editor_property("allowed", True); cut.set_editor_property("duration_seconds", cut_seconds)
@@ -618,7 +629,9 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_beacon("QD_SuitUp", "SUIT STATIONS", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "security":
         # The trunk landing is buckled: cut or squeeze past to keep climbing.
-        spawn_barrier(550.0, 450.0, z, 90.0, "TrunkBarrier", "Buckled trunk frame", False, 8.0, 6.0)
+        # A collapsed ceiling frame section, dropped across the landing and leaning on the hull.
+        spawn_barrier(550.0, 450.0, z, 90.0, "TrunkBarrier", "Buckled trunk frame", False, 8.0, 6.0,
+                      visual=K.ceiling_frame, visual_offset=(40.0, 195.0, -160.0), visual_rotation=(0.0, -68.0, 0.0), visual_scale=(1.0, 0.82, 1.0))
         for i, dx in enumerate((-350.0, 0.0, 350.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ArmoryLocker_{i}", collide=False)
         place(K.computer, (cx, cy - 100.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
@@ -714,7 +727,8 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     # corridor (squeeze past, or cut it clear). The observation deck's secondary room is welded
     # shut from some earlier emergency and cut free with the tool (see the door spawn).
     if kind == "tactical":
-        spawn_barrier(1100.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1)
+        spawn_barrier(1100.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
+                      visual=K.duct_run, visual_offset=(0.0, 185.0, -120.0), visual_rotation=(18.0, 0.0, 90.0), visual_scale=(1.05, 1.0, 1.0))
 
 
 # --- the ship -------------------------------------------------------------------------------------

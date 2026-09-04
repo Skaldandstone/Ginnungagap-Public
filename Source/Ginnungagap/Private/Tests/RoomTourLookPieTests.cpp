@@ -5,6 +5,7 @@
 #include "Tests/AutomationEditorCommon.h"
 
 #include "Camera/CameraActor.h"
+#include "Obstructions/ObstructionBarrier.h"
 #include "Camera/CameraComponent.h"
 #include "CollisionQueryParams.h"
 #include "Engine/Engine.h"
@@ -61,26 +62,45 @@ namespace RoomTour
 		{
 			Stops.Add({ TEXT("Hulk"), It->GetActorLocation() });
 		}
+		// The ship's obstacles and optional work, where a map has them: each is a thing the
+		// player must read at a glance.
+		for (TActorIterator<AObstructionBarrier> It(World); It; ++It)
+		{
+			Stops.Add({ FString::Printf(TEXT("Barrier_%s"), *It->GetName()), It->GetActorLocation() });
+		}
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			if (It->ActorHasTag(TEXT("CorvetteWeldedDoor")) || It->ActorHasTag(TEXT("CorvetteSideStation")))
+			{
+				Stops.Add({ FString::Printf(TEXT("Side_%s"), *It->GetName()), It->GetActorLocation() });
+			}
+		}
 		return Stops;
 	}
 
 	/** The camera spot with the longest clear run from the target among four compass directions. */
 	FVector PickCameraSpot(UWorld* World, const FVector& Target)
 	{
-		const FVector Eye = Target + FVector(0.0f, 0.0f, 120.0f);
+		// A target in a wall (a door) has no clear run from its own spot; try a step to either side
+		// of it as well and keep the eye with the longest run.
 		float BestDistance = 0.0f;
-		FVector Best = Eye + FVector(-200.0f, 0.0f, 0.0f);
-		for (const FVector& Dir : { FVector(1, 0, 0), FVector(-1, 0, 0), FVector(0, 1, 0), FVector(0, -1, 0) })
+		FVector Best = Target + FVector(-200.0f, 0.0f, 120.0f);
+		for (const FVector& EyeOffset : { FVector(0, 0, 120), FVector(0, -150, 120), FVector(0, 150, 120), FVector(-150, 0, 120), FVector(150, 0, 120) })
 		{
-			FHitResult Hit;
-			const FVector End = Eye + Dir * 420.0f;
-			const bool bHit = World->LineTraceSingleByChannel(Hit, Eye, End, ECC_Visibility, FCollisionQueryParams(SCENE_QUERY_STAT(RoomTour), false));
-			const float Clear = bHit ? Hit.Distance : 420.0f;
-			if (Clear > BestDistance)
+			const FVector Eye = Target + EyeOffset;
+			for (const FVector& Dir : { FVector(1, 0, 0), FVector(-1, 0, 0), FVector(0, 1, 0), FVector(0, -1, 0) })
 			{
-				BestDistance = Clear;
-				Best = Eye + Dir * FMath::Clamp(Clear - 40.0f, 120.0f, 380.0f);
+				FHitResult Hit;
+				const FVector End = Eye + Dir * 420.0f;
+				const bool bHit = World->LineTraceSingleByChannel(Hit, Eye, End, ECC_Visibility, FCollisionQueryParams(SCENE_QUERY_STAT(RoomTour), false));
+				const float Clear = bHit ? Hit.Distance : 420.0f;
+				if (Clear > BestDistance)
+				{
+					BestDistance = Clear;
+					Best = Eye + Dir * FMath::Clamp(Clear - 40.0f, 120.0f, 380.0f);
+				}
 			}
+			if (BestDistance >= 300.0f) { break; }
 		}
 		return Best + FVector(0.0f, 0.0f, 10.0f);
 	}
