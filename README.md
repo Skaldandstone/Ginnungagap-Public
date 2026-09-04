@@ -5,7 +5,7 @@ Unreal Engine 5.8 by a solo developer at Skald and Stone. This repository is the
 snapshot of the project: the complete C++ source, the Python tooling that generates and dresses the
 ship, the design documentation and concept art, the project's own game assets, and the
 evidence-based project record. It is refreshed from the private working repository by
-`tools/export_public_repo.py`; this snapshot is from 2026-09-03.
+`tools/export_public_repo.py`; this snapshot is from 2026-09-04.
 
 ## The demo
 

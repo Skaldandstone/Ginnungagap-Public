@@ -163,6 +163,20 @@ bool FAssertCorvetteRoutes::Update()
 		Test->TestTrue(FString::Printf(TEXT("A complete walkable path exists from the start to the %s (path ends %.0f cm from it, %d points, partial %d)"),
 			*Leg.Name, FVector::Dist(End, Leg.Target->GetActorLocation()), Path ? Path->PathPoints.Num() : 0, (Path && Path->IsPartial()) ? 1 : 0), bComplete);
 	}
+	// The optional work on every deck (tagged CorvetteSideStation by the generator) must be
+	// walkable too, or a deck is just a corridor with a locked room.
+	int32 SideStations = 0;
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		if (!It->ActorHasTag(TEXT("CorvetteSideStation"))) continue;
+		++SideStations;
+		FNavLocation GoalOnMesh;
+		const bool bGoalOnMesh = Nav->ProjectPointToNavigation(It->GetActorLocation(), GoalOnMesh, FVector(250.0f, 250.0f, 300.0f));
+		UNavigationPath* Path = bGoalOnMesh ? Nav->FindPathToLocationSynchronously(World, StartOnMesh.Location, GoalOnMesh.Location, Pawn) : nullptr;
+		const bool bComplete = Path && Path->IsValid() && !Path->IsPartial() && Path->PathPoints.Num() > 1;
+		Test->TestTrue(FString::Printf(TEXT("Side station %s at %s is reachable from the start"), *It->GetName(), *It->GetActorLocation().ToCompactString()), bComplete);
+	}
+	Test->TestTrue(FString::Printf(TEXT("The corvette has side stations to find (%d)"), SideStations), SideStations >= 8);
 	bPrepared = false; StartedAt = -1.0;
 	return true;
 }

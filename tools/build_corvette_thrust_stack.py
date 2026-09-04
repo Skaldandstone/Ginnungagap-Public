@@ -490,6 +490,15 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state)
 
 
+def side_station(cls, deck, code, z, name, display, port=False, dy=0.0, condition="WORN", rarity="ROUTINE", mount="WALL_PANEL"):
+    """Optional work on a deck's side wall: a real activity station off the objective chain, so
+    every deck has something to do besides walk through it."""
+    cy = (MAIN[2] + MAIN[3]) * 0.5
+    x = MAIN[0] + 120.0 if port else MAIN[1] - 120.0
+    return spawn_station(cls, x, cy + dy, z, 0.0 if port else 180.0, name, display=display, condition=condition, rarity=rarity, mount=mount,
+                         tags=("QuickDemoGameplay", "CorvetteSideStation", code))
+
+
 def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state):
     cx, cy = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
     sx, sy = (SECOND[0] + SECOND[1]) * 0.5, (SECOND[2] + SECOND[3]) * 0.5
@@ -512,6 +521,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         main.set_editor_property("system_anchor", station)
         spawn_beacon("QD_RestorePower", "MAIN POWER", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
         place(K.distrib, (MAIN[0] + 60.0, cy, z + 120.0), (0, 0, -90.0), (1, 1, 1), f"D{deck:02d}_Distrib", collide=False)
+        side_station(unreal.BatteryRecoveryStation, deck, code, z, "BatteryRecovery", "Recover backup batteries", dy=-200.0)
     elif kind == "workshop":
         trigger = actors.spawn_actor_from_class(unreal.QuickDemoObjectiveTrigger, unreal.Vector(cx, cy, z + 150.0), unreal.Rotator())
         label(trigger, "WorkshopTrigger")
@@ -576,11 +586,14 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ArmoryLocker_{i}", collide=False)
         place(K.computer, (cx, cy - 100.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
         place(K.alarm, (MAIN_DOOR_X + 200.0, CORRIDOR[3] - 60.0, z + 300.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_Alarm", collide=False)
+        side_station(unreal.MechanicalOverrideStation, deck, code, z, "ArmoryOverride", "Override armory lock", port=True, dy=200.0)
     elif kind == "marine":
         for i, dx in enumerate((-450.0, -150.0, 150.0, 450.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_GearLocker_{i}", collide=False)
         place(K.table, (cx, cy, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_BriefingTable")
         place(K.oxygen, (MAIN[0] + 100.0, cy + 250.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_O2")
+        side_station(unreal.TurretServiceStation, deck, code, z, "TurretService", "Service point-defence turret", dy=-200.0)
+        side_station(unreal.SuitPatchingStation, deck, code, z, "SuitPatching", "Patch pressure suit", port=True, dy=-150.0)
     elif kind == "commons":
         for i, dx in enumerate((-400.0, 0.0, 400.0)):
             place(K.crate, (cx + dx, back_y - 20.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_GearCrate_{i}")
@@ -590,6 +603,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         # The secondary room is an airlock that has lost pressure: repressurise before it opens.
         outer = spawn_door(bulkhead_class, sx, SECOND[3], z, 0.0, f"Airlock_{code}", seal=True)
         station = spawn_station(unreal.AirlockRepressurizationStation, sx - 250.0, SECOND[3] - 90.0, z, 0.0, "AirlockRepressurize", target=outer, display="Repressurise airlock")
+        side_station(unreal.OxygenScrubberServiceStation, deck, code, z, "ScrubberService", "Service CO2 scrubbers", dy=200.0)
     elif kind == "breach":
         hazard = actors.spawn_actor_from_class(unreal.HazardZoneActor, unreal.Vector(cx, cy, z + 200.0), unreal.Rotator())
         label(hazard, "VacuumHazard")
@@ -628,16 +642,19 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         place(K.circular, (cx - 75.0, cy, z), (0, 0, 0), (1.2, 1.2, 1.0), f"D{deck:02d}_PlottingTable")
         for i, dx in enumerate((-450.0, 450.0)):
             place(K.control_panel or K.computer2, (cx + dx, back_y, z + 80.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_Plotter_{i}")
+        side_station(unreal.ComponentReplacementStation, deck, code, z, "PlotterCore", "Replace plotter core", dy=200.0)
     elif kind == "observation":
         # A glass wall to space along the fore hull.
         for i, dx in enumerate((-550.0, -183.0, 183.0, 550.0)):
             place(K.glass, (cx + dx, MAIN[3] - 20.0, z + 200.0), (0, 0, 0), (1, 1, 1.8), f"D{deck:02d}_Window_{i}", collide=False)
         for i, dx in enumerate((-300.0, 300.0)):
             place(K.chair, (cx + dx, cy, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_ObsChair_{i}")
+        side_station(unreal.DecontaminationStation, deck, code, z, "ObsDecon", "Run decontamination cycle", port=True, dy=-200.0)
     elif kind == "sensors":
         for i, dx in enumerate((-500.0, -167.0, 167.0, 500.0)):
             place(K.ice_computer, (cx + dx, back_y, z + 78.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_SensorRack_{i}")
         place(K.computer2, (cx, cy - 150.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
+        side_station(unreal.SensorCalibrationStation, deck, code, z, "SensorCalibration", "Calibrate sensor suite", dy=200.0)
 
 
 # --- the ship -------------------------------------------------------------------------------------
