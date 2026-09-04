@@ -5,9 +5,14 @@
 #
 # Run it alone: the cook loads every asset the maps reference and a parallel editor or build
 # fights it for the DLLs and the DDC. Budget thirty to sixty minutes the first time.
+#
+# Known: the cook commandlet has hung at shutdown after "Cook by the book total time". If the
+# log stops there and UnrealEditor-Cmd.exe is still alive, kill it and rerun with
+# -skipbuild -skipcook (the cooked data is complete); this script does that with -StageOnly.
 param(
     [ValidateSet("Development", "Shipping")]
     [string]$Configuration = "Development",
+    [switch]$StageOnly,
     [string]$EngineRoot = "C:\Program Files\Epic Games\UE_5.8",
     [string]$ArchiveDirectory = ""
 )
@@ -24,6 +29,7 @@ $Maps = @(
     "/Game/UI/MainMenu",
     "/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack"
 ) -join "+"
+$Steps = if ($StageOnly) { @("-skipbuild", "-skipcook") } else { @("-build", "-cook") }
 & $RunUAT BuildCookRun `
     "-project=$ProjectFile" `
     -target=Ginnungagap `
@@ -32,8 +38,7 @@ $Maps = @(
     -unattended `
     -platform=Win64 `
     "-clientconfig=$Configuration" `
-    -build `
-    -cook `
+    @Steps `
     "-map=$Maps" `
     -CookCultures=en `
     -stage `

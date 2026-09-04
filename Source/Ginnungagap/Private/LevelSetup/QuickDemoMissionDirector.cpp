@@ -300,6 +300,7 @@ void AQuickDemoMissionDirector::ApplyRestoredWorldState(const TArray<FName>& Com
         {
             if (It->ActorHasTag(TEXT("QuickDemoCICDoor")))
             {
+                It->SetLocked(false);
                 It->Unseal();
             }
         }

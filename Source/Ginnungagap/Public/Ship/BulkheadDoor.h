@@ -41,6 +41,19 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bulkhead Door")
     float CycleDuration = 2.0f;
 
+    /** A locked door does not cycle from its own panel; something else (an override station) releases it. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bulkhead Door")
+    bool bLocked = false;
+
+    /** Why, in the words the prompt shows: "override from the CIC access panel". */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bulkhead Door")
+    FText LockedReason;
+
+    UFUNCTION(BlueprintCallable, Category = "Bulkhead Door")
+    void SetLocked(bool bInLocked);
+
+    virtual FText GetInteractionPrompt_Implementation(APawn* Viewer) const override;
+
     UFUNCTION(BlueprintCallable, Category = "Bulkhead Door")
     virtual void Seal();
 

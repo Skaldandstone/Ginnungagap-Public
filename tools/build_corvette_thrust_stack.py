@@ -457,6 +457,10 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     # Doors.
     main_door = spawn_door(bulkhead_class, MAIN_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}",
                            seal=(kind == "cic"), tags=(["QuickDemoCICDoor"] if kind == "cic" else []))
+    if kind == "cic":
+        # Sealed and locked: its own panel refuses, the access station in the corridor releases it.
+        main_door.set_editor_property("locked", True)
+        main_door.set_editor_property("locked_reason", unreal.Text("override from the CIC access panel"))
     if kind == "observation":
         welded = spawn_door(unreal.WeldableBulkheadDoor, SECOND_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}-B", tags=("CorvetteWeldedDoor",))
         welded.set_editor_property("welded_shut", True)

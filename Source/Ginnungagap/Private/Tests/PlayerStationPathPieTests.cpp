@@ -77,6 +77,7 @@ namespace StationPath
 			{ TEXT("suit repair bench"),  &First<AQuickDemoSuitRepairBench>,   NAME_None,                NAME_None },
 			{ TEXT("power station"),      &First<AQuickDemoPowerStation>,      TEXT("QD_RestorePower"),  TEXT("QD_SealBreach") },
 			{ TEXT("breach station"),     &First<AQuickDemoBreachStation>,     TEXT("QD_SealBreach"),    TEXT("QD_ReachCIC") },
+			{ TEXT("locked CIC door"),    [](UWorld* W) -> AActor* { for (TActorIterator<ABulkheadDoor> It(W); It; ++It) { if (It->ActorHasTag(TEXT("QuickDemoCICDoor"))) return *It; } return nullptr; }, NAME_None, NAME_None },
 			{ TEXT("CIC access station"), &First<AQuickDemoCICAccessStation>,  TEXT("QD_ReachCIC"),      TEXT("QD_ReachCIC") },
 			{ TEXT("CIC console"),        &First<AQuickDemoCICConsole>,        TEXT("QD_ReachCIC"),      NAME_None },
 		};
@@ -160,6 +161,7 @@ bool FPlayEveryStation::Update()
 	static double PhaseAt = -1.0;
 	static double StartedAt = 0.0;
 	static int32 Presses = 0;
+	static bool bSawLockedCICDoor = false;
 
 	UWorld* World = StationPath::FindPieWorld();
 	ASurvivalPlayerController* PC = World ? Cast<ASurvivalPlayerController>(UGameplayStatics::GetPlayerController(World, 0)) : nullptr;
@@ -333,6 +335,23 @@ bool FPlayEveryStation::Update()
 		return false;
 
 	case 3:
+		if (Step.Name == TEXT("locked CIC door"))
+		{
+			// The press must do nothing: the door stays sealed and says why. Only maps that lock it
+			// (the corvette) are strict; elsewhere the step just records what the door did.
+			if (Now - PhaseAt < 2.6) return false;   // longer than a door cycle
+			const ABulkheadDoor* Door = Cast<ABulkheadDoor>(Station);
+			bSawLockedCICDoor = Door && Door->bLocked;
+			if (Door && Door->bLocked)
+			{
+				Test->TestTrue(TEXT("A locked CIC door stays sealed after the E press"), Door->bIsSealed && !Door->IsPassable());
+				const FText Prompt = IInteractable::Execute_GetInteractionPrompt(Station, Pawn);
+				Test->TestTrue(FString::Printf(TEXT("The locked door's prompt says so (%s)"), *Prompt.ToString()), Prompt.ToString().Contains(TEXT("locked")));
+			}
+			Test->AddInfo(FString::Printf(TEXT("STATIONPATH %s: sealed %d locked %d, %.1fs"), *Step.Name, Door && Door->bIsSealed ? 1 : 0, Door && Door->bLocked ? 1 : 0, Now - StartedAt));
+			++Index; Phase = 0; PhaseAt = -1.0; Presses = 0;
+			return false;
+		}
 		if (Step.Name.StartsWith(TEXT("supply ")))
 		{
 			// A pickup either vanished on the press (handled above, once Find returns null) or did
@@ -379,6 +398,18 @@ bool FPlayEveryStation::Update()
 		{
 			const AObstructionBarrier* Barrier = Cast<AObstructionBarrier>(Station);
 			Test->TestTrue(FString::Printf(TEXT("After working it, %s is cleared"), *Step.Name), Barrier && Barrier->bCleared);
+		}
+		if (Step.Name == TEXT("CIC access station") && bSawLockedCICDoor)
+		{
+			// Only where the door was locked (the corvette): the older map's door opens on the
+			// objective rather than the override, on its own timing.
+			for (TActorIterator<ABulkheadDoor> It(World); It; ++It)
+			{
+				if (It->ActorHasTag(TEXT("QuickDemoCICDoor")))
+				{
+					Test->TestTrue(TEXT("After the override the CIC door is unlocked and passable"), !It->bLocked && It->IsPassable());
+				}
+			}
 		}
 		if (Step.Name == TEXT("welded door"))
 		{

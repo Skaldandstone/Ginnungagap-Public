@@ -118,6 +118,8 @@ void AMaintenanceActivityStation::OnActivityCompleted_Implementation(APawn* Play
     case EMaintenanceActivityEffect::ToggleMechanicalOverride:
         if (ABulkheadDoor* Door = Cast<ABulkheadDoor>(Target))
         {
+            // An override is the release for a locked door; from here on its own panel works.
+            Door->SetLocked(false);
             if (Door->bIsSealed) Door->Unseal(); else Door->Seal();
         }
         break;

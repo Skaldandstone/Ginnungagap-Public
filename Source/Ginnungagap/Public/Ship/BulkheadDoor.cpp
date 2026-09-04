@@ -55,9 +55,28 @@ bool ABulkheadDoor::IsPassable() const
     return !bIsSealed;
 }
 
+void ABulkheadDoor::SetLocked(bool bInLocked)
+{
+    bLocked = bInLocked;
+    ForceNetUpdate();
+}
+
+FText ABulkheadDoor::GetInteractionPrompt_Implementation(APawn* Viewer) const
+{
+    // What the door offers, in words: the HUD otherwise shows the placement label.
+    if (bIsCorrupted) return NSLOCTEXT("BulkheadDoor", "Corrupted", "Bulkhead fouled: purge the growth first");
+    if (bIsCycling) return NSLOCTEXT("BulkheadDoor", "Cycling", "Bulkhead cycling...");
+    if (bLocked && bIsSealed)
+    {
+        return LockedReason.IsEmpty() ? NSLOCTEXT("BulkheadDoor", "Locked", "Bulkhead locked")
+                                      : FText::Format(NSLOCTEXT("BulkheadDoor", "LockedWhy", "Bulkhead locked: {0}"), LockedReason);
+    }
+    return bIsSealed ? NSLOCTEXT("BulkheadDoor", "Open", "Open bulkhead") : NSLOCTEXT("BulkheadDoor", "Seal", "Seal bulkhead");
+}
+
 void ABulkheadDoor::OnInteract_Implementation(APawn* InteractingPawn)
 {
-    if (bIsCorrupted || bIsCycling)
+    if (bIsCorrupted || bIsCycling || (bLocked && bIsSealed))
     {
         return;
     }
