@@ -17,6 +17,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Welding")
     FPlayerActivityDefinition WeldingActivity;
 
+    /** The work of cutting a welded seam free again; offered instead of welding while the door is welded shut. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Welding")
+    FPlayerActivityDefinition CuttingActivity;
+
     UPROPERTY(ReplicatedUsing=OnRep_WeldedShut, BlueprintReadOnly, Category="Welding")
     bool bWeldedShut = false;
 

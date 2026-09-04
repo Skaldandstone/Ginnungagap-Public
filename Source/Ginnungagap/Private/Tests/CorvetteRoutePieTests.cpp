@@ -16,6 +16,7 @@
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "LevelSetup/QuickDemoPowerStation.h"
 #include "Obstructions/ObstructionBarrier.h"
+#include "Activities/WeldableBulkheadDoor.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "NavigationData.h"
 
@@ -177,6 +178,23 @@ bool FAssertCorvetteRoutes::Update()
 		Test->TestTrue(FString::Printf(TEXT("Side station %s at %s is reachable from the start"), *It->GetName(), *It->GetActorLocation().ToCompactString()), bComplete);
 	}
 	Test->TestTrue(FString::Printf(TEXT("The corvette has side stations to find (%d)"), SideStations), SideStations >= 8);
+	// The obstacles beyond the security deck: a bypassable cable tray in the tactical corridor and
+	// the observation deck's welded secondary door. They were hidden for the reachability question
+	// above; here they must exist and be what they claim.
+	int32 Barriers = 0, Bypassable = 0;
+	for (TActorIterator<AObstructionBarrier> It(World); It; ++It) { ++Barriers; if (It->bBypassable) { ++Bypassable; } }
+	Test->TestTrue(FString::Printf(TEXT("The corvette has obstruction barriers (%d, %d bypassable)"), Barriers, Bypassable), Barriers >= 2 && Bypassable >= 1);
+	int32 Welded = 0;
+	for (TActorIterator<AWeldableBulkheadDoor> It(World); It; ++It)
+	{
+		if (!It->ActorHasTag(TEXT("CorvetteWeldedDoor"))) continue;
+		++Welded;
+		Test->TestTrue(FString::Printf(TEXT("%s is welded shut and impassable"), *It->GetName()), It->bWeldedShut && !It->IsPassable());
+	}
+	Test->TestTrue(FString::Printf(TEXT("The corvette has a welded door to cut free (%d)"), Welded), Welded >= 1);
+	int32 Supplies = 0;
+	for (TActorIterator<AActor> It(World); It; ++It) { if (It->ActorHasTag(TEXT("CorvetteSupply"))) { ++Supplies; } }
+	Test->TestTrue(FString::Printf(TEXT("The corvette has supplies to find (%d)"), Supplies), Supplies >= 20);
 	bPrepared = false; StartedAt = -1.0;
 	return true;
 }

@@ -16,6 +16,7 @@
 #include "CoopSurvivalCharacter.h"
 #include "Interaction/InteractionComponent.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
+#include "Ship/BulkheadDoor.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "LevelSetup/QuickDemoPowerStation.h"
 #include "Player/SurvivalPlayerController.h"
@@ -87,9 +88,19 @@ namespace StationPath
 		for (const FVector& Dir : { Forward, -Forward, FVector(Forward.Y, -Forward.X, 0.0f), FVector(-Forward.Y, Forward.X, 0.0f), FVector(1, 0, 0), FVector(-1, 0, 0), FVector(0, 1, 0), FVector(0, -1, 0) })
 		{
 			const FVector Feet = Target + Dir * Distance;
-			const FVector Spot(Feet.X, Feet.Y, Target.Z + 96.0f);
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(StationPath), false, Pawn);
 			Params.AddIgnoredActor(Station);
+			// Stand on the floor under the spot, not at the station's own height: stations sit 90 cm
+			// up a wall and doors 20 cm under the deck, and a capsule sunk into the floor is "blocked".
+			float FloorZ = Target.Z;
+			{
+				FHitResult Floor;
+				if (World->LineTraceSingleByChannel(Floor, FVector(Feet.X, Feet.Y, Target.Z + 200.0f), FVector(Feet.X, Feet.Y, Target.Z - 400.0f), ECC_Visibility, Params))
+				{
+					FloorZ = Floor.ImpactPoint.Z;
+				}
+			}
+			const FVector Spot(Feet.X, Feet.Y, FloorZ + 96.0f + 2.0f);
 			TArray<FOverlapResult> Overlaps;
 			World->OverlapMultiByChannel(Overlaps, Spot, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(40.0f, 94.0f), Params);
 			bool bBlocked = false;
@@ -160,6 +171,22 @@ bool FPlayEveryStation::Update()
 	{
 		for (TActorIterator<AQuickDemoOpeningSequence> It(World); It; ++It) { It->Skip(); }
 		Steps = StationPath::Steps();
+		// The optional work off the chain (the corvette's CorvetteSideStation actors): each is
+		// played the same way, with no objective expectations.
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			if (!It->ActorHasTag(TEXT("CorvetteSideStation"))) continue;
+			TWeakObjectPtr<AActor> Side = *It;
+			Steps.Add({ FString::Printf(TEXT("side station %s"), *It->GetName()), [Side](UWorld*) -> AActor* { return Side.Get(); }, NAME_None, NAME_None });
+		}
+		// The welded door is worked the same way (an activity source rather than a station); once
+		// its weld is cut it must be passable.
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			if (!It->ActorHasTag(TEXT("CorvetteWeldedDoor"))) continue;
+			TWeakObjectPtr<AActor> Door = *It;
+			Steps.Add({ TEXT("welded door"), [Door](UWorld*) -> AActor* { return Door.Get(); }, NAME_None, NAME_None });
+		}
 		Index = 0; Phase = 0; PhaseAt = -1.0;
 		StartedAt = Now;
 		if (Pawn->GetPlayerActivityComponent() == nullptr || Pawn->GetInteractionComponent() == nullptr)
@@ -168,9 +195,9 @@ bool FPlayEveryStation::Update()
 		}
 		return false;
 	}
-	if (Now - StartedAt > 180.0)
+	if (Now - StartedAt > 300.0)
 	{
-		return Fail(FString::Printf(TEXT("Playing the stations took more than 180s (stuck at %s, phase %d)"), *Steps[Index].Name, Phase));
+		return Fail(FString::Printf(TEXT("Playing the stations took more than 300s (stuck at %s, phase %d)"), *Steps[Index].Name, Phase));
 	}
 	if (Index >= Steps.Num())
 	{
@@ -227,8 +254,15 @@ bool FPlayEveryStation::Update()
 		{
 			// Not every station is the thing the eye-line hits first (a bench's prop can be); aim at its
 			// bounds centre once, then judge.
+			// Colliding components only: a door's hidden, collision-free visual mesh sits at the world
+			// origin and would drag the bounds centre (and the aim) into the floor.
 			FVector Origin, Extent;
-			Station->GetActorBounds(false, Origin, Extent, false);
+			Station->GetActorBounds(true, Origin, Extent, false);
+			if (Extent.IsNearlyZero()) { Station->GetActorBounds(false, Origin, Extent, false); }
+			if (Now - PhaseAt >= 1.2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("STATIONPATH aim at %s: bounds origin %s extent %s (actor at %s)"), *Step.Name, *Origin.ToCompactString(), *Extent.ToCompactString(), *Station->GetActorLocation().ToCompactString());
+			}
 			if (AController* C = Pawn->GetController())
 			{
 				FVector Eye; FRotator EyeRot;
@@ -237,6 +271,16 @@ bool FPlayEveryStation::Update()
 			}
 			if (Now - PhaseAt < 1.2) return false;
 			const AActor* Focused = Interaction->GetFocusedInteractable();
+			{
+				// What the eye-line actually hits, for the log.
+				FVector Eye; FRotator EyeRot;
+				Pawn->GetActorEyesViewPoint(Eye, EyeRot);
+				FHitResult Hit;
+				FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(StationPathEye), false, Pawn);
+				const bool bHit = World->LineTraceSingleByChannel(Hit, Eye, Eye + EyeRot.Vector() * 250.0f, ECC_Visibility, TraceParams);
+				UE_LOG(LogTemp, Display, TEXT("STATIONPATH eye-line at %s from %s rot %s hits %s.%s at %.0f cm"), *Step.Name, *Eye.ToCompactString(), *EyeRot.ToCompactString(),
+					bHit && Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("nothing"), bHit && Hit.GetComponent() ? *Hit.GetComponent()->GetName() : TEXT("-"), bHit ? Hit.Distance : 0.0f);
+			}
 			{
 				const UPrimitiveComponent* Base = Pawn->GetMovementBase();
 				const UCharacterMovementComponent* Move = Pawn->GetCharacterMovement();
@@ -288,10 +332,15 @@ bool FPlayEveryStation::Update()
 			Test->TestTrue(FString::Printf(TEXT("After the %s, %s is the active objective"), *Step.Name, *Step.ObjectiveActiveAfter.ToString()),
 				AQuickDemoMissionDirector::IsObjectiveActive(World, Step.ObjectiveActiveAfter));
 		}
-		else if (Index == Steps.Num() - 1)
+		else if (Step.Name == TEXT("CIC console"))
 		{
 			Test->TestFalse(TEXT("After the CIC console the chain is complete: ReachCIC is no longer active"),
 				AQuickDemoMissionDirector::IsObjectiveActive(World, TEXT("QD_ReachCIC")));
+		}
+		if (Step.Name == TEXT("welded door"))
+		{
+			const ABulkheadDoor* Door = Cast<ABulkheadDoor>(Station);
+			Test->TestTrue(TEXT("After cutting the weld, the door is passable"), Door && Door->IsPassable());
 		}
 		Test->AddInfo(FString::Printf(TEXT("STATIONPATH %s: %d presses, %.1fs"), *Step.Name, Presses, Now - StartedAt));
 		++Index; Phase = 0; PhaseAt = -1.0; Presses = 0;

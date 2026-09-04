@@ -170,6 +170,11 @@ void AProductionBulkheadDoor::SnapLeavesToState()
 void AProductionBulkheadDoor::BeginPlay()
 {
     Super::BeginPlay();
+    // The leaf layout (closed X, travel, Z) is derived in construction and never saved, so a door
+    // loaded from a level would otherwise snap its leaves to Z 0: half under the deck, where
+    // nothing in front of the doorway could be looked at or blocked. Derive it again from the
+    // saved settings before taking the state.
+    ApplyGeometry();
     // A door begins in its state, not sliding into it.
     SnapLeavesToState();
 }

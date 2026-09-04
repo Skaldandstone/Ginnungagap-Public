@@ -451,7 +451,11 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     # Doors.
     main_door = spawn_door(bulkhead_class, MAIN_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}",
                            seal=(kind == "cic"), tags=(["QuickDemoCICDoor"] if kind == "cic" else []))
-    spawn_door(bulkhead_class, SECOND_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}-B")
+    if kind == "observation":
+        welded = spawn_door(unreal.WeldableBulkheadDoor, SECOND_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}-B", tags=("CorvetteWeldedDoor",))
+        welded.set_editor_property("welded_shut", True)
+    else:
+        spawn_door(bulkhead_class, SECOND_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}-B")
     spawn_door(bulkhead_class, SERVICE_DOOR_X, CORRIDOR[2], z, 0.0, f"Door_{code}-S")
     state["doors"][code] = main_door
 
@@ -497,6 +501,47 @@ def side_station(cls, deck, code, z, name, display, port=False, dy=0.0, conditio
     x = MAIN[0] + 120.0 if port else MAIN[1] - 120.0
     return spawn_station(cls, x, cy + dy, z, 0.0 if port else 180.0, name, display=display, condition=condition, rarity=rarity, mount=mount,
                          tags=("QuickDemoGameplay", "CorvetteSideStation", code))
+
+
+ITEMS = "/Game/Assets/Gameplay/FieldSupplies/Data/Items"
+
+
+def supply(item, x, y, z_floor, code, quantity=1, name=None):
+    """A field supply on the deck: an inventory pickup drawing the item's own world mesh."""
+    definition = load(f"{ITEMS}/DA_Item_{item}")
+    if not definition:
+        unreal.log_warning(f"no item definition DA_Item_{item}")
+        return None
+    pickup = actors.spawn_actor_from_class(unreal.InventoryItemPickup, unreal.Vector(x, y, z_floor + 6.0), unreal.Rotator(pitch=0.0, yaw=35.0, roll=0.0))
+    label(pickup, name or f"Supply_{item}_{code[-3:]}")
+    pickup.set_editor_property("item_definition", definition)
+    pickup.set_editor_property("quantity", quantity)
+    pickup.set_editor_property("tags", [unreal.Name("CorvetteSupply"), unreal.Name(code)])
+    return pickup
+
+
+def oxygen_canister(x, y, z_floor, code, amount=35.0):
+    """A loose oxygen canister: walked over, it tops the suit up."""
+    pickup = actors.spawn_actor_from_class(unreal.SurvivalPickup, unreal.Vector(x, y, z_floor + 30.0), unreal.Rotator())
+    label(pickup, f"O2Canister_{code[-3:]}")
+    pickup.set_editor_property("pickup_type", unreal.PickupType.OXYGEN)
+    pickup.set_editor_property("amount", amount)
+    pickup.set_editor_property("tags", [unreal.Name("CorvetteSupply"), unreal.Name(code)])
+    return pickup
+
+
+def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, squeeze_seconds, squeeze_entrapment=0.25):
+    """An obstruction across a passage: cut through with the tool, or squeeze past."""
+    barrier = actors.spawn_actor_from_class(unreal.ObstructionBarrier, unreal.Vector(x, y, z_floor), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
+    label(barrier, name)
+    barrier.set_editor_property("display_name", display)
+    barrier.set_editor_property("bypassable", bypassable)
+    cut = unreal.ObstructionVerbOption(); cut.set_editor_property("allowed", True); cut.set_editor_property("duration_seconds", cut_seconds)
+    cut.set_editor_property("minimum_equipment_condition", 0.2); cut.set_editor_property("noise_loudness", 0.3)
+    squeeze = unreal.ObstructionVerbOption(); squeeze.set_editor_property("allowed", True); squeeze.set_editor_property("duration_seconds", squeeze_seconds)
+    squeeze.set_editor_property("noise_loudness", 0.15); squeeze.set_editor_property("near_entrapment_chance", squeeze_entrapment)
+    barrier.set_editor_property("options", {unreal.ObstructionVerb.CUT: cut, unreal.ObstructionVerb.SQUEEZE: squeeze})
+    return barrier
 
 
 def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state):
@@ -573,15 +618,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_beacon("QD_SuitUp", "SUIT STATIONS", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "security":
         # The trunk landing is buckled: cut or squeeze past to keep climbing.
-        barrier = actors.spawn_actor_from_class(unreal.ObstructionBarrier, unreal.Vector(550.0, 450.0, z), unreal.Rotator(pitch=0.0, yaw=90.0, roll=0.0))
-        label(barrier, "TrunkBarrier")
-        barrier.set_editor_property("display_name", "Buckled trunk frame")
-        barrier.set_editor_property("bypassable", False)
-        cut = unreal.ObstructionVerbOption(); cut.set_editor_property("allowed", True); cut.set_editor_property("duration_seconds", 8.0)
-        cut.set_editor_property("minimum_equipment_condition", 0.2); cut.set_editor_property("noise_loudness", 0.3)
-        squeeze = unreal.ObstructionVerbOption(); squeeze.set_editor_property("allowed", True); squeeze.set_editor_property("duration_seconds", 6.0)
-        squeeze.set_editor_property("noise_loudness", 0.15); squeeze.set_editor_property("near_entrapment_chance", 0.25)
-        barrier.set_editor_property("options", {unreal.ObstructionVerb.CUT: cut, unreal.ObstructionVerb.SQUEEZE: squeeze})
+        spawn_barrier(550.0, 450.0, z, 90.0, "TrunkBarrier", "Buckled trunk frame", False, 8.0, 6.0)
         for i, dx in enumerate((-350.0, 0.0, 350.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ArmoryLocker_{i}", collide=False)
         place(K.computer, (cx, cy - 100.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
@@ -655,6 +692,29 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
             place(K.ice_computer, (cx + dx, back_y, z + 78.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_SensorRack_{i}")
         place(K.computer2, (cx, cy - 150.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
         side_station(unreal.SensorCalibrationStation, deck, code, z, "SensorCalibration", "Calibrate sensor suite", dy=200.0)
+
+    # Supplies. Two spots inside every main room's aft corners, clear of the door, the side
+    # stations and each deck's furniture; loose oxygen in a few corridors. Enough to keep the
+    # suit's meters honest on the climb, not enough to ignore them.
+    SUPPLIES = {
+        "power": ("FieldRepairKit", "CoolantGelPack"), "workshop": ("SuitPatchSealant", None), "cryo": ("TraumaKit", "GeneralMedicalAmpoule"),
+        "security": ("SuitPatchSealant", "EmergencyOxygenCartridge"), "marine": ("EmergencyOxygenCartridge", "CompoundSplint"),
+        "commons": ("GeneralMedicalAmpoule", "EmergencyOxygenCartridge"), "breach": ("SuitPatchSealant", "RecompressionAmpoule"),
+        "cic": ("CoolantGelPack", "ChelationInjector"), "tactical": ("FieldRepairKit", None), "observation": ("RecompressionAmpoule", "ThermalRegulationWrap"),
+        "sensors": ("EmergencyOxygenCartridge", "FieldRepairKit"),
+    }
+    a, b = SUPPLIES.get(kind, (None, None))
+    if a:
+        supply(a, MAIN[0] + 400.0, MAIN[2] + 300.0, z, code)
+    if b:
+        supply(b, MAIN[1] - 350.0, MAIN[2] + 300.0, z, code)
+    if kind in ("marine", "breach", "observation"):
+        oxygen_canister(300.0, 800.0, z, code)
+    # Obstacles beyond the security deck's trunk: a fallen cable tray across the tactical deck's
+    # corridor (squeeze past, or cut it clear). The observation deck's secondary room is welded
+    # shut from some earlier emergency and cut free with the tool (see the door spawn).
+    if kind == "tactical":
+        spawn_barrier(1100.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1)
 
 
 # --- the ship -------------------------------------------------------------------------------------
