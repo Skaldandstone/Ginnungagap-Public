@@ -1,4 +1,5 @@
 #include "LevelSetup/QuickDemoOpeningSequence.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -330,7 +331,15 @@ void AQuickDemoOpeningSequence::Finish()
             Character->SetActorEnableCollision(true);
             if (!StandLocation.IsZero())
             {
+                // Off the pod first: leaving a moving base (the lid, the sleeper's platform)
+                // imparts its velocity, and under drive gravity that launched the crew across
+                // the casualty station on wake.
+                Character->SetBase(static_cast<UPrimitiveComponent*>(nullptr), NAME_None);
                 Character->SetActorLocation(StandLocation, false, nullptr, ETeleportType::TeleportPhysics);
+                if (UCharacterMovementComponent* Move = Character->GetCharacterMovement())
+                {
+                    Move->StopMovementImmediately();
+                }
             }
             Character->SetFirstPersonView(true);
             PC->SetViewTargetWithBlend(Character, 0.0f);

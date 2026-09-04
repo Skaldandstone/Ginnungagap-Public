@@ -10,6 +10,9 @@
 #include "Editor/UnrealEdEngine.h"
 #include "UnrealEdGlobals.h"
 #include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Bloom/BloomDormantHulk.h"
 #include "Settings/LevelEditorPlaySettings.h"
 #include "CollisionQueryParams.h"
 #include "CoopSurvivalCharacter.h"
@@ -137,18 +140,50 @@ namespace CryoWalk
 		static const bool bRecording = FParse::Param(FCommandLine::Get(), TEXT("GinnungagapRecordWalk"));
 		return bRecording;
 	}
+	// Frames recorded so far; the audio cues below are timed in frames, which is exact on the
+	// fixed 30 Hz step regardless of how long each frame's readback really took.
+	int32 RecordedFrames = 0;
+	struct FCue { FString Name; int32 Frame; };
+	TArray<FCue> Cues;
+
 	void RecordFrame()
 	{
 		// Unbuilt-reflection and light-overflow notices are debug text, not the game; keep them out
 		// of every frame. (A leading exec on -ExecCmds swallows the automation command, so it is
 		// done here rather than on the command line.)
 		GAreScreenMessagesEnabled = false;
-		static int32 FrameIndex = 0;
 		if (!IsRecording() || !FApp::CanEverRender() || !GEngine || !GEngine->GameViewport)
 		{
 			return;
 		}
-		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("Frame_%06d"), FrameIndex++), true, false, false, FIntRect(), true);
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("Frame_%06d"), RecordedFrames++), true, false, false, FIntRect(), true);
+	}
+
+	/** A sound event at the current frame, for tools/assemble_demo_video.py to lay the cue in. */
+	void RecordCue(const TCHAR* Name)
+	{
+		if (IsRecording())
+		{
+			Cues.Add({ Name, RecordedFrames });
+		}
+	}
+
+	/** Saved/Video/cues.json: the cue list the assembler mixes from. Written once, at the end. */
+	void WriteCues()
+	{
+		if (!IsRecording())
+		{
+			return;
+		}
+		FString Json = TEXT("{\n  \"fps\": 30,\n  \"cues\": [\n");
+		for (int32 i = 0; i < Cues.Num(); ++i)
+		{
+			Json += FString::Printf(TEXT("    {\"name\": \"%s\", \"frame\": %d}%s\n"), *Cues[i].Name, Cues[i].Frame, i + 1 < Cues.Num() ? TEXT(",") : TEXT(""));
+		}
+		Json += TEXT("  ]\n}\n");
+		const FString Path = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Video"), TEXT("cues.json"));
+		FFileHelper::SaveStringToFile(Json, *Path);
+		UE_LOG(LogTemp, Display, TEXT("WALK wrote %d audio cues to %s"), Cues.Num(), *Path);
 	}
 
 	// The player's own view, through the game viewport, when the editor can render. Under
@@ -259,6 +294,22 @@ bool FWalkCryoExit::Update()
 	}
 
 	CryoWalk::RecordFrame();
+	{
+		// The hulk's wake is the roar; note the frame it happens on.
+		static bool bHulkCued = false;
+		if (!bHulkCued)
+		{
+			for (TActorIterator<ABloomDormantHulk> HulkIt(World); HulkIt; ++HulkIt)
+			{
+				if (!HulkIt->IsDormant())
+				{
+					CryoWalk::RecordCue(TEXT("roar"));
+					bHulkCued = true;
+					break;
+				}
+			}
+		}
+	}
 	// World time when recording (see IsRecording), wall time otherwise. StartSeconds is 0 for a
 	// recording, set by RunTest, since the PIE world's clock starts there.
 	const double Now = CryoWalk::IsRecording() ? static_cast<double>(World->GetTimeSeconds()) : FPlatformTime::Seconds();
@@ -300,7 +351,10 @@ bool FWalkCryoExit::Update()
 				Test->AddInfo(FString::Printf(TEXT("OPENING phase %d at t+%.1fs"), static_cast<int32>(OpeningPhase), Now - StartSeconds));
 				switch (OpeningPhase)
 				{
-				case EQuickDemoOpeningPhase::Asleep:   CryoWalk::Capture(TEXT("Open_01_asleep")); break;
+				case EQuickDemoOpeningPhase::Asleep:   CryoWalk::Capture(TEXT("Open_01_asleep")); CryoWalk::RecordCue(TEXT("asleep")); break;
+				case EQuickDemoOpeningPhase::Strike:   CryoWalk::RecordCue(TEXT("strike")); break;
+				case EQuickDemoOpeningPhase::Wake:     CryoWalk::RecordCue(TEXT("wake")); break;
+				case EQuickDemoOpeningPhase::FirstPerson: CryoWalk::RecordCue(TEXT("first_person")); break;
 				case EQuickDemoOpeningPhase::Blackout: CryoWalk::Capture(TEXT("Open_02_blackout")); break;
 				case EQuickDemoOpeningPhase::ClimbOut: CryoWalk::Capture(TEXT("Open_03_climb_out")); break;
 				default: break;
@@ -951,7 +1005,11 @@ bool FWalkCryoExit::Update()
 		// A recording holds on the title card so the video ends on it rather than a cut to black.
 		constexpr double TitleHoldSeconds = 6.0;
 		static bool bHoldingOnTitle = false;
-		if (bHoldingOnTitle) { return (Now - PhaseSince >= TitleHoldSeconds || bExpired) ? Finish(true) : false; }
+		if (bHoldingOnTitle)
+		{
+			if (Now - PhaseSince >= TitleHoldSeconds || bExpired) { CryoWalk::WriteCues(); return Finish(true); }
+			return false;
+		}
 		if (Now - PhaseSince < TitleCutMarginSeconds && !bExpired)
 		{
 			return false;
@@ -961,6 +1019,7 @@ bool FWalkCryoExit::Update()
 		UObject* StartScreen = Menus ? CryoWalk::ReadObject(Menus, TEXT("CurrentStartScreen")) : nullptr;
 		Test->TestNotNull(TEXT("The demo's own MenuManagerSubsystem cut to the title screen after ReachCIC completed"), StartScreen);
 		CryoWalk::Capture(TEXT("Walk_10_title_screen"), true);
+		CryoWalk::RecordCue(TEXT("title"));
 		if (CryoWalk::IsRecording())
 		{
 			bHoldingOnTitle = true;

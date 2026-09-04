@@ -29,10 +29,14 @@ void ASurvivalPickup::OnConstruction(const FTransform& Transform)
     Super::OnConstruction(Transform);
     if (VisualMesh && !VisualMesh->GetStaticMesh())
     {
-        const TCHAR* Path = PickupType == EPickupType::Oxygen
-            ? TEXT("/Game/Assets/Models/Pickups/SM_Pickup_OxygenCanister.SM_Pickup_OxygenCanister")
-            : TEXT("/Game/Assets/Models/Pickups/SM_Pickup_MedicalInjector.SM_Pickup_MedicalInjector");
+        // Fab meshes: the engineering props pack's oxygen tank (authored along Y, stood up) and the
+        // Frontier toolbox scanner as the medical instrument.
+        const bool bOxygen = PickupType == EPickupType::Oxygen;
+        const TCHAR* Path = bOxygen
+            ? TEXT("/Game/ModSci_EngiProps/Meshes/SM_OxygenTank_B.SM_OxygenTank_B")
+            : TEXT("/Game/Frontier_EngineersToolbox/Tools/SM_Frontier_Scanner.SM_Frontier_Scanner");
         VisualMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, Path));
+        VisualMesh->SetRelativeRotation(bOxygen ? FRotator(0.0f, 0.0f, 90.0f) : FRotator::ZeroRotator);
     }
 }
 

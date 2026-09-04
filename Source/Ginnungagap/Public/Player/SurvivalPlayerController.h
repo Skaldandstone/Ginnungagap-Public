@@ -29,6 +29,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "HUD")
     USurvivalHUDWidget* GetHUDWidget() const { return HUDWidget; }
 
+    /** What the Interact binding does, for tests that press the key path rather than call into stations. */
+    void PressInteract() { OnInteract(); }
+
 protected:
     virtual void BeginPlay() override;
     virtual void OnPossess(APawn* InPawn) override;

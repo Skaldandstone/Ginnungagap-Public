@@ -1595,9 +1595,12 @@ void ACoopSurvivalCharacter::UpdateFirstPersonHeadVisibility()
         {
             if (!Component) continue;
             const FName Name = Component->GetFName();
+            // The assembled body ("SkeletalMesh" / "Body") is hidden too: the oversuit is what the
+            // owner sees of themselves, and the body's copied pose leaves its arms where the
+            // first-person camera shows a gloved hand hanging in the top-left of the view.
             if (Name == TEXT("Face") || Name == TEXT("Hair") || Name == TEXT("Eyebrows") ||
                 Name == TEXT("Fuzz") || Name == TEXT("Eyelashes") || Name == TEXT("Mustache") ||
-                Name == TEXT("Beard"))
+                Name == TEXT("Beard") || Name == TEXT("SkeletalMesh") || Name == TEXT("Body"))
             {
                 Component->SetOwnerNoSee(bHideFromOwner);
             }

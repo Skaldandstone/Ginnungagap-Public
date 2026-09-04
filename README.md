@@ -20,7 +20,10 @@ cuts to its title screen.
 Every step of that chain is walked by the real player character under path following in an
 automated PIE test (`Source/Ginnungagap/Private/Tests/CryoExitWalkthroughPieTests.cpp`), with
 each station's real completion trigger fired in sequence and the player's own view captured at
-every stop. The suite it belongs to has 113 automation tests and runs headlessly.
+every stop. The suite it belongs to has 116 automation tests and runs headlessly. The same walk, run under a
+windowed editor with `tools/record_demo_walk.ps1`, records one frame per fixed 30 Hz step of the
+player's own view and `tools/assemble_demo_video.py` cuts it into the demo video, laying the
+in-game sound cues back in on the same timeline.
 
 ## What is here
 

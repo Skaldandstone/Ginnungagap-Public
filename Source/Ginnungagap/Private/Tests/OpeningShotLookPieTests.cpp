@@ -18,6 +18,25 @@
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Engine/SkeletalMesh.h"
+#include "Components/PrimitiveComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+
+namespace GinnungagapTestMap
+{
+	/** The demo map, or whatever -GinnungagapMap=<package path> names: the same tests serve every ship. */
+	inline FString Path()
+	{
+		FString Override;
+		if (FParse::Value(FCommandLine::Get(), TEXT("GinnungagapMap="), Override) && !Override.IsEmpty())
+		{
+			return Override;
+		}
+		return TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck");
+	}
+}
 
 /**
  * Stills of the opening, one per phase, captured on phase change from the player's own view.
@@ -260,7 +279,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGinnungagapOpeningShotLookTest,
 
 bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 {
-	AutomationOpenMap(TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck"));
+	AutomationOpenMap(GinnungagapTestMap::Path());
 	ToolboxShaders::Preload();
 	ADD_LATENT_AUTOMATION_COMMAND(FWaitForShadersToFinishCompilingInGame());
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
