@@ -46,7 +46,7 @@ for name, prop, out in [("BaseColor", unreal.MaterialProperty.MP_BASE_COLOR, "RG
     if name == "Normal":
         node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
     elif name in ("Metallic", "Roughness"):
-        node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+        node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS)  # masks-compressed: Linear Color fails the compile
     mel.connect_material_property(node, out, prop)
     if name == "BaseColor":
         mel.connect_material_property(node, "A", unreal.MaterialProperty.MP_OPACITY)

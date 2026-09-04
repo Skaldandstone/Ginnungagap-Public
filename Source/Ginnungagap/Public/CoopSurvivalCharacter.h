@@ -479,6 +479,8 @@ private:
     void ApplyMetaHumanVisual(ECharacterFacePreset FacePreset, ECharacterHairStyle HairStyle);
     UClass* ResolveMetaHumanVisualClass(ECharacterFacePreset FacePreset) const;
     USkeletalMesh* ResolvePrimaryOversuitMesh() const;
+    /** The assembled MetaHuman's undersuit garment: hidden under a worn oversuit, shown without one. */
+    void SetUndersuitGarmentHidden(bool bHideGarment);
     void UpdateSuitConditionVisuals();
     void ValidateSuitAttachmentBones() const;
     void RespawnFromCheckpoint();

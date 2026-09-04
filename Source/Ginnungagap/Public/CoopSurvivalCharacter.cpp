@@ -1867,7 +1867,9 @@ void ACoopSurvivalCharacter::ConfigureCharacterModelLayers()
             {
                 Component->SetSkeletalMesh(FittedCryoBodysuit);
                 Component->SetLeaderPoseComponent(MetaHumanBodyDriver);
-                Component->SetHiddenInGame(false, false);
+                // Under a worn oversuit the garment stays hidden (see SetUndersuitGarmentHidden).
+                const bool bOversuitWorn = bPressureOversuitEquipped || ResolvePrimaryOversuitMesh() != nullptr;
+                Component->SetHiddenInGame(bOversuitWorn, false);
             }
             else
             {
@@ -1877,6 +1879,30 @@ void ACoopSurvivalCharacter::ConfigureCharacterModelLayers()
         else
         {
             Component->SetHiddenInGame(false, false);
+        }
+    }
+}
+
+void ACoopSurvivalCharacter::SetUndersuitGarmentHidden(bool bHideGarment)
+{
+    AActor* MetaHumanActor = MetaHumanActorComponent ? MetaHumanActorComponent->GetChildActor() : nullptr;
+    if (!MetaHumanActor)
+    {
+        return;
+    }
+    TArray<USkeletalMeshComponent*> MetaHumanMeshes;
+    MetaHumanActor->GetComponents<USkeletalMeshComponent>(MetaHumanMeshes);
+    for (USkeletalMeshComponent* Component : MetaHumanMeshes)
+    {
+        if (!Component) continue;
+        const USkeletalMesh* LayerMesh = Component->GetSkeletalMeshAsset();
+        const FString LayerMeshPath = LayerMesh ? LayerMesh->GetPathName() : FString();
+        const bool bGarment = Component->GetName().Equals(TEXT("SkeletalMesh"), ESearchCase::IgnoreCase)
+            || LayerMeshPath.Contains(TEXT("/CryoBodysuitV34/"), ESearchCase::IgnoreCase)
+            || LayerMeshPath.Contains(TEXT("/Clothing/"), ESearchCase::IgnoreCase);
+        if (bGarment)
+        {
+            Component->SetHiddenInGame(bHideGarment, false);
         }
     }
 }
@@ -1966,10 +1992,20 @@ void ACoopSurvivalCharacter::ApplyPressureSuitVisuals()
 
         if (bHasPrimaryOversuit)
         {
+            // Every call here made a new dynamic instance of whatever the slot held, so after
+            // three calls the slot held a MID of a MID of a MID and the renderer drew the default
+            // grey in its place: the crew wore a white plaster suit. Instance the asset's own
+            // material each time instead.
+            const TArray<FSkeletalMaterial>& AssetMaterials = DesiredPrimaryOversuit->GetMaterials();
             const int32 OversuitMaterialCount = PrimaryOversuitMesh->GetNumMaterials();
             for (int32 Slot = 0; Slot < OversuitMaterialCount; ++Slot)
             {
-                if (UMaterialInterface* BaseMaterial = PrimaryOversuitMesh->GetMaterial(Slot))
+                UMaterialInterface* BaseMaterial = AssetMaterials.IsValidIndex(Slot) ? AssetMaterials[Slot].MaterialInterface.Get() : PrimaryOversuitMesh->GetMaterial(Slot);
+                while (UMaterialInstanceDynamic* AsDynamic = Cast<UMaterialInstanceDynamic>(BaseMaterial))
+                {
+                    BaseMaterial = AsDynamic->Parent;
+                }
+                if (BaseMaterial)
                 {
                     UMaterialInstanceDynamic* DynamicMaterial =
                         UMaterialInstanceDynamic::Create(BaseMaterial, this);
@@ -1994,6 +2030,12 @@ void ACoopSurvivalCharacter::ApplyPressureSuitVisuals()
             PressureSuitDynamicMaterials.Add(BodyMaterial);
         }
     }
+    // The undersuit garment on the assembled MetaHuman is worn under the oversuit, and drawn over
+    // it wherever it is the larger of the two: with the Space Marshal on, the crew read as a white
+    // plaster figure (the garment's default white cloth) with the Marshal's silhouette. Hide it
+    // while an oversuit is worn.
+    SetUndersuitGarmentHidden(bPressureOversuitEquipped || bHasPrimaryOversuit);
+
     for (UStaticMeshComponent* Part : PressureSuitParts)
     {
         if (!Part)

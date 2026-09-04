@@ -6,6 +6,15 @@
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Camera/CameraActor.h"
+#include "Rendering/SkeletalMeshLODRenderData.h"
+#include "Rendering/SkeletalMeshRenderData.h"
+#include "Engine/StaticMeshActor.h"
+#include "Animation/SkeletalMeshActor.h"
+#include "UObject/UObjectIterator.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/Texture.h"
+#include "Materials/MaterialInstance.h"
 #include "EngineUtils.h"
 #include "UnrealClient.h"
 
@@ -187,6 +196,88 @@ bool FCaptureToolInHand::Update()
 }
 
 /**
+ * The crew in third person after the opening, from a camera two metres in front: is the suit the
+ * Space Marshal (the Fab primary oversuit) and not a development shell? One still, then back to
+ * first person.
+ */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FCaptureSuitedThirdPerson, FAutomationTestBase*, Test);
+
+bool FCaptureSuitedThirdPerson::Update()
+{
+	// 0: place the camera; 1: settle, then request the shot; 2: let it render, then restore.
+	static int32 Phase = 0;
+	static double PhaseAt = -1.0;
+	static TWeakObjectPtr<ACameraActor> Camera;
+	UWorld* World = OpeningLook::FindPieWorld();
+	ACoopSurvivalCharacter* Character = World ? Cast<ACoopSurvivalCharacter>(UGameplayStatics::GetPlayerPawn(World, 0)) : nullptr;
+	APlayerController* PC = World ? UGameplayStatics::GetPlayerController(World, 0) : nullptr;
+	if (!Character || !PC)
+	{
+		Phase = 0; PhaseAt = -1.0;
+		return true;
+	}
+	const double Now = World->GetTimeSeconds();
+	if (Phase == 0)
+	{
+		// Front-left of the crew, since straight ahead is the pod they just left; spawned regardless
+		// of what the spot overlaps, a camera has no collision to speak of.
+		// Close, at chest height: the straps and the shoulder patch are the proof of a textured suit.
+		const FVector Eye = Character->GetActorLocation() + Character->GetActorForwardVector() * 170.0f
+			- Character->GetActorRightVector() * 30.0f + FVector(0, 0, 35.0f);
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ACameraActor* Cam = World->SpawnActor<ACameraActor>(Eye, (Character->GetActorLocation() + Character->GetActorRightVector() * 50.0f + FVector(0, 0, 20.0f) - Eye).Rotation(), Params);
+		Test->TestNotNull(TEXT("A camera for the suited still spawned"), Cam);
+		Camera = Cam;
+		// The view switch re-targets the controller to the character; the camera must come after.
+		Character->SetFirstPersonView(false);
+		if (Camera.IsValid()) { PC->SetViewTargetWithBlend(Camera.Get(), 0.0f); }
+		// The suit's 4K set has only its base mips resident this early; ask for the rest now.
+		if (USkeletalMeshComponent* Oversuit = Character->GetPrimaryOversuitMesh()) { Oversuit->PrestreamTextures(6.0f, true); }
+		Phase = 1; PhaseAt = Now;
+		return false;
+	}
+	if (Phase == 1)
+	{
+		if (Camera.IsValid() && PC->GetViewTarget() != Camera.Get()) { PC->SetViewTargetWithBlend(Camera.Get(), 0.0f); }
+		if (Now - PhaseAt < 3.0) { return false; }
+		if (USkeletalMeshComponent* Oversuit = Character->GetPrimaryOversuitMesh())
+		{
+			TArray<UTexture*> Textures;
+			Oversuit->GetUsedTextures(Textures, EMaterialQualityLevel::High);
+			int32 Streamed = 0;
+			for (UTexture* T : Textures) { if (T && T->IsFullyStreamedIn()) { ++Streamed; } }
+			UE_LOG(LogTemp, Display, TEXT("SUITLOOK %d of %d suit textures fully streamed in"), Streamed, Textures.Num());
+		}
+		UE_LOG(LogTemp, Display, TEXT("SUITLOOK view target %s (camera %s at %s), pawn at %s, first person %d"),
+			PC->GetViewTarget() ? *PC->GetViewTarget()->GetName() : TEXT("none"), Camera.IsValid() ? *Camera->GetName() : TEXT("invalid"),
+			Camera.IsValid() ? *Camera->GetActorLocation().ToCompactString() : TEXT("-"), *Character->GetActorLocation().ToCompactString(),
+			Character->IsFirstPersonView() ? 1 : 0);
+		// The shot renders a frame after the request; the view goes back to the crew only after.
+		FScreenshotRequest::RequestScreenshot(TEXT("Opening_8_suited_third_person"), false, false, false, FIntRect(), true);
+		Phase = 2; PhaseAt = Now;
+		return false;
+	}
+	if (Now - PhaseAt < 0.3) { return false; }
+	if (USkeletalMeshComponent* Oversuit = Character->GetPrimaryOversuitMesh())
+	{
+		UE_LOG(LogTemp, Display, TEXT("SUITLOOK primary oversuit %s visible %d"), Oversuit->GetSkeletalMeshAsset() ? *Oversuit->GetSkeletalMeshAsset()->GetPathName() : TEXT("none"), Oversuit->IsVisible() ? 1 : 0);
+		for (int32 Slot = 0; Slot < Oversuit->GetNumMaterials(); ++Slot)
+		{
+			UMaterialInterface* M = Oversuit->GetMaterial(Slot);
+			const UMaterialInstance* Inst = Cast<UMaterialInstance>(M);
+			UE_LOG(LogTemp, Display, TEXT("SUITLOOK slot %d: %s (parent %s)"), Slot, M ? *M->GetPathName() : TEXT("none"),
+				Inst && Inst->Parent ? *Inst->Parent->GetPathName() : TEXT("-"));
+		}
+	}
+	PC->SetViewTargetWithBlend(Character, 0.0f);
+	Character->SetFirstPersonView(true);
+	if (Camera.IsValid()) { Camera->Destroy(); }
+	Phase = 0; PhaseAt = -1.0;
+	return true;
+}
+
+/**
  * The hold pose from each candidate hold animation, one still each, with the hand's position in
  * camera space logged: the numbers pick the variant (forward, slightly right, a little below the
  * eye), the stills confirm it.
@@ -274,6 +365,7 @@ bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureOpeningPhases(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureToolInHand(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FSweepHoldPose(this));
+	ADD_LATENT_AUTOMATION_COMMAND(FCaptureSuitedThirdPerson(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;

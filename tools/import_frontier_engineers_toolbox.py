@@ -67,7 +67,8 @@ def make_material(name, textures):
         if c == "Normal":
             node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
         elif c in ("Metallic", "Roughness"):
-            node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+            # Masks-compressed textures sample as Masks; Linear Color fails the compile.
+            node.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS)
         mel.connect_material_property(node, "RGB" if c != "Metallic" and c != "Roughness" else "R", prop)
         y += 220
     mel.recompile_material(mat)
