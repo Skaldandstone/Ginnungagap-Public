@@ -428,7 +428,11 @@ def build_deck(deck, name, kind, bulkhead_class, state):
 
     # Hull walls, decorated face inward.
     wall_run("x", 0.0, 0.0, FOOT_X, +1, z, name=f"D{deck:02d}_HullAft", variant=deck)
-    wall_run("x", FOOT_Y, 0.0, FOOT_X, -1, z, name=f"D{deck:02d}_HullFore", variant=deck + 1)
+    # The observation deck's fore hull is glass across its main room (placed with the deck's
+    # dressing); the hull panels there would otherwise stand behind the glass and the windows
+    # would look out on a wall.
+    wall_run("x", FOOT_Y, 0.0, FOOT_X, -1, z, name=f"D{deck:02d}_HullFore", variant=deck + 1,
+             gaps=([(MAIN[0], MAIN[1])] if kind == "observation" else []))
     wall_run("y", 0.0, 0.0, FOOT_Y, +1, z, name=f"D{deck:02d}_HullPort", variant=deck + 2)
     wall_run("y", FOOT_X, 0.0, FOOT_Y, -1, z, name=f"D{deck:02d}_HullStbd", variant=deck)
     # Partitions, both faces. Corridor/rooms line y=900 with the two room doors; trunk/service line
@@ -553,6 +557,125 @@ def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, sq
     squeeze.set_editor_property("noise_loudness", 0.15); squeeze.set_editor_property("near_entrapment_chance", squeeze_entrapment)
     barrier.set_editor_property("options", {unreal.ObstructionVerb.CUT: cut, unreal.ObstructionVerb.SQUEEZE: squeeze})
     return barrier
+
+
+STARFIELD_MATERIAL = "/Game/Assets/Ships/Production/Materials/Space/M_Starfield"
+AMBIENT = "/Game/HorrorAmbientSFX/HorrorAmbientSFX_cue"
+
+
+def starfield_material():
+    """A black emissive sky with sparse white points from world-space noise: what the observation
+    deck's windows look out on. Built once, reused by every regeneration."""
+    if unreal.EditorAssetLibrary.does_asset_exist(STARFIELD_MATERIAL):
+        return unreal.load_asset(STARFIELD_MATERIAL)
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    mel = unreal.MaterialEditingLibrary
+    mat = tools.create_asset("M_Starfield", STARFIELD_MATERIAL.rsplit("/", 1)[0], unreal.Material, unreal.MaterialFactoryNew())
+    mat.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    mat.set_editor_property("two_sided", True)
+    stars = load("/Engine/EngineSky/T_Sky_Stars")
+    if stars:
+        # The engine's own tiling star map on the sphere's UVs, tiled so a star is a point.
+        uv = mel.create_material_expression(mat, unreal.MaterialExpressionTextureCoordinate, -700, 0)
+        uv.set_editor_property("u_tiling", 3.0); uv.set_editor_property("v_tiling", 3.0)
+        sample = mel.create_material_expression(mat, unreal.MaterialExpressionTextureSample, -500, 0)
+        sample.set_editor_property("texture", stars)
+        mel.connect_material_expressions(uv, "", sample, "UVs")
+        bright = mel.create_material_expression(mat, unreal.MaterialExpressionMultiply, -200, 0)
+        gain = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -350, 200); gain.set_editor_property("r", 4.0)
+        mel.connect_material_expressions(sample, "RGB", bright, "A"); mel.connect_material_expressions(gain, "", bright, "B")
+    else:
+        # No star map: sparse points from world-space Voronoi noise.
+        pos = mel.create_material_expression(mat, unreal.MaterialExpressionWorldPosition, -900, 0)
+        scale = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -900, 200); scale.set_editor_property("r", 0.00001)
+        mul = mel.create_material_expression(mat, unreal.MaterialExpressionMultiply, -700, 60)
+        mel.connect_material_expressions(pos, "", mul, "A"); mel.connect_material_expressions(scale, "", mul, "B")
+        noise = mel.create_material_expression(mat, unreal.MaterialExpressionNoise, -520, 60)
+        noise.set_editor_property("noise_function", unreal.NoiseFunction.NOISEFUNCTION_VORONOI_ALU)
+        noise.set_editor_property("levels", 1); noise.set_editor_property("output_min", 0.0); noise.set_editor_property("output_max", 1.0)
+        mel.connect_material_expressions(mul, "", noise, "Position")
+        one = mel.create_material_expression(mat, unreal.MaterialExpressionOneMinus, -340, 60)
+        mel.connect_material_expressions(noise, "", one, "")
+        power = mel.create_material_expression(mat, unreal.MaterialExpressionPower, -180, 60)
+        exponent = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -340, 220); exponent.set_editor_property("r", 200.0)
+        mel.connect_material_expressions(one, "", power, "Base"); mel.connect_material_expressions(exponent, "", power, "Exp")
+        bright = mel.create_material_expression(mat, unreal.MaterialExpressionMultiply, -20, 60)
+        gain = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -180, 220); gain.set_editor_property("r", 25.0)
+        mel.connect_material_expressions(power, "", bright, "A"); mel.connect_material_expressions(gain, "", bright, "B")
+    mel.connect_material_property(bright, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    mel.recompile_material(mat)
+    unreal.EditorAssetLibrary.save_loaded_asset(mat)
+    return mat
+
+
+OBSERVATION_GLASS = "/Game/Assets/Ships/Production/Materials/Space/M_ObservationGlass"
+
+
+def observation_glass():
+    """Clean armoured glass: translucent, a little blue, a little reflective. The kit's own glass
+    panel is dirty enough to hide the stars behind it."""
+    if unreal.EditorAssetLibrary.does_asset_exist(OBSERVATION_GLASS):
+        return unreal.load_asset(OBSERVATION_GLASS)
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    mel = unreal.MaterialEditingLibrary
+    mat = tools.create_asset("M_ObservationGlass", OBSERVATION_GLASS.rsplit("/", 1)[0], unreal.Material, unreal.MaterialFactoryNew())
+    mat.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    mat.set_editor_property("two_sided", True)
+    mat.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE)
+    colour = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -400, -100)
+    colour.set_editor_property("constant", unreal.LinearColor(0.02, 0.04, 0.06, 1.0))
+    mel.connect_material_property(colour, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    opacity = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -400, 100); opacity.set_editor_property("r", 0.12)
+    mel.connect_material_property(opacity, "", unreal.MaterialProperty.MP_OPACITY)
+    rough = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -400, 220); rough.set_editor_property("r", 0.08)
+    mel.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    spec = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -400, 340); spec.set_editor_property("r", 0.9)
+    mel.connect_material_property(spec, "", unreal.MaterialProperty.MP_SPECULAR)
+    mel.recompile_material(mat)
+    unreal.EditorAssetLibrary.save_loaded_asset(mat)
+    return mat
+
+
+def spawn_space(height):
+    """The sky sphere around the whole stack, inside-out black with stars, far enough out that no
+    deck's hull glass meets it. The Dam_city sphere mesh is 82 m across at scale 1."""
+    sphere = load("/Game/Dam_city/Meshes/Sky_sphere/SM_SkySphere")
+    if not sphere:
+        return None
+    star = starfield_material()
+    sky = actors.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(FOOT_X * 0.5, FOOT_Y * 0.5, height * 0.5), unreal.Rotator())
+    comp = sky.static_mesh_component
+    comp.set_static_mesh(sphere)
+    comp.set_mobility(unreal.ComponentMobility.STATIC)
+    comp.set_editor_property("use_default_collision", False)
+    comp.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
+    comp.set_editor_property("cast_shadow", False)
+    comp.set_editor_property("can_ever_affect_navigation", False)
+    if star:
+        for slot in range(comp.get_num_materials()):
+            comp.set_material(slot, star)
+    sky.set_actor_scale3d(unreal.Vector(6.0, 6.0, 6.0))
+    sky.set_editor_property("tags", [unreal.Name("CorvetteSpace")])
+    return label(sky, "Space")
+
+
+def spawn_ambient(cue_name, x, y, z, code, volume=0.35, radius=1400.0):
+    """A looping drone in a room or corridor, falling off before the next deck hears it."""
+    cue = load(f"{AMBIENT}/{cue_name}")
+    if not cue:
+        return None
+    sound = actors.spawn_actor_from_class(unreal.AmbientSound, unreal.Vector(x, y, z + 200.0), unreal.Rotator())
+    label(sound, f"Ambient_{cue_name.replace('AMB_Drone_', '').replace('_Cue', '')}_{code[-3:]}")
+    audio = sound.get_editor_property("audio_component")
+    audio.set_sound(cue)
+    audio.set_editor_property("volume_multiplier", volume)
+    audio.set_editor_property("override_attenuation", True)
+    att = audio.get_editor_property("attenuation_overrides")
+    att.set_editor_property("falloff_distance", radius)
+    att.set_editor_property("attenuation_shape_extents", unreal.Vector(300.0, 300.0, 300.0))
+    audio.set_editor_property("attenuation_overrides", att)
+    sound.set_editor_property("tags", [unreal.Name("CorvetteAmbient"), unreal.Name(code)])
+    return sound
 
 
 def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state):
@@ -700,7 +823,12 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     elif kind == "observation":
         # A glass wall to space along the fore hull.
         for i, dx in enumerate((-550.0, -183.0, 183.0, 550.0)):
-            place(K.glass, (cx + dx, MAIN[3] - 20.0, z + 200.0), (0, 0, 0), (1, 1, 1.8), f"D{deck:02d}_Window_{i}", collide=False)
+            # Solid: the hull behind it is open to space, and the glass is what keeps the crew in.
+            pane = place(K.glass, (cx + dx, MAIN[3] - 20.0, z + 200.0), (0, 0, 0), (1, 1, 1.8), f"D{deck:02d}_Window_{i}")
+            clear = observation_glass()
+            if pane and clear:
+                for slot in range(pane.static_mesh_component.get_num_materials()):
+                    pane.static_mesh_component.set_material(slot, clear)
         for i, dx in enumerate((-300.0, 300.0)):
             place(K.chair, (cx + dx, cy, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_ObsChair_{i}")
         side_station(unreal.DecontaminationStation, deck, code, z, "ObsDecon", "Run decontamination cycle", port=True, dy=-200.0)
@@ -727,6 +855,13 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         supply(b, MAIN[1] - 350.0, MAIN[2] + 300.0, z, code)
     if kind in ("marine", "breach", "observation"):
         oxygen_canister(300.0, 800.0, z, code)
+    # The ship's sound: a hum in every main room, the corridor drone along the corridor, and a
+    # deeper machine note where the machinery is.
+    cx_, cy_ = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
+    room_cue = {"power": "AMB_Drone_ServerBass_Cue", "workshop": "AMB_Drone_Server_Cue", "breach": "AMB_Drone_Beneath_Cue",
+                "cic": "AMB_Drone_Server_Cue", "sensors": "AMB_Drone_AC_Cue"}.get(kind, "AMB_Drone_Hum_Cue")
+    spawn_ambient(room_cue, cx_, cy_, z, code, volume=0.3)
+    spawn_ambient("AMB_Drone_Corridor_Cue", 1200.0, 800.0, z, code, volume=0.22, radius=1600.0)
     # Obstacles beyond the security deck's trunk: a fallen cable tray across the tactical deck's
     # corridor (squeeze past, or cut it clear). The observation deck's secondary room is welded
     # shut from some earlier emergency and cut free with the tool (see the door spawn).
@@ -806,6 +941,7 @@ def build():
     sky = actors.spawn_actor_from_class(unreal.SkyLight, unreal.Vector(FOOT_X * 0.5, FOOT_Y * 0.5, height + 500.0), unreal.Rotator())
     label(sky, "SkyLight")
     sky.get_component_by_class(unreal.SkyLightComponent).set_editor_property("intensity", 0.15)
+    spawn_space(height)
     # Under drive: the stack's "down" is toward the engines. The ship is zero-g until something
     # thrusts, and the crew would float off every deck.
     drive = actors.spawn_actor_from_class(unreal.ShipThrustGravity, unreal.Vector(FOOT_X * 0.5, FOOT_Y * 0.5, 0.0), unreal.Rotator())

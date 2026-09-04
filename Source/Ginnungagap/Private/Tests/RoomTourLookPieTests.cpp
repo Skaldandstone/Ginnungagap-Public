@@ -74,6 +74,11 @@ namespace RoomTour
 			{
 				Stops.Add({ FString::Printf(TEXT("Side_%s"), *It->GetName()), It->GetActorLocation() });
 			}
+			// The observation deck's glass wall, from inside the room: what is outside the ship.
+			if (It->GetActorNameOrLabel().Contains(TEXT("_Window_1")))
+			{
+				Stops.Add({ TEXT("Space_ObservationWindow"), It->GetActorLocation() + FVector(0.0f, -10.0f, -80.0f) });
+			}
 		}
 		return Stops;
 	}
@@ -141,7 +146,10 @@ bool FTourRooms::Update()
 	const RoomTour::FStop& Stop = Stops[Index];
 	if (StepAt < 0.0)
 	{
-		const FVector Spot = RoomTour::PickCameraSpot(World, Stop.Target);
+		// A window is looked *through*: the camera stands inside the room, three and a half metres
+		// back from the glass, rather than wherever the longest clear run is (which, with the hull
+		// open behind the glass, is outside the ship).
+		const FVector Spot = Stop.Label.StartsWith(TEXT("Space_")) ? Stop.Target + FVector(0.0f, -350.0f, 60.0f) : RoomTour::PickCameraSpot(World, Stop.Target);
 		const FRotator Look = (Stop.Target + FVector(0.0f, 0.0f, 110.0f) - Spot).Rotation();
 		if (!Camera.IsValid())
 		{

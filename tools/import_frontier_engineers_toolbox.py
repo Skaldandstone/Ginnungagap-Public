@@ -8,6 +8,7 @@ Art/Fab/Frontier_EngineersToolbox (ignored by git; the imported assets are what 
 
     UnrealEditor-Cmd.exe <project> -ExecutePythonScript=tools/import_frontier_engineers_toolbox.py -NullRHI
 """
+import sys
 import unreal
 from pathlib import Path
 
@@ -95,6 +96,12 @@ def import_meshes():
 
 textures = import_textures()
 mats = {s: make_material(f"M_{s}", {c: textures[(s, c)] for c in CHANNELS}) for s in SETS}
+# The combined FBX import (274 pieces under Meshes/, including a corrupt NurbsPath) is only the
+# raw material for the split tools under Tools/; a texture or material rerun must not recreate
+# it. Pass --meshes to import the FBX again.
+if not any("meshes" in a for a in sys.argv):
+    print("TOOLBOX textures and materials refreshed; meshes left as they are (pass --meshes to re-import)")
+    raise SystemExit(0)
 paths = import_meshes()
 print(f"TOOLBOX imported {len(paths)} mesh(es)")
 for p in paths:
