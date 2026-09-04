@@ -628,10 +628,10 @@ void UMenuManagerSubsystem::LoadGameMode(EGameMode GameMode)
 {
 	HideAllMenus();
 
-	// The authored four-deck ship is the prototype's sole deployable vessel for now.
-	// Keep this independent of legacy save-file size selections so Continue also
-	// returns to the same level while it is under active development.
-	const FString LevelName = TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck");
+	// The corvette thrust stack is the playable ship. Keep this independent of legacy
+	// save-file size selections so Continue also returns to the same level while it is
+	// under active development.
+	const FString LevelName = TEXT("/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack");
 
 	FString Options = GameMode == EGameMode::SinglePlayerSurvival ? FString() : TEXT("listen");
 	if (GameMode == EGameMode::Versus)

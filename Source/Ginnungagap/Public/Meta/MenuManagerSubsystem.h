@@ -110,9 +110,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
 	TMap<EGameMode, FString> GameModeLevelMap = {
-		{EGameMode::SinglePlayerSurvival, TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck")},
-		{EGameMode::CoopSurvival, TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck")},
-		{EGameMode::Versus, TEXT("/Game/Assets/Maps/ShipProduction/L_QuickDemo_FourDeck")}
+		{EGameMode::SinglePlayerSurvival, TEXT("/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack")},
+		{EGameMode::CoopSurvival, TEXT("/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack")},
+		{EGameMode::Versus, TEXT("/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack")}
 	};
 
 	UPROPERTY()
