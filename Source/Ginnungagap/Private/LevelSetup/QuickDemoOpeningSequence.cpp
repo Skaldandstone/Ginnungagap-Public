@@ -120,7 +120,16 @@ void AQuickDemoOpeningSequence::TryArm()
     const FVector PodLocation = Chosen->GetActorLocation();
     const FVector Out = (StandLocation - PodLocation).GetSafeNormal2D();
     StandRotation = (-Out).Rotation();
-    PodSideLocation = FVector(PodLocation.X, PodLocation.Y, StandLocation.Z) + Out * 120.0f;
+    // A vertical pod holds its sleeper standing behind the glass door; turn the pod so the door
+    // faces where they will step out to, and start them just inside it.
+    const bool bVertical = Chosen->UsesVerticalPod();
+    if (bVertical)
+    {
+        Chosen->SetActorRotation(FRotator(0.0f, Out.Rotation().Yaw, 0.0f));
+    }
+    PodSideLocation = bVertical
+        ? FVector(PodLocation.X, PodLocation.Y, StandLocation.Z) - Out * 8.0f
+        : FVector(PodLocation.X, PodLocation.Y, StandLocation.Z) + Out * 120.0f;
 
     // The room's lights, so they can go out. Any light inside the tagged room's footprint.
     for (TActorIterator<AModularShipRoom> It(GetWorld()); It; ++It)
@@ -167,8 +176,17 @@ void AQuickDemoOpeningSequence::TryArm()
         Chosen->TryEnterPod(Character);
     }
     Character->SetActorEnableCollision(false);
-    Character->SetActorLocation(PodLocation + FVector(0.0f, 0.0f, 40.0f), false, nullptr, ETeleportType::TeleportPhysics);
-    Character->SetActorHiddenInGame(true);
+    if (bVertical)
+    {
+        // Seen asleep on their feet behind the glass, facing the door.
+        Character->SetActorLocation(PodSideLocation, false, nullptr, ETeleportType::TeleportPhysics);
+        Character->SetActorRotation(FRotator(0.0f, Out.Rotation().Yaw, 0.0f));
+    }
+    else
+    {
+        Character->SetActorLocation(PodLocation + FVector(0.0f, 0.0f, 40.0f), false, nullptr, ETeleportType::TeleportPhysics);
+        Character->SetActorHiddenInGame(true);
+    }
     PC->DisableInput(PC);
     if (ASurvivalPlayerController* Survival = Cast<ASurvivalPlayerController>(PC))
     {
@@ -182,8 +200,10 @@ void AQuickDemoOpeningSequence::TryArm()
     // The shot: high and close over the foot of the pod, looking down its length at the lid, so
     // the sleeper's pod fills the frame and the neighbouring pods stay out of the foreground. A
     // low, distant camera between the rows saw only the nearest lid's underside.
-    const FVector CameraLocation = PodLocation + Out * 300.0f + FVector(0.0f, 0.0f, 330.0f);
-    const FRotator CameraRotation = (PodLocation + FVector(0.0f, 0.0f, 75.0f) - CameraLocation).Rotation();
+    const FVector CameraLocation = bVertical
+        ? PodLocation + Out * 340.0f + FVector(0.0f, 0.0f, 165.0f)   // front of the glass, chest height
+        : PodLocation + Out * 300.0f + FVector(0.0f, 0.0f, 330.0f);
+    const FRotator CameraRotation = ((bVertical ? PodLocation + FVector(0.0f, 0.0f, 120.0f) : PodLocation + FVector(0.0f, 0.0f, 75.0f)) - CameraLocation).Rotation();
     FActorSpawnParameters Params;
     Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     ACameraActor* Camera = GetWorld()->SpawnActor<ACameraActor>(CameraLocation, CameraRotation, Params);

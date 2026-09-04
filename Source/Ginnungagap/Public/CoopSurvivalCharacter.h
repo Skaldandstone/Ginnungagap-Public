@@ -280,6 +280,28 @@ public:
     UFUNCTION(BlueprintPure, Category="Weapon")
     UWeaponMountComponent* GetWeaponMountComponent() const { return WeaponMountComponent; }
 
+    /**
+     * Where a mounted tool sits in the right hand: the mount re-parents from the camera to the
+     * body's hand_r while something is mounted, and the arm comes up under HoldAnimation, an
+     * additive played through the body's DefaultSlot so the legs keep walking. Offsets are the
+     * grip relative to the hand bone.
+     */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon|Hold")
+    FVector HandGripLocation = FVector(4.0f, 2.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon|Hold")
+    FRotator HandGripRotation = FRotator(0.0f, 180.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon|Hold")
+    TObjectPtr<class UAnimSequenceBase> HoldAnimation;
+
+    /** Seconds into HoldAnimation where the arm is out; the pose is held there. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon|Hold")
+    float HoldAnimationTime = 1.6f;
+
+    UFUNCTION()
+    void HandleMountedWeaponChanged(class AShipboardWeapon* Weapon);
+
     UFUNCTION(BlueprintCallable, Category="Weapon")
     void FirePrimaryWeapon();
 

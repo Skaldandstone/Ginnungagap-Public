@@ -137,6 +137,35 @@ ACryoPodSystem::ACryoPodSystem()
     LidGlass->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     if (GlassMaterialFinder.Succeeded()) LidGlass->SetMaterial(0, GlassMaterialFinder.Object);
 
+    // The Fab stasis pod, if it has been imported (tools/import_fab_cryo_stasis_pod.py). Its mesh
+    // is centred, 200 cm tall, door on its -Y; stood on the actor origin and turned so the door
+    // faces +X. It replaces every generated part of the pod's look.
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> VerticalPodFinder(
+        TEXT("/Game/Fab_CryoStasisPod/Meshes/SM_CryoStasisPod.SM_CryoStasisPod"));
+    VerticalPod = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VerticalPod"));
+    VerticalPod->SetupAttachment(RootComponent);
+    VerticalPod->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+    VerticalPod->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
+    VerticalPod->SetCollisionProfileName(TEXT("BlockAll"));
+    if (VerticalPodFinder.Succeeded())
+    {
+        VerticalPod->SetStaticMesh(VerticalPodFinder.Object);
+        for (UStaticMeshComponent* Generated : { VisualMesh.Get(), BedInsert.Get(), DetailTrim.Get(), HingeAssembly.Get(),
+            Restraints.Get(), StatusLights.Get(), LidFrame.Get(), LidGlass.Get() })
+        {
+            if (Generated)
+            {
+                Generated->SetVisibility(false, true);
+                Generated->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            }
+        }
+    }
+    else
+    {
+        VerticalPod->SetVisibility(false);
+        VerticalPod->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
     PodRakePivot->SetRelativeLocation(FVector(0.0f, 0.0f, PodRakeLift));
     PodRakePivot->SetRelativeRotation(FRotator(0.0f, 0.0f, PodRakeAngle));
     // Shut by default. A bay where every lid stands open reads as already evacuated -- an open pod
@@ -151,6 +180,11 @@ ACryoPodSystem::ACryoPodSystem()
     bLidOpen = false;
     LidAnimationAlpha = 0.0f;
     ApplyLidPose();
+}
+
+bool ACryoPodSystem::UsesVerticalPod() const
+{
+    return VerticalPod && VerticalPod->GetStaticMesh() != nullptr;
 }
 
 void ACryoPodSystem::OnConstruction(const FTransform& Transform)

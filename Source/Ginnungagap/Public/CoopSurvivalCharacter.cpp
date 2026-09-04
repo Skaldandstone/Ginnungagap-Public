@@ -33,6 +33,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSequenceBase.h"
 #include "Animation/MetaHumanCopyPoseAnimInstance.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/MaterialInterface.h"
@@ -303,6 +304,15 @@ void ACoopSurvivalCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (WeaponMountComponent)
+    {
+        WeaponMountComponent->OnMountedWeaponChanged.AddUniqueDynamic(this, &ACoopSurvivalCharacter::HandleMountedWeaponChanged);
+        if (WeaponMountComponent->GetMountedWeapon())
+        {
+            HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon());
+        }
+    }
+
     InitialSpawnTransform = GetActorTransform();
 
     ConfigureCharacterModelLayers();
@@ -338,6 +348,41 @@ void ACoopSurvivalCharacter::BeginPlay()
         if (SkillComponent)
         {
             SkillComponent->ReloadFromProgression();
+        }
+    }
+}
+
+void ACoopSurvivalCharacter::HandleMountedWeaponChanged(AShipboardWeapon* Weapon)
+{
+    if (!WeaponMountComponent || !GetMesh())
+    {
+        return;
+    }
+    if (!HoldAnimation)
+    {
+        HoldAnimation = LoadObject<UAnimSequenceBase>(nullptr,
+            TEXT("/Game/Characters/Mannequins/Anims/Tools/A_ToolHold_Combo_B.A_ToolHold_Combo_B"));
+    }
+    UAnimInstance* Anim = GetMesh()->GetAnimInstance();
+    if (Weapon)
+    {
+        WeaponMountComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
+        WeaponMountComponent->SetRelativeLocation(HandGripLocation);
+        WeaponMountComponent->SetRelativeRotation(HandGripRotation);
+        if (Anim && HoldAnimation)
+        {
+            // Held on the frame where the arm is out: a play rate of nearly nothing from that time.
+            Anim->PlaySlotAnimationAsDynamicMontage(HoldAnimation, TEXT("DefaultSlot"), 0.3f, 0.3f, 0.001f, 1, -1.0f, HoldAnimationTime);
+        }
+    }
+    else
+    {
+        WeaponMountComponent->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        WeaponMountComponent->SetRelativeLocation(FVector(46.0f, 18.0f, -15.0f));
+        WeaponMountComponent->SetRelativeRotation(FRotator::ZeroRotator);
+        if (Anim && HoldAnimation)
+        {
+            Anim->StopSlotAnimation(0.3f, TEXT("DefaultSlot"));
         }
     }
 }

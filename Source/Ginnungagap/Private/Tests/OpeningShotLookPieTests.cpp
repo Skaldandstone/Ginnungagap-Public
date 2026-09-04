@@ -16,6 +16,8 @@
 #include "Weapons/ShipboardWeapon.h"
 #include "Weapons/WeaponMountComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 /**
  * Stills of the opening, one per phase, captured on phase change from the player's own view.
@@ -62,7 +64,7 @@ DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FCaptureOpeningPhases, FAutomatio
 bool FCaptureOpeningPhases::Update()
 {
 	static EQuickDemoOpeningPhase LastCaptured = EQuickDemoOpeningPhase::Idle;
-	static double PhaseEnteredAt = 0.0;
+	static double PhaseEnteredAt = -1.0;
 	UWorld* World = OpeningLook::FindPieWorld();
 	if (!World)
 	{
@@ -83,9 +85,10 @@ bool FCaptureOpeningPhases::Update()
 	const EQuickDemoOpeningPhase Phase = Opening->GetPhase();
 	if (Phase != LastCaptured)
 	{
-		if (PhaseEnteredAt == 0.0)
+		if (PhaseEnteredAt < 0.0)
 		{
 			PhaseEnteredAt = Now;
+			UE_LOG(LogTemp, Display, TEXT("OPENINGLOOK phase %d at t=%.2f"), static_cast<int32>(Phase), Now);
 		}
 		// Half a second into the phase, so the picture is of the phase and not of the cut into it.
 		// (First person completes almost at once, so it is caught sooner.)
@@ -96,14 +99,14 @@ bool FCaptureOpeningPhases::Update()
 				FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("Opening_%s"), Name), false, false, false, FIntRect(), true);
 			}
 			LastCaptured = Phase;
-			PhaseEnteredAt = 0.0;
+			PhaseEnteredAt = -1.0;
 		}
 	}
 	if (Opening->IsComplete() || Now > 30.0)
 	{
 		Test->TestTrue(TEXT("The opening ran through to completion within 30s"), Opening->IsComplete());
 		LastCaptured = EQuickDemoOpeningPhase::Idle;
-		PhaseEnteredAt = 0.0;
+		PhaseEnteredAt = -1.0;
 		return true;
 	}
 	return false;
@@ -149,8 +152,16 @@ bool FCaptureToolInHand::Update()
 		if (UWeaponMountComponent* Mount = Character->FindComponentByClass<UWeaponMountComponent>())
 		{
 			const FVector View = Character->GetBaseAimRotation().Vector();
-			const FString MountInfo = FString::Printf(TEXT("mount rel loc %s rel rot %s, forward.view %.2f"),
-				*Mount->GetRelativeLocation().ToCompactString(), *Mount->GetRelativeRotation().ToCompactString(),
+			FString HandInfo;
+			if (Character->GetFirstPersonCamera() && Character->GetMesh())
+			{
+				const FTransform Cam = Character->GetFirstPersonCamera()->GetComponentTransform();
+				const FVector HandInCam = Cam.InverseTransformPosition(Character->GetMesh()->GetSocketLocation(TEXT("hand_r")));
+				const FVector MountInCam = Cam.InverseTransformPosition(Mount->GetComponentLocation());
+				HandInfo = FString::Printf(TEXT(" hand_r in camera space %s, mount in camera space %s,"), *HandInCam.ToCompactString(), *MountInCam.ToCompactString());
+			}
+			const FString MountInfo = FString::Printf(TEXT("mount rel loc %s rel rot %s,%s forward.view %.2f"),
+				*Mount->GetRelativeLocation().ToCompactString(), *Mount->GetRelativeRotation().ToCompactString(), *HandInfo,
 				FVector::DotProduct(Mount->GetForwardVector(), View));
 			if (AShipboardWeapon* Weapon = Mount->GetMountedWeapon())
 			{
@@ -166,6 +177,62 @@ bool FCaptureToolInHand::Update()
 	}
 	GrantedAt = 0.0;
 	return true;
+}
+
+/**
+ * The hold pose from each candidate hold animation, one still each, with the hand's position in
+ * camera space logged: the numbers pick the variant (forward, slightly right, a little below the
+ * eye), the stills confirm it.
+ */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FSweepHoldPose, FAutomationTestBase*, Test);
+
+bool FSweepHoldPose::Update()
+{
+	// The one the character uses; add names here (and build them with
+	// tools/build_tool_hold_additive_anim.py --sweep) to compare candidates again.
+	static const TCHAR* Variants[] = { TEXT("A_ToolHold_Combo_B") };
+	static int32 Index = 0;
+	static double SetAt = -1.0;
+	UWorld* World = OpeningLook::FindPieWorld();
+	ACoopSurvivalCharacter* Character = World ? Cast<ACoopSurvivalCharacter>(UGameplayStatics::GetPlayerPawn(World, 0)) : nullptr;
+	UWeaponMountComponent* Mount = Character ? Character->FindComponentByClass<UWeaponMountComponent>() : nullptr;
+	if (!Mount || !Mount->GetMountedWeapon() || !Character->GetFirstPersonCamera() || !Character->GetMesh())
+	{
+		Index = 0; SetAt = -1.0;
+		return true;
+	}
+	const double Now = World->GetTimeSeconds();
+	if (SetAt < 0.0)
+	{
+		UAnimSequenceBase* Variant = LoadObject<UAnimSequenceBase>(nullptr,
+			*FString::Printf(TEXT("/Game/Characters/Mannequins/Anims/Tools/%s.%s"), Variants[Index], Variants[Index]));
+		if (!Variant)
+		{
+			UE_LOG(LogTemp, Display, TEXT("HOLDSWEEP %s missing"), Variants[Index]);
+			if (++Index >= UE_ARRAY_COUNT(Variants)) { Index = 0; return true; }
+			return false;
+		}
+		Character->HoldAnimation = Variant;
+		Character->HoldAnimationTime = 1.6f;
+		Character->HandleMountedWeaponChanged(Mount->GetMountedWeapon());
+		SetAt = Now;
+		return false;
+	}
+	if (Now - SetAt < 0.8)
+	{
+		return false;
+	}
+	const FTransform Cam = Character->GetFirstPersonCamera()->GetComponentTransform();
+	UE_LOG(LogTemp, Display, TEXT("HOLDSWEEP %s hand_r in camera space %s"), Variants[Index],
+		*Cam.InverseTransformPosition(Character->GetMesh()->GetSocketLocation(TEXT("hand_r"))).ToCompactString());
+	FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("Hold_%02d_%s"), Index, Variants[Index]), true, false, false, FIntRect(), true);
+	++Index; SetAt = -1.0;
+	if (Index >= UE_ARRAY_COUNT(Variants))
+	{
+		Index = 0;
+		return true;
+	}
+	return false;
 }
 
 namespace ToolboxShaders
@@ -199,6 +266,7 @@ bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureOpeningPhases(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureToolInHand(this));
+	ADD_LATENT_AUTOMATION_COMMAND(FSweepHoldPose(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;

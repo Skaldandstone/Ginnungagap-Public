@@ -62,6 +62,7 @@ working copy, a licensed copy of each pack is installed to `Content/<PackName>/`
 - `Scifi_Hideout`
 - `kb3d_missiontominerva`
 - `Frontier_EngineersToolbox`
+- `Fab_CryoStasisPod`
 
 Source art scenes (`Art/`, 5 GB of Blender files and capture packets) and `Content/Characters` are
 also excluded for size and licensing. Files over 95 MB are skipped by the export:

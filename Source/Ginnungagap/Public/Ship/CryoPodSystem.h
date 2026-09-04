@@ -76,6 +76,19 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Visual")
     TObjectPtr<class UStaticMeshComponent> LidGlass;
 
+    /**
+     * The vertical stasis pod from Fab ("Sci-Fi Cryo Stasis Pod - Sleep Chamber", one mesh, glass
+     * door in the base colour's alpha). When its mesh is present it is the pod's whole look: the
+     * generated bed, lid, trim and lights are hidden and the sleeper stands inside behind the
+     * glass. The door faces the actor's +X. Lid open/shut still drives state and lights; there
+     * is no moving door on this mesh.
+     */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Visual")
+    TObjectPtr<class UStaticMeshComponent> VerticalPod;
+
+    UFUNCTION(BlueprintPure, Category = "Cryo Pod|Visual")
+    bool UsesVerticalPod() const;
+
     /** Resting state. Closed by default; a level opens the pods whose occupants got out. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_LidOpen, Category = "Cryo Pod")
     bool bLidOpen = false;
