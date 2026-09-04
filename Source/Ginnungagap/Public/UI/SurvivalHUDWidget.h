@@ -200,6 +200,13 @@ private:
     TObjectPtr<UTextBlock> DemoTitleText;
 
     UPROPERTY()
+    TObjectPtr<UTextBlock> ControlsHintText;
+
+    /** How long the key hint stays up after the HUD appears, fading over its last four seconds. */
+    UPROPERTY(EditDefaultsOnly, Category = "HUD")
+    float ControlsHintSeconds = 30.0f;
+
+    UPROPERTY()
     TObjectPtr<UTextBlock> VisorStatusText;
 
     UPROPERTY()

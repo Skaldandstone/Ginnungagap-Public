@@ -63,6 +63,7 @@ private:
     void OnActivityCancel();
     void OnToggleProgressionMenu();
     void OnRestartDemo();
+    void OnToggleView();
     void SetupAntagonistActivityWidget(APawn* InPawn);
 
 public:

@@ -499,6 +499,8 @@ FPlayerActivityDefinition AObstructionBarrier::GetActivityDefinition_Implementat
 		Definition.Type = EPlayerActivityType::FieldProcedure;
 		Definition.Mechanic = EActivityMechanic::Timed;
 		Definition.DisplayName = NSLOCTEXT("Obstructions", "SqueezeThrough", "Squeeze through");
+		// Seen from outside: a body working through a gap is the shot, not a visor full of wall.
+		Definition.bThirdPersonView = true;
 		break;
 	}
 

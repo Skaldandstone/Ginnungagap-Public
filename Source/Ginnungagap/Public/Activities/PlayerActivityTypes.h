@@ -137,6 +137,10 @@ struct FPlayerActivityDefinition
     /** Scenario-authored minimum, used when a local target is already compromised. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Activity", meta=(ClampMin="0.0", ClampMax="1.0"))
     float MinimumBloomInterference = 0.0f;
+
+    /** The body is the point of this one (a squeeze through a gap, a crawl): the owner's view goes to third person for its duration and back after. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Activity")
+    bool bThirdPersonView = false;
 };
 
 USTRUCT(BlueprintType)
@@ -152,6 +156,10 @@ struct FPlayerActivitySnapshot
 
     UPROPERTY(BlueprintReadOnly, Category="Activity")
     FText DisplayName;
+
+    /** Mirrors the definition's flag so the owning client can switch its view without the definition. */
+    UPROPERTY(BlueprintReadOnly, Category="Activity")
+    bool bThirdPersonView = false;
 
     UPROPERTY(BlueprintReadOnly, Category="Activity")
     float Progress = 0.0f;

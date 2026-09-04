@@ -70,6 +70,10 @@ private:
     UPROPERTY(ReplicatedUsing=OnRep_Snapshot)
     FPlayerActivitySnapshot Snapshot;
 
+    /** Owner-side: whether this component moved the view to third person for the running activity, and what it was before. */
+    bool bViewSwitchedForActivity = false;
+    bool bViewWasFirstPerson = true;
+
     UPROPERTY(Replicated)
     TObjectPtr<AActor> ActivitySource;
 

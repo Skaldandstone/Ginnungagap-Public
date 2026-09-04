@@ -1,4 +1,6 @@
 #include "Ship/ProductionBulkheadDoor.h"
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
@@ -188,15 +190,36 @@ float AProductionBulkheadDoor::GetLeafOpenFraction() const
     return FMath::Clamp(FMath::Abs(LeftPanel->GetRelativeLocation().X - LeftClosedX) / LeafOpenTravel, 0.0f, 1.0f);
 }
 
+namespace
+{
+    // The door's own voice: a servo close and open from the SciFiWorld pack, played where the door
+    // is, only when the state actually changes (a restore that re-applies the same state is silent).
+    void PlayDoorSound(const AActor* Door, bool bClosing)
+    {
+        if (!Door || !Door->GetWorld() || !Door->GetWorld()->IsGameWorld()) return;
+        USoundBase* Sound = LoadObject<USoundBase>(nullptr, bClosing
+            ? TEXT("/Game/SciFiWorld/Audio/S_SciFiDoorClose01_Cue.S_SciFiDoorClose01_Cue")
+            : TEXT("/Game/SciFiWorld/Audio/S_SciFiDoorOpen01_Cue.S_SciFiDoorOpen01_Cue"));
+        if (Sound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(Door, Sound, Door->GetActorLocation() + FVector(0.0f, 0.0f, 120.0f), 0.8f);
+        }
+    }
+}
+
 void AProductionBulkheadDoor::Seal()
 {
+    const bool bWasSealed = bIsSealed;
     Super::Seal();
+    if (!bWasSealed && bIsSealed && HasActorBegunPlay()) PlayDoorSound(this, true);
     SetActorTickEnabled(true);
 }
 
 void AProductionBulkheadDoor::Unseal()
 {
+    const bool bWasSealed = bIsSealed;
     Super::Unseal();
+    if (bWasSealed && !bIsSealed && HasActorBegunPlay()) PlayDoorSound(this, false);
     SetActorTickEnabled(true);
 }
 

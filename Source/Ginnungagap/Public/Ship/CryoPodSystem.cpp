@@ -298,6 +298,14 @@ void ACryoPodSystem::ApplyLidPose()
         : FMath::SmoothStep(0.0f, 1.0f, LidAnimationAlpha);
     const float LidAngle = FMath::Lerp(-90.0f, LidOpenAngle, EasedAlpha);
     LidPivot->SetRelativeRotation(FRotator(0.0f, 0.0f, LidAngle));
+
+    // The Fab vertical pod is one mesh with no lid of its own: "open" is the whole canopy lifting
+    // clear of the sleeper, who is left standing on the deck where the pod stood. It is the beat
+    // the wake-up is watched for, in third person, before the crew steps out.
+    if (VerticalPod && UsesVerticalPod())
+    {
+        VerticalPod->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f + EasedAlpha * 150.0f));
+    }
 }
 
 void ACryoPodSystem::OnInteract_Implementation(APawn* InteractingPawn)

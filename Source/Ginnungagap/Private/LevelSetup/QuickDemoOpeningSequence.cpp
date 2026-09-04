@@ -177,6 +177,9 @@ void AQuickDemoOpeningSequence::TryArm()
         Chosen->TryEnterPod(Character);
     }
     Character->SetActorEnableCollision(false);
+    // Watched from outside until the hand-over: in first person the crew's own head sections are
+    // switched off, which from the shot camera is a body with no helmet.
+    Character->SetFirstPersonView(false);
     if (bVertical)
     {
         // Seen asleep on their feet behind the glass, facing the door.

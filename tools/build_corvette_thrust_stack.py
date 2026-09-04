@@ -499,6 +499,11 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     spawn_sign(f"{code} // {name.upper()}", MAIN_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, code, big=True)
     spawn_sign(f"{code}-B // {SECOND_NAMES[deck].upper()}", SECOND_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, f"{code}-B")
     spawn_sign(f"DECK {deck:02d}", 550.0, LANDING[1] - 60.0, z, -90.0, f"{code}-T", big=True)
+    # Wayfinding at the trunk: what the ramp beside you leads to.
+    if has_ramp:
+        spawn_sign(f"UP  >  DECK {deck + 1:02d}", RAMP_X1 + 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Up")
+    if has_hole:
+        spawn_sign(f"DOWN  >  DECK {deck - 1:02d}", RAMP_X0 - 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Down")
 
     # Dressing by role, then the gameplay of the deck.
     dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state)

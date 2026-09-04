@@ -60,6 +60,7 @@ bool UPlayerActivityComponent::StartActivityAuthoritative(AActor* Source, const 
     Snapshot.State = EPlayerActivityState::Active;
     Snapshot.Type = Definition.Type;
     Snapshot.DisplayName = Definition.DisplayName;
+    Snapshot.bThirdPersonView = Definition.bThirdPersonView;
     Snapshot.Progress = 0.0f;
     Snapshot.Mechanic = ActiveDefinition.Mechanic;
     Snapshot.Mistakes = 0;
@@ -95,6 +96,24 @@ bool UPlayerActivityComponent::StartActivityAuthoritative(AActor* Source, const 
 void UPlayerActivityComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    // Activities that are about the body (a squeeze through a gap) are watched from outside: the
+    // owner's view goes to third person while one runs and returns to what it was after.
+    if (ACoopSurvivalCharacter* Crew = Cast<ACoopSurvivalCharacter>(GetOwner()); Crew && Crew->IsLocallyControlled())
+    {
+        const bool bWantThird = IsActivityActive() && Snapshot.bThirdPersonView;
+        if (bWantThird && !bViewSwitchedForActivity)
+        {
+            bViewWasFirstPerson = Crew->IsFirstPersonView();
+            if (bViewWasFirstPerson) Crew->SetFirstPersonView(false);
+            bViewSwitchedForActivity = true;
+        }
+        else if (!bWantThird && bViewSwitchedForActivity)
+        {
+            if (bViewWasFirstPerson) Crew->SetFirstPersonView(true);
+            bViewSwitchedForActivity = false;
+        }
+    }
     if (!GetOwner() || !GetOwner()->HasAuthority() || !IsActivityActive()) return;
     float TaskEfficiency = 1.0f;
     if (const ACoopSurvivalCharacter* Character = Cast<ACoopSurvivalCharacter>(GetOwner()))

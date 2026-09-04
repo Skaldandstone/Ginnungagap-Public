@@ -162,6 +162,7 @@ bool FPlayEveryStation::Update()
 	static double StartedAt = 0.0;
 	static int32 Presses = 0;
 	static bool bSawLockedCICDoor = false;
+	static bool bCheckedThirdPerson = false;
 
 	UWorld* World = StationPath::FindPieWorld();
 	ASurvivalPlayerController* PC = World ? Cast<ASurvivalPlayerController>(UGameplayStatics::GetPlayerController(World, 0)) : nullptr;
@@ -225,6 +226,9 @@ bool FPlayEveryStation::Update()
 	}
 	if (Index >= Steps.Num())
 	{
+		// Leave no checkpoint behind: the director restores it on the next play, and a person
+		// starting the ship after a test run would otherwise wake with the chain already done.
+		UGameplayStatics::DeleteGameInSlot(TEXT("GinnungagapShipCheckpoint"), 0);
 		Reset();
 		return true;
 	}
@@ -361,6 +365,14 @@ bool FPlayEveryStation::Update()
 		}
 		if (Activity->IsActivityActive())
 		{
+			// A body activity (the squeeze) is watched from outside: third person while it runs.
+			// The component switches the view on its own tick, which can run after this one in the
+			// frame the activity starts; judge it a moment in.
+			if (Activity->GetSnapshot().bThirdPersonView && !bCheckedThirdPerson && Activity->GetSnapshot().Progress > 0.05f)
+			{
+				Test->TestFalse(FString::Printf(TEXT("During the %s (a body activity) the view is third person"), *Step.Name), Pawn->IsFirstPersonView());
+				bCheckedThirdPerson = true;
+			}
 			// Answer whatever the prompt asks for, at a human-ish cadence. Primary goes through the
 			// same Interact handler a player's E key does; the others through their bound actions.
 			if (Now - PhaseAt >= 0.25)
@@ -415,6 +427,11 @@ bool FPlayEveryStation::Update()
 		{
 			const ABulkheadDoor* Door = Cast<ABulkheadDoor>(Station);
 			Test->TestTrue(TEXT("After cutting the weld, the door is passable"), Door && Door->IsPassable());
+		}
+		if (bCheckedThirdPerson)
+		{
+			Test->TestTrue(FString::Printf(TEXT("After the %s the view is back in first person"), *Step.Name), Pawn->IsFirstPersonView());
+			bCheckedThirdPerson = false;
 		}
 		Test->AddInfo(FString::Printf(TEXT("STATIONPATH %s: %d presses, %.1fs"), *Step.Name, Presses, Now - StartedAt));
 		++Index; Phase = 0; PhaseAt = -1.0; Presses = 0;

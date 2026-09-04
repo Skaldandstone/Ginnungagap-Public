@@ -15,6 +15,7 @@
 #include "Public/Ship/ArmorPlatingSystem.h"
 #include "Public/Ship/SensorArraySystem.h"
 #include "Public/Ship/ShipHelmSystem.h"
+#include "Public/Ship/ShipPropulsionSubsystem.h"
 #include "Public/Ship/ShipSystemActor.h"
 #include "Mission/MissionObjectiveSubsystem.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
@@ -165,6 +166,14 @@ void USurvivalHUDWidget::BuildWidgetTree()
     DemoTitleText->SetText(FText::FromString(TEXT("SUIT // CREW TELEMETRY")));
     DemoTitleText->SetColorAndOpacity(FSlateColor(HudCyan));
     AnchorTopLeft(RootCanvas, DemoTitleText, FVector2D(70.0f, 154.0f), FVector2D(300.0f, 24.0f));
+
+    // The keys, for the first half minute on deck: the ship is played by people who have not read
+    // the ini. It fades on its own.
+    ControlsHintText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ControlsHintText"));
+    ControlsHintText->SetText(FText::FromString(TEXT("E  INTERACT   //   F  CYCLE APPROACH   //   TAB  VIEW   //   ENTER  RESTART")));
+    ControlsHintText->SetColorAndOpacity(FSlateColor(FLinearColor(HudCyan.R, HudCyan.G, HudCyan.B, 0.85f)));
+    ControlsHintText->SetJustification(ETextJustify::Center);
+    AnchorTopLeft(RootCanvas, ControlsHintText, FVector2D(560.0f, 1000.0f), FVector2D(800.0f, 26.0f));
 
     auto AddStatLabel = [&](const TCHAR* Name, const TCHAR* Label, float Y, TObjectPtr<UTextBlock>& OutLabel)
     {
@@ -361,6 +370,12 @@ void USurvivalHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
     Super::NativeTick(MyGeometry, InDeltaTime);
 
     AlertPulseTime += InDeltaTime;
+    if (ControlsHintText)
+    {
+        const float Fade = FMath::Clamp((ControlsHintSeconds - AlertPulseTime) / 4.0f, 0.0f, 1.0f);
+        ControlsHintText->SetVisibility(Fade > 0.0f ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+        ControlsHintText->SetRenderOpacity(Fade);
+    }
     PsychosisVoiceSecondsRemaining = FMath::Max(0.0f, PsychosisVoiceSecondsRemaining - InDeltaTime);
     if (PsychosisVoiceSecondsRemaining <= 0.0f)
     {
@@ -718,8 +733,20 @@ void USurvivalHUDWidget::RefreshAllStats()
     if (MagneticSuitText)
     {
         const TCHAR* Target = OwningCharacter->HasValidMagneticTarget() ? TEXT("TARGET: METAL") : TEXT("TARGET: ---");
-        MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("MAG  BOOTS %s\nGRIP L %s  R %s  //  %s"),
-            OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"),
+        // Under drive the deck has gravity and the boots are moot: say so, rather than "MAG BOOTS
+        // OFF" on a ship you are plainly standing in.
+        const UShipPropulsionSubsystem* Propulsion = OwningCharacter->GetWorld() ? OwningCharacter->GetWorld()->GetSubsystem<UShipPropulsionSubsystem>() : nullptr;
+        FString Footing;
+        if (Propulsion && Propulsion->IsShipThrusting())
+        {
+            // The zero-g component turns acceleration into gravity at 0.0001 g per cm/s^2, so one g is 10,000.
+            Footing = FString::Printf(TEXT("DRIVE GRAVITY %.1fg"), Propulsion->GetPseudoGravity().Size() * 0.0001f);
+        }
+        else
+        {
+            Footing = FString::Printf(TEXT("MAG  BOOTS %s"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"));
+        }
+        MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("%s\nGRIP L %s  R %s  //  %s"), *Footing,
             OwningCharacter->IsLeftMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"),
             OwningCharacter->IsRightMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"), Target)));
     }
@@ -959,7 +986,9 @@ void USurvivalHUDWidget::SetCharacterName_Implementation(const FString& NewName)
         return;
     }
 
-    CharacterNameText->SetText(FText::FromString(NewName));
+    // A profile with no name yet is still somebody: the suit's role, not a placeholder.
+    const bool bUnnamed = NewName.IsEmpty() || NewName.Equals(TEXT("Unnamed"), ESearchCase::IgnoreCase);
+    CharacterNameText->SetText(FText::FromString(bUnnamed ? TEXT("MARSHAL") : NewName));
 }
 
 void USurvivalHUDWidget::OnCharacterProfileChanged(const FCharacterProfile& NewProfile)

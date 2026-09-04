@@ -124,6 +124,7 @@ void ASurvivalPlayerController::SetupInputComponent()
     FInputActionBinding& ProgressionBinding = InputComponent->BindAction(TEXT("Progression"), IE_Pressed, this, &ASurvivalPlayerController::OnToggleProgressionMenu);
     ProgressionBinding.bExecuteWhenPaused = true;
     InputComponent->BindAction(TEXT("RestartDemo"), IE_Pressed, this, &ASurvivalPlayerController::OnRestartDemo);
+    InputComponent->BindAction(TEXT("ToggleView"), IE_Pressed, this, &ASurvivalPlayerController::OnToggleView);
 }
 
 void ASurvivalPlayerController::OnMove_Forward(float Value)
@@ -282,6 +283,15 @@ void ASurvivalPlayerController::OnActivityCancel()
         if (UPlayerActivityComponent* Activity = SurvivalCharacter->GetPlayerActivityComponent()) Activity->CancelActivity();
 	if (APawn* ControlledPawn = GetPawn())
 		if (UAntagonistActivityComponent* Activity = ControlledPawn->FindComponentByClass<UAntagonistActivityComponent>()) Activity->CancelActivity();
+}
+
+void ASurvivalPlayerController::OnToggleView()
+{
+    // First or third person, on a key: the way the ship is played and recorded.
+    if (ACoopSurvivalCharacter* Crew = Cast<ACoopSurvivalCharacter>(GetPawn()))
+    {
+        Crew->SetFirstPersonView(!Crew->IsFirstPersonView());
+    }
 }
 
 void ASurvivalPlayerController::OnRestartDemo()
