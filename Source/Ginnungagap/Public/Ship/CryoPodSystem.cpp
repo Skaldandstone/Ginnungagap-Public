@@ -152,10 +152,18 @@ ACryoPodSystem::ACryoPodSystem()
     Glow = CreateDefaultSubobject<UPointLightComponent>(TEXT("Glow"));
     Glow->SetupAttachment(RootComponent);
     Glow->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
-    Glow->SetLightColor(FLinearColor(0.22f, 0.52f, 1.0f));
-    Glow->SetIntensity(1100.0f);
-    Glow->SetAttenuationRadius(800.0f);
-    Glow->SetCastShadows(false);
+    // Enough to light the bay it stands in, and no further: the casualty station reads by the
+    // tubes' light alone before the crew suit up.
+    // A wide, flat falloff rather than inverse-square: with the source a hand from the sleeper,
+    // inverse-square blows them out and leaves the walls black. This spreads the same light to
+    // the far bulkheads and the rack.
+    Glow->SetLightColor(FLinearColor(0.30f, 0.58f, 1.0f));
+    Glow->bUseInverseSquaredFalloff = false;
+    Glow->LightFalloffExponent = 1.6f;
+    Glow->SetIntensity(28.0f);
+    Glow->SetAttenuationRadius(1600.0f);
+    Glow->SetSourceRadius(45.0f);
+    Glow->SetCastShadows(true);
 
     if (VerticalPodFinder.Succeeded())
     {

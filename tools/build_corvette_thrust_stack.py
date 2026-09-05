@@ -1234,8 +1234,10 @@ def build():
     label(volume, "Exposure")
     volume.set_editor_property("unbound", True); volume.set_editor_property("priority", 10.0)
     settings = volume.get_editor_property("settings")
-    settings.set_editor_property("override_auto_exposure_bias", True); settings.set_editor_property("auto_exposure_bias", -0.75)
-    settings.set_editor_property("override_auto_exposure_min_brightness", True); settings.set_editor_property("auto_exposure_min_brightness", 2.0)
+    # The eye may open up in a dark ship (the pods' glow, the wrist lamp), but not so far that
+    # black reads as grey: the floor is low, the bias slightly under.
+    settings.set_editor_property("override_auto_exposure_bias", True); settings.set_editor_property("auto_exposure_bias", -0.5)
+    settings.set_editor_property("override_auto_exposure_min_brightness", True); settings.set_editor_property("auto_exposure_min_brightness", 0.5)
     settings.set_editor_property("override_auto_exposure_max_brightness", True); settings.set_editor_property("auto_exposure_max_brightness", 11.0)
     volume.set_editor_property("settings", settings)
     height = DECK_PITCH * len(DECKS)

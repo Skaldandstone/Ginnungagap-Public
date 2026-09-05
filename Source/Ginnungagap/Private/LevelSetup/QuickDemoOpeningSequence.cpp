@@ -386,6 +386,12 @@ void AQuickDemoOpeningSequence::TryArm()
         const FBox Room = FBox::BuildAABB(It->GetActorLocation(), It->ModuleSize * 0.5f + FVector(60.0f));
         for (TActorIterator<AActor> ActorIt(GetWorld()); ActorIt; ++ActorIt)
         {
+            // The tubes' own glow is on the pods' circuit, not the room's: it does not die with
+            // the ship, and it is what lights the bay until the crew suit up.
+            if (ActorIt->IsA<ACryoPodSystem>())
+            {
+                continue;
+            }
             if (!Room.IsInside(ActorIt->GetActorLocation()))
             {
                 continue;
