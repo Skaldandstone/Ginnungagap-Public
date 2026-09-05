@@ -128,7 +128,7 @@ void USurvivalHUDWidget::BuildWidgetTree()
     // Four compact glass panels mirror the concept art and leave the central play space clear.
     AddHudPanel(WidgetTree, RootCanvas, TEXT("SuitPanel"), FVector2D(54.0f, 142.0f), FVector2D(344.0f, 210.0f));
     AddHudPanel(WidgetTree, RootCanvas, TEXT("LifeSupportPanel"), FVector2D(54.0f, 714.0f), FVector2D(344.0f, 246.0f));
-    AddHudPanel(WidgetTree, RootCanvas, TEXT("NavigationPanel"), FVector2D(1432.0f, 88.0f), FVector2D(432.0f, 142.0f));
+    AddHudPanel(WidgetTree, RootCanvas, TEXT("NavigationPanel"), FVector2D(1432.0f, 88.0f), FVector2D(432.0f, 200.0f));
     AddHudPanel(WidgetTree, RootCanvas, TEXT("EquipmentPanel"), FVector2D(1492.0f, 720.0f), FVector2D(372.0f, 240.0f));
 
     VisorStatusText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VisorStatusText"));
@@ -248,7 +248,10 @@ void USurvivalHUDWidget::BuildWidgetTree()
     ObjectiveText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ObjectiveText"));
     ObjectiveText->SetText(FText::FromString(TEXT("MISSION INITIALIZING...")));
     ObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.78f, 0.22f)));
-    AnchorTopLeft(RootCanvas, ObjectiveText, FVector2D(1450.0f, 154.0f), FVector2D(390.0f, 64.0f));
+    // Wrapped inside the visor's navigation panel: an objective title with a range and a sentence
+    // of description ran off the right edge of the frame unwrapped.
+    ObjectiveText->SetAutoWrapText(true);
+    AnchorTopLeft(RootCanvas, ObjectiveText, FVector2D(1450.0f, 154.0f), FVector2D(396.0f, 120.0f));
 
     CompassText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CompassText"));
     CompassText->SetText(FText::FromString(TEXT("W      NW       N       NE      E")));
@@ -787,7 +790,7 @@ void USurvivalHUDWidget::RefreshAllStats()
                         }
                     }
                     ObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.78f, 0.22f)));
-                    ObjectiveText->SetText(FText::FromString(FString::Printf(TEXT("PRIMARY OBJECTIVE  //  %s%s\n%s"),
+                    ObjectiveText->SetText(FText::FromString(FString::Printf(TEXT("OBJECTIVE  //  %s%s\n%s"),
                         *Objective.Definition.Title.ToString(), *RangeText,
                         *Objective.Definition.Description.ToString())));
                 }

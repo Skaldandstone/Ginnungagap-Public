@@ -432,7 +432,7 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     # dressing); the hull panels there would otherwise stand behind the glass and the windows
     # would look out on a wall.
     wall_run("x", FOOT_Y, 0.0, FOOT_X, -1, z, name=f"D{deck:02d}_HullFore", variant=deck + 1,
-             gaps=([(MAIN[0], MAIN[1])] if kind == "observation" else []))
+             gaps=([(MAIN[0], MAIN[1])] if kind == "observation" else ([(50.0, 750.0)] if kind == "breach" else [])))
     wall_run("y", 0.0, 0.0, FOOT_Y, +1, z, name=f"D{deck:02d}_HullPort", variant=deck + 2)
     wall_run("y", FOOT_X, 0.0, FOOT_Y, -1, z, name=f"D{deck:02d}_HullStbd", variant=deck)
     # Partitions, both faces. Corridor/rooms line y=900 with the two room doors; trunk/service line
@@ -550,7 +550,7 @@ def oxygen_canister(x, y, z_floor, code, amount=35.0):
 
 
 def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, squeeze_seconds, squeeze_entrapment=0.25,
-                  visual=None, visual_offset=(0.0, 0.0, 0.0), visual_rotation=(0.0, 0.0, 0.0), visual_scale=(1.0, 1.0, 1.0)):
+                  visual=None, visual_offset=(0.0, 0.0, 0.0), visual_rotation=(0.0, 0.0, 0.0), visual_scale=(1.0, 1.0, 1.0), allow_cut=True):
     """An obstruction across a passage: cut through with the tool, or squeeze past. The blocker is
     a box (depth x, width y, height z in the barrier's frame); the visual is a Fab mesh posed to
     fill it, since an invisible box with a prompt is a bug, not an obstacle."""
@@ -564,7 +564,7 @@ def spawn_barrier(x, y, z_floor, yaw, name, display, bypassable, cut_seconds, sq
         comp.set_editor_property("relative_scale3d", unreal.Vector(*visual_scale))
     barrier.set_editor_property("display_name", display)
     barrier.set_editor_property("bypassable", bypassable)
-    cut = unreal.ObstructionVerbOption(); cut.set_editor_property("allowed", True); cut.set_editor_property("duration_seconds", cut_seconds)
+    cut = unreal.ObstructionVerbOption(); cut.set_editor_property("allowed", allow_cut); cut.set_editor_property("duration_seconds", cut_seconds)
     cut.set_editor_property("minimum_equipment_condition", 0.2); cut.set_editor_property("noise_loudness", 0.3)
     squeeze = unreal.ObstructionVerbOption(); squeeze.set_editor_property("allowed", True); squeeze.set_editor_property("duration_seconds", squeeze_seconds)
     squeeze.set_editor_property("noise_loudness", 0.15); squeeze.set_editor_property("near_entrapment_chance", squeeze_entrapment)
@@ -722,7 +722,11 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         no_nav(trigger.get_editor_property("trigger_bounds"))
         bench = actors.spawn_actor_from_class(unreal.QuickDemoWorkshopBench, unreal.Vector(cx - 200.0, back_y, z + 90.0), unreal.Rotator(pitch=0.0, yaw=180.0, roll=0.0))
         label(bench, "WorkshopBench")
-        bench.get_editor_property("mesh").set_static_mesh(K.control_panel or K.terminal)
+        # The bench is the toolbox itself, on the table where a person looks for a tool; the
+        # console it used to be read as furniture and nobody found the tool.
+        bench.get_editor_property("mesh").set_static_mesh(K.toolbox)
+        bench.get_editor_property("mesh").set_relative_scale3d(unreal.Vector(1.6, 1.6, 1.6))
+        bench.set_actor_location(unreal.Vector(cx + 550.0, cy, z + 92.0), False, False)
         weapon = load("/Game/Assets/Gameplay/EarlyProjectileWeapons/Data/Weapons/DA_Weapon_PressureBottleFastenerTool")
         weapon_class = load("/Game/Assets/Gameplay/EarlyProjectileWeapons/Blueprints/BP_Weapon_PressureBottleFastenerTool")
         if weapon:
@@ -735,7 +739,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         repair = actors.spawn_actor_from_class(unreal.QuickDemoSuitRepairBench, unreal.Vector(cx + 300.0, back_y, z + 90.0), unreal.Rotator(pitch=0.0, yaw=180.0, roll=0.0))
         label(repair, "SuitRepairBench")
         repair.get_editor_property("mesh").set_static_mesh(K.terminal)
-        place(K.toolbox, (cx - 500.0, back_y - 20.0, z + 90.0), (0, 0, 20.0), (1, 1, 1), f"D{deck:02d}_Toolbox", collide=False)
+        # (No second toolbox: one is the bench, and two would send the player to the wrong one.)
         place(K.table, (cx + 550.0, cy, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_Table")
         spawn_beacon("QD_ReachWorkshop", "ENGINEERING CONTROL", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "cryo":
@@ -815,6 +819,16 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         # the room is enterable (a rack across the door left 66 cm and no navmesh into the room).
         for i, dx in enumerate((-550.0, 550.0)):
             place(K.ice_computer, (cx + dx, cy - 250.0, z + 78.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CommsRack_{i}")
+        # The rupture itself: the fore hull is torn open beside the patch station (the hull panels
+        # there are left out at the wall run), a buckled plate hangs into the room, stars show
+        # through, and an unseen wall keeps the crew aboard.
+        place(K.ceiling_frame, (cx - 420.0, MAIN[3] - 60.0, z + 60.0), (12.0, -55.0, 0.0), (0.7, 0.55, 1.0), f"D{deck:02d}_BreachPlate")
+        place(K.duct_run, (cx - 120.0, MAIN[3] - 140.0, z), (0, 0, 70.0), (0.6, 1.0, 1.0), f"D{deck:02d}_BreachDebris", collide=False)
+        for i, bx in enumerate((cx - 500.0, cx - 100.0)):
+            seal = place(K.wall[0], (bx, MAIN[3] + 30.0, z), (0, 0, 180.0), (1.0, 1.0, 1.0), f"D{deck:02d}_BreachSeal_{i}")
+            if seal:
+                seal.static_mesh_component.set_visibility(False)
+        wc.set_editor_property("intensity", 900.0); wc.set_visibility(True)
         spawn_beacon("QD_SealBreach", "HULL BREACH", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "cic":
         # Off the door frame and the sign, out in the corridor, so the eye-line finds the panel.
@@ -878,6 +892,12 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     # Obstacles beyond the security deck's trunk: a fallen cable tray across the tactical deck's
     # corridor (squeeze past, or cut it clear). The observation deck's secondary room is welded
     # shut from some earlier emergency and cut free with the tool (see the door spawn).
+    # A crawl space: the marine deck's service plenum is reached through a collapsed duct run in
+    # its doorway that can only be crawled, on hands and knees, in third person.
+    if kind == "marine":
+        spawn_barrier(SERVICE_DOOR_X, SERVICE[3] - 90.0, z, 0.0, "PlenumCrawl", "Collapsed duct: crawl through", False, 0.0, 9.0,
+                      squeeze_entrapment=0.15, allow_cut=False,
+                      visual=K.duct_run, visual_offset=(0.0, 180.0, -60.0), visual_rotation=(0.0, 0.0, 90.0), visual_scale=(1.0, 1.4, 1.0))
     if kind == "tactical":
         spawn_barrier(1100.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
                       visual=K.duct_run, visual_offset=(0.0, 185.0, -120.0), visual_rotation=(18.0, 0.0, 90.0), visual_scale=(1.05, 1.0, 1.0))

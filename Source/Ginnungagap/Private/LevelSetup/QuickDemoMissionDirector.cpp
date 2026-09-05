@@ -466,7 +466,7 @@ void AQuickDemoSuitStation::OnActivityCompleted_Implementation(APawn* Player)
 
 AQuickDemoBreachStation::AQuickDemoBreachStation()
 {
-    Activity.DisplayName = NSLOCTEXT("QuickDemo", "PatchBreachActivity", "Patch Bloom hull rupture");
+    Activity.DisplayName = NSLOCTEXT("QuickDemo", "PatchBreachActivity", "Patch the hull rupture");
     Activity.DurationSeconds = 7.0f;
     Activity.MinimumBloomInterference = 0.35f;
     CompletionEffect = EMaintenanceActivityEffect::SealBreach;
@@ -607,7 +607,7 @@ namespace
 
 AQuickDemoWorkshopBench::AQuickDemoWorkshopBench()
 {
-    Activity.DisplayName = NSLOCTEXT("QuickDemo", "WorkshopBenchActivity", "Draw field equipment");
+    Activity.DisplayName = NSLOCTEXT("QuickDemo", "WorkshopBenchActivity", "Take the engineer's tool");
     Activity.DurationSeconds = 5.0f;
 
     // Component replacement is the closest existing effect, but the real outcome is the handover

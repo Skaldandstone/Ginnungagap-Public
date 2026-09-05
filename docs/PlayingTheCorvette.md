@@ -26,6 +26,13 @@ toward the engines.
 
 The HUD shows these for the first thirty seconds.
 
+## The camera
+
+You wake in third person, standing in the pod behind its glass; the canopy lifts, you step out,
+and the view hands over to first person with the visor HUD. Squeezing through a gap (an
+obstruction's squeeze, and any crawl space to come) is watched in third person for its duration
+and returns to first person after. Cutting with the tool stays first person. Tab toggles at will.
+
 ## The chain
 
 1. **Casualty station (deck 3).** Wake in the pod, suit up at the rack on the port wall.
