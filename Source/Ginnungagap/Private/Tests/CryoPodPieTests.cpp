@@ -12,6 +12,8 @@
 
 #include "Ship/CryoPodSystem.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/SurvivalPlayerController.h"
 
 /**
  * The cryo bay, which is the first thing anyone sees of this game.
@@ -205,6 +207,11 @@ bool FWaitForCryoOpening::Update()
 	{
 		Opening = *It;
 		break;
+	}
+	// Awake in the tube, the crew presses the release: the pod does not open itself.
+	if (Opening && Opening->GetPhase() == EQuickDemoOpeningPhase::Wake)
+	{
+		if (ASurvivalPlayerController* PC = Cast<ASurvivalPlayerController>(UGameplayStatics::GetPlayerController(World, 0))) { PC->PressInteract(); }   // RELEASE
 	}
 	const bool bDone = !Opening || Opening->IsComplete();
 	const bool bExpired = World->GetTimeSeconds() > 25.0f;

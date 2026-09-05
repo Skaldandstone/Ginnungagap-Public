@@ -20,6 +20,7 @@
 
 #include "CoopSurvivalCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/SurvivalPlayerController.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "Weapons/ShipboardWeapon.h"
@@ -117,6 +118,12 @@ bool FCaptureOpeningPhases::Update()
 			LastCaptured = Phase;
 			PhaseEnteredAt = -1.0;
 		}
+	}
+	// Awake in the tube, the crew presses the release: the pod does not open itself. A moment
+	// after the wake still has been taken, so the tube is seen awake and shut first.
+	if (Phase == EQuickDemoOpeningPhase::Wake && LastCaptured == EQuickDemoOpeningPhase::Wake)
+	{
+		if (ASurvivalPlayerController* PC = Cast<ASurvivalPlayerController>(UGameplayStatics::GetPlayerController(World, 0))) { PC->PressInteract(); }
 	}
 	if (Opening->IsComplete() || Now > 30.0)
 	{
@@ -219,6 +226,9 @@ bool FCaptureSuitedThirdPerson::Update()
 	const double Now = World->GetTimeSeconds();
 	if (Phase == 0)
 	{
+		// The crew wake in the bodysuit and draw the suit at the rack; this still is about the suit,
+		// so put it on them here.
+		if (!Character->bPressureOversuitEquipped) { Character->SetPressureOversuitEquipped(true); }
 		// Front-left of the crew, since straight ahead is the pod they just left; spawned regardless
 		// of what the spot overlaps, a camera has no collision to speak of.
 		// Close, at chest height: the straps and the shoulder patch are the proof of a textured suit.

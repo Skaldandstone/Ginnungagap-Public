@@ -1,3 +1,6 @@
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSequenceBase.h"
+#include "Animation/AnimInstance.h"
 #include "Activities/PlayerActivityComponent.h"
 #include "Activities/PlayerActivitySource.h"
 #include "GameFramework/Character.h"
@@ -114,6 +117,56 @@ void UPlayerActivityComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
             bViewSwitchedForActivity = false;
         }
     }
+    // The body at work, on every machine: each kind of activity plays its clip on the crew while
+    // it runs and lets go when it ends. Fab's interaction and free animation packs, retargeted to
+    // Manny (tools/retarget_ue4_anims.py); Lyra's crouch set for the rest.
+    if (ACharacter* Body = Cast<ACharacter>(GetOwner()))
+    {
+        UAnimInstance* Anim = Body->GetMesh() ? Body->GetMesh()->GetAnimInstance() : nullptr;
+        const bool bWantPose = IsActivityActive();
+        if (bWantPose && !bCrawlPosePlaying && Anim)
+        {
+            const TCHAR* Clip = nullptr;
+            float Rate = 1.0f;
+            const FString Name = Snapshot.DisplayName.ToString();
+            if (Snapshot.bThirdPersonView)
+            {
+                // A crawl through a duct on the belly; a squeeze through a gap sideways on.
+                Clip = Name.Contains(TEXT("rawl")) ? TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Prone/RT_anim_Prone_Fwd_Loop_R.RT_anim_Prone_Fwd_Loop_R")
+                                                   : TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_Narrow.RT_A_Narrow");
+                Rate = Name.Contains(TEXT("rawl")) ? 0.8f : 0.6f;
+            }
+            else switch (Snapshot.Type)
+            {
+            case EPlayerActivityType::Welding:
+                Clip = TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_Door_CrowbarBrake.RT_A_Door_CrowbarBrake"); Rate = 0.5f; break;
+            case EPlayerActivityType::HullPatching:
+            case EPlayerActivityType::PipeSealing:
+                Clip = TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_PlaceDevice.RT_A_PlaceDevice"); Rate = 0.7f; break;
+            case EPlayerActivityType::ComponentReplacement:
+            case EPlayerActivityType::Fabrication:
+                Clip = TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_PlaceDeviceFloor.RT_A_PlaceDeviceFloor"); Rate = 0.7f; break;
+            default:
+                Clip = TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_KeyBoardUse.RT_A_KeyBoardUse"); Rate = 1.0f; break;
+            }
+            UAnimSequenceBase* Loaded = Clip ? LoadObject<UAnimSequenceBase>(nullptr, Clip) : nullptr;
+            if (!Loaded)
+            {
+                Loaded = LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Lyra/crouch/MM_Unarmed_Crouch_Idle.MM_Unarmed_Crouch_Idle"));
+            }
+            if (Loaded)
+            {
+                CrawlLoop = Loaded;
+                Anim->PlaySlotAnimationAsDynamicMontage(Loaded, TEXT("DefaultSlot"), 0.25f, 0.25f, Rate, 0, -1.0f, 0.0f);
+                bCrawlPosePlaying = true;
+            }
+        }
+        else if (!bWantPose && bCrawlPosePlaying)
+        {
+            if (Anim) Anim->StopSlotAnimation(0.25f, TEXT("DefaultSlot"));
+            bCrawlPosePlaying = false;
+        }
+    }
     if (!GetOwner() || !GetOwner()->HasAuthority() || !IsActivityActive()) return;
     float TaskEfficiency = 1.0f;
     if (const ACoopSurvivalCharacter* Character = Cast<ACoopSurvivalCharacter>(GetOwner()))
@@ -143,9 +196,13 @@ void UPlayerActivityComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
     }
     if (Snapshot.Mechanic == EActivityMechanic::ToolPath)
     {
-        // A straight seam advances beneath the tool. Bloom adds organic, slowly changing pull.
+        // The seam advances beneath the tool and does not run dead straight: a plate's edge wanders,
+        // slowly and then not so slowly, and the torch has to follow it -- holding still is not
+        // welding. Bloom adds its own organic pull on top.
+        const float SeamWander = FMath::Sin(ActivityElapsed * 0.9f) * 0.34f + FMath::Sin(ActivityElapsed * 2.3f + 1.1f) * 0.16f;
         const float BloomDrift = FMath::Sin(ActivityElapsed * (1.7f + Snapshot.BloomInterference * 2.0f)) * Snapshot.BloomInterference * 0.38f;
-        const float Error = FMath::Abs(Snapshot.ToolOffset.Y - BloomDrift);
+        Snapshot.SeamOffset = FMath::Clamp(SeamWander + BloomDrift, -1.0f, 1.0f);
+        const float Error = FMath::Abs(Snapshot.ToolOffset.Y - Snapshot.SeamOffset);
         Snapshot.ToolAccuracy = FMath::Clamp(1.0f - Error / FMath::Max(ActiveDefinition.ToolPathTolerance, 0.05f), 0.0f, 1.0f);
         if (Snapshot.ToolAccuracy > 0.0f)
             Snapshot.Progress = FMath::Clamp(Snapshot.Progress + DeltaTime / FMath::Max(ActiveDefinition.DurationSeconds, 0.1f) * Snapshot.ToolAccuracy * TaskEfficiency, 0.0f, 1.0f);

@@ -101,4 +101,15 @@ class GINNUNGAGAP_API ABreakerReroutingStation : public AMaintenanceActivityStat
 
 UCLASS(Blueprintable)
 class GINNUNGAGAP_API AMechanicalOverrideStation : public AMaintenanceActivityStation
-{ GENERATED_BODY() public: AMechanicalOverrideStation(); };
+{
+    GENERATED_BODY()
+
+public:
+    AMechanicalOverrideStation();
+
+    /** The panel refuses anyone not sealed in a pressure suit: what is beyond the door has no air. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Maintenance")
+    bool bRequiresPressureSuit = false;
+
+    virtual bool CanStartActivity_Implementation(APawn* Player) const override;
+};

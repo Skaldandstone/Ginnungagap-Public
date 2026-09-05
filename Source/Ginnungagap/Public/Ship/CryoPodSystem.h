@@ -87,6 +87,24 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Visual")
     TObjectPtr<class UStaticMeshComponent> VerticalPod;
 
+    /**
+     * The standing tube the crew wake in: a base the sleeper stands on, three ribs, and a glass
+     * cylinder with a cap that lifts clear when the pod releases. The tube stays on the deck; only
+     * the glass rises, and the sleeper is seen through it the whole time. Replaces the one-piece
+     * Fab pod, which was opaque (the sleeper vanished inside it) and had to lift whole to open.
+     */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
+    TObjectPtr<class UStaticMeshComponent> TubeBase;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
+    TObjectPtr<class UStaticMeshComponent> TubeGlass;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
+    TObjectPtr<class UStaticMeshComponent> TubeCap;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
+    TArray<TObjectPtr<class UStaticMeshComponent>> TubeRibs;
+
     UFUNCTION(BlueprintPure, Category = "Cryo Pod|Visual")
     bool UsesVerticalPod() const;
 

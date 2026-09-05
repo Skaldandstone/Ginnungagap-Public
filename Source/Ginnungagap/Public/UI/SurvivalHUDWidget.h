@@ -98,6 +98,11 @@ protected:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
     void SetInteractionPrompt(const FString& Prompt);
 
+public:
+    /** A line from the ship rather than from a focused thing: the opening's release prompt. */
+    void ShowSystemPrompt(const FString& Prompt) { SetInteractionPrompt(Prompt); }
+protected:
+
     /** Reads whatever the player is looking at and asks it what to say. */
     void RefreshInteractionPrompt();
     virtual void SetInteractionPrompt_Implementation(const FString& Prompt);

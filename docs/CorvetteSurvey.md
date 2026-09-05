@@ -1,0 +1,113 @@
+# Corvette survey
+
+Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-05 15:17 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
+
+## The walk
+
+| # | Leg | Deck | Where | Path (m) | Walk (s) | Snags | Outcome |
+|---|-----|------|-------|----------|----------|-------|---------|
+| 1 | suit rack | 3 | (120, 1200, 960) | 2.9 | 0 | 0 | arrived, played |
+| 2 | workshop bench | 2 | (1300, 1400, 522) | 44.5 | 7 | 0 | arrived, played |
+| 3 | power station | 1 | (750, 1250, 41) | 34.2 | 0 | 0 | arrived, played |
+| 4 | breach patch | 7 | (450, 1707, 2621) | no path | 28 | 0 | arrived, played |
+| 5 | CIC access panel | 8 | (830, 910, 3051) | 30.1 | 5 | 0 | arrived, played |
+| 6 | CIC console | 8 | (750, 1520, 3051) | 10.6 | 2 | 0 | arrived, played |
+| 7 | back to the breach patch | 7 | (450, 1707, 2621) | no path | 0 | 0 | arrived |
+| 8 | back to the power station | 1 | (750, 1250, 41) | 147.2 | 25 | 0 | arrived |
+| 9 | back to the workshop bench | 2 | (1300, 1400, 522) | 34.2 | 6 | 0 | arrived |
+| 10 | back to the suit rack | 3 | (120, 1200, 960) | 44.0 | 8 | 0 | arrived |
+| 11 | side: CVT_BatteryRecovery | 1 | (1410, 1200, 41) | 58.9 | 10 | 0 | arrived |
+| 12 | side: CVT_ArmoryOverride | 4 | (93, 1600, 1331) | 75.6 | 13 | 0 | arrived |
+| 13 | side: CVT_SuitPatching | 5 | (93, 1250, 1761) | 34.4 | 7 | 0 | arrived |
+| 14 | side: CVT_TurretService | 5 | (1410, 1200, 1761) | 9.5 | 2 | 0 | arrived |
+| 15 | side: CVT_ScrubberService | 6 | (1410, 1600, 2191) | 43.2 | 8 | 0 | arrived |
+| 16 | side: CVT_Door_CVT-D07 | 7 | (750, 1000, 2560) | no path | 15 | 1 | arrived with snags |
+| 17 | side: CVT_PlotterCore | 9 | (1410, 1600, 3481) | 55.5 | 9 | 0 | arrived |
+| 18 | side: CVT_Door_CVT-D10-B | 10 | (1950, 1000, 3850) | 40.1 | 10 | 0 | arrived |
+| 19 | side: CVT_ObsDecon | 10 | (93, 1200, 3911) | 16.8 | 3 | 0 | arrived |
+| 20 | side: CVT_SensorCalibration | 11 | (1410, 1600, 4341) | 39.9 | 7 | 0 | arrived |
+
+## Collision and movement findings
+
+- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (583, 1393, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1240, 1475, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 7) on the way to side: CVT_Door_CVT-D07; cut through with the tool.
+- Snag: stuck at (961, 854, 2678) (deck 7) on the way to side: CVT_Door_CVT-D07, 1.6 m short, against nothing solid (a navmesh or path-following stall).
+
+## Asset audit
+
+What each interactable is made of. A station with a static mesh and no skeletal mesh is a prop that speaks only through its prompt: the activity plays as a timer or a button sequence with nothing moving on it.
+
+| Actor | Class | Deck | Where | Made of | Note |
+|-------|-------|------|-------|---------|------|
+| CVT_PowerRestore | QuickDemoPowerStation | 1 | (750, 1250, 41) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_BatteryRecovery | BatteryRecoveryStation | 1 | (1410, 1200, 41) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_EngineeringOverride | MechanicalOverrideStation | 2 | (830, 910, 471) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_WorkshopBench | QuickDemoWorkshopBench | 2 | (1300, 1400, 522) | static prop | SM_Toolbox | activity station: prompt + timer/sequence, nothing animates |
+| CVT_SuitRepairBench | QuickDemoSuitRepairBench | 2 | (1050, 1707, 471) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_CryoDoorOverride | MechanicalOverrideStation | 3 | (1410, 1090, 901) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_SuitStation_01 | QuickDemoSuitStation | 3 | (120, 1200, 960) | static prop | SM_DOOR_FRAME_03_LOCKER_LEFT | activity station: prompt + timer/sequence, nothing animates |
+| CVT_SuitStation_02 | QuickDemoSuitStation | 3 | (120, 1600, 960) | static prop | SM_DOOR_FRAME_03_LOCKER_LEFT | activity station: prompt + timer/sequence, nothing animates |
+| CVT_ArmoryOverride | MechanicalOverrideStation | 4 | (93, 1600, 1331) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_TurretService | TurretServiceStation | 5 | (1410, 1200, 1761) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_SuitPatching | SuitPatchingStation | 5 | (93, 1250, 1761) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_AirlockRepressurize | AirlockRepressurizationStation | 6 | (1700, 1710, 2191) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_ScrubberService | OxygenScrubberServiceStation | 6 | (1410, 1600, 2191) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_BreachPatch | QuickDemoBreachStation | 7 | (450, 1707, 2621) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_CICAccess | QuickDemoCICAccessStation | 8 | (830, 910, 3051) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_CICConsole | QuickDemoCICConsole | 8 | (750, 1520, 3051) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_PlotterCore | ComponentReplacementStation | 9 | (1410, 1600, 3481) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_ObsDecon | DecontaminationStation | 10 | (93, 1200, 3911) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_SensorCalibration | SensorCalibrationStation | 11 | (1410, 1600, 4341) | static prop | SM_COMPUTER_02 | activity station: prompt + timer/sequence, nothing animates |
+| CVT_Supply_FieldRepairKit_D01 | InventoryItemPickup | 1 | (400, 1300, 6) | static prop | SM_Toolbox | pickup |
+| CVT_Supply_CoolantGelPack_D01 | InventoryItemPickup | 1 | (1150, 1300, 6) | static prop | SM_Case_A | pickup |
+| CVT_Supply_SuitPatchSealant_D02 | InventoryItemPickup | 2 | (400, 1300, 436) | static prop | SM_WireReel_A | pickup |
+| CVT_Supply_TraumaKit_D03 | InventoryItemPickup | 3 | (400, 1300, 866) | static prop | SM_Case_A | pickup |
+| CVT_Supply_GeneralMedicalAmpoule_D03 | InventoryItemPickup | 3 | (1150, 1300, 866) | static prop | SM_Frontier_Scanner | pickup |
+| CVT_Supply_SuitPatchSealant_D04 | InventoryItemPickup | 4 | (400, 1300, 1296) | static prop | SM_WireReel_A | pickup |
+| CVT_Supply_EmergencyOxygenCartridge_D04 | InventoryItemPickup | 4 | (1150, 1300, 1296) | static prop | SM_OxygenTank_B | pickup |
+| CVT_Supply_EmergencyOxygenCartridge_D05 | InventoryItemPickup | 5 | (400, 1300, 1726) | static prop | SM_OxygenTank_B | pickup |
+| CVT_Supply_CompoundSplint_D05 | InventoryItemPickup | 5 | (1150, 1300, 1726) | static prop | SM_RubberMat_Rolled | pickup |
+| CVT_Supply_GeneralMedicalAmpoule_D06 | InventoryItemPickup | 6 | (400, 1300, 2156) | static prop | SM_Frontier_Scanner | pickup |
+| CVT_Supply_EmergencyOxygenCartridge_D06 | InventoryItemPickup | 6 | (1150, 1300, 2156) | static prop | SM_OxygenTank_B | pickup |
+| CVT_Supply_SuitPatchSealant_D07 | InventoryItemPickup | 7 | (400, 1300, 2586) | static prop | SM_WireReel_A | pickup |
+| CVT_Supply_RecompressionAmpoule_D07 | InventoryItemPickup | 7 | (1150, 1300, 2586) | static prop | SM_Frontier_Scanner | pickup |
+| CVT_Supply_CoolantGelPack_D08 | InventoryItemPickup | 8 | (400, 1300, 3016) | static prop | SM_Case_A | pickup |
+| CVT_Supply_ChelationInjector_D08 | InventoryItemPickup | 8 | (1150, 1300, 3016) | static prop | SM_Frontier_Scanner | pickup |
+| CVT_Supply_FieldRepairKit_D09 | InventoryItemPickup | 9 | (400, 1300, 3446) | static prop | SM_Toolbox | pickup |
+| CVT_Supply_RecompressionAmpoule_D10 | InventoryItemPickup | 10 | (400, 1300, 3876) | static prop | SM_Frontier_Scanner | pickup |
+| CVT_Supply_ThermalRegulationWrap_D10 | InventoryItemPickup | 10 | (1150, 1300, 3876) | static prop | SM_RubberMat_Rolled | pickup |
+| CVT_Supply_EmergencyOxygenCartridge_D11 | InventoryItemPickup | 11 | (400, 1300, 4306) | static prop | SM_OxygenTank_B | pickup |
+| CVT_Supply_FieldRepairKit_D11 | InventoryItemPickup | 11 | (1150, 1300, 4306) | static prop | SM_Toolbox | pickup |
+| CVT_TrunkBarrier | ObstructionBarrier | 4 | (230, 345, 1450) | static prop | SM_Ceiling_HB_A | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
+| CVT_PlenumCrawl | ObstructionBarrier | 5 | (1550, 510, 1880) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
+| CVT_ConduitBarrier | ObstructionBarrier | 6 | (230, 345, 2310) | static prop | SM_CABLE_MASS_04 | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
+| CVT_CorridorDebris | ObstructionBarrier | 9 | (1400, 800, 3600) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
+| CVT_CoolantBarrier | ObstructionBarrier | 10 | (230, 345, 4030) | static prop | SM_PIPE_03 | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
+
+Also aboard: 38 bulkhead doors (sliding leaves animate, sound on open/close), 2 cryo pods (lid animates), 59 text signs (TextRender on plates: no printed asset), 5 objective beacons (TextRender), 0 placed meshes with the engine default material.
+
+| Floating prop | Class | Deck | Where | Mesh | Under it (cm) | Nearest wall (cm) |
+|---------------|-------|------|-------|------|---------------|-------------------|
+| CVT_D04_DamageBarrel | StaticMeshActor | 4 | (2100, 1460, 1330) | SM_BARREL_01 | 29 | 268 |
+| CVT_D05_DamageBarrel | StaticMeshActor | 5 | (2100, 1460, 1760) | SM_BARREL_01 | 29 | 247 |
+| CVT_D11_DamageBarrel | StaticMeshActor | 11 | (2100, 1460, 4340) | SM_BARREL_01 | 29 | 245 |
+| (3 floating props in all) | | | | | | |
+
+Figures at the end of the walk; the crew stands at (1179, 1508, 4398).
+| Figure | Class | Deck | Where | Mesh | Attached to |
+|--------|-------|------|-------|------|-------------|
+| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1179, 1508, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1179, 1508, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+
+## Next work drawn from this survey
+
+- 44 activity stations are static props with a text prompt: each wants a purpose-built asset with an animation for its activity (panel opening, lever, weld arc, console boot).
+- 1 placed meshes render with the engine default material (grey, reads as collision).
+- Floating props: (3 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
+- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (583, 1393, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1240, 1475, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 7) on the way to side: CVT_Door_CVT-D07; cut through with the tool.
+- Every snag, penetration and floor gap above is a place to stand in the editor and look.

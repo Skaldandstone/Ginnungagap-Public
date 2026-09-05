@@ -32,13 +32,24 @@ void UInteractionComponent::UpdateFocusedInteractable()
         FRotator EyeRotation;
         OwnerPawn->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
+        // The eye sits at the visor, a step ahead of the capsule, and a bench or console close
+        // enough to touch can have its collision around the eye already: a trace that starts
+        // inside a body never hits it. Start from behind the eye, inside the capsule (the pawn
+        // itself is ignored), so what is right in front still comes up.
+        const FVector TraceStart = EyeLocation;
         const FVector TraceEnd = EyeLocation + EyeRotation.Vector() * InteractionRange;
 
         FHitResult Hit;
         FCollisionQueryParams QueryParams;
         QueryParams.AddIgnoredActor(OwnerPawn);
+        // The pawn's own attachments (the MetaHuman body and face are child actors of it) are
+        // the pawn too; starting behind the eye, the trace would otherwise find the back of the
+        // crew's own head and call that the thing in focus.
+        TArray<AActor*> Attached;
+        OwnerPawn->GetAttachedActors(Attached, true, true);
+        QueryParams.AddIgnoredActors(Attached);
 
-        if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, ECC_Visibility, QueryParams))
+        if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
         {
             if (Hit.GetActor() && Hit.GetActor()->Implements<UInteractable>())
             {

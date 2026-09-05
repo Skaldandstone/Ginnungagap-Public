@@ -16,6 +16,7 @@
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "LevelSetup/QuickDemoPowerStation.h"
 #include "Obstructions/ObstructionBarrier.h"
+#include "Ship/BulkheadDoor.h"
 #include "Activities/WeldableBulkheadDoor.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "NavigationData.h"
@@ -65,6 +66,7 @@ bool FAssertCorvetteRoutes::Update()
 {
 	static double StartedAt = -1.0;
 	static bool bPrepared = false;
+	static int32 WeldedAtStart = 0, WeldedShutAndImpassable = 0;
 	UWorld* World = CorvetteRoute::FindPieWorld();
 	if (!World)
 	{
@@ -102,13 +104,25 @@ bool FAssertCorvetteRoutes::Update()
 			It->SetActorEnableCollision(false);
 			It->SetActorHiddenInGame(true);
 		}
+		// The welded doors are judged before they are cut: they must exist and be what they claim.
+		WeldedAtStart = 0; WeldedShutAndImpassable = 0;
+		for (TActorIterator<AWeldableBulkheadDoor> It(World); It; ++It)
+		{
+			if (!It->ActorHasTag(TEXT("CorvetteWeldedDoor"))) continue;
+			++WeldedAtStart;
+			if (It->bWeldedShut && !It->IsPassable()) { ++WeldedShutAndImpassable; }
+		}
+		// Doors too: the welded ones are cut and the locked ones overridden, as the crew would.
+		for (TActorIterator<AWeldableBulkheadDoor> It(World); It; ++It) { if (It->bWeldedShut) { It->CutEmergencyWeld(); It->Unseal(); } }
+		for (TActorIterator<ABulkheadDoor> It(World); It; ++It) { if (It->bLocked) { It->SetLocked(false); } }
 		Nav->Build();
 		bPrepared = true;
 		StartedAt = World->GetTimeSeconds();
 		return false;
 	}
-	// Runtime generation is asynchronous; give it up to 30 s.
-	if (Nav->IsNavigationBuildInProgress() && World->GetTimeSeconds() - StartedAt < 30.0)
+	// Runtime generation is asynchronous, and the dirty areas from the cut welds and cleared
+	// barriers are only picked up on a later tick: give it a moment to start, then up to 30 s.
+	if (World->GetTimeSeconds() - StartedAt < 3.0 || (Nav->IsNavigationBuildInProgress() && World->GetTimeSeconds() - StartedAt < 30.0))
 	{
 		return false;
 	}
@@ -116,6 +130,29 @@ bool FAssertCorvetteRoutes::Update()
 	Test->TestNotNull(TEXT("The map has navigation data"), NavData);
 	UE_LOG(LogTemp, Display, TEXT("CORVETTEROUTE nav data %s, build in progress %d, %.1fs after prepare"),
 		NavData ? *NavData->GetName() : TEXT("none"), Nav->IsNavigationBuildInProgress() ? 1 : 0, World->GetTimeSeconds() - StartedAt);
+
+	// The service-plenum links: decks 2-3, 6-7 and 9-10 are joined by a ramp through their plenums
+	// as well as by the trunk. From the foot of each ramp to the head above it, the path must be
+	// the ramp itself and not the walk round through the trunk, which is several times longer.
+	{
+		const float Pitch = 430.0f;
+		for (const int32 Lower : { 2, 6, 9 })
+		{
+			const float ZLow = (Lower - 1) * Pitch, ZHigh = Lower * Pitch;
+			FNavLocation Foot, Head;
+			if (!Nav->ProjectPointToNavigation(FVector(2300.0f, 150.0f, ZLow), Foot, FVector(120.0f, 120.0f, 200.0f))
+				|| !Nav->ProjectPointToNavigation(FVector(1450.0f, 150.0f, ZHigh), Head, FVector(120.0f, 120.0f, 200.0f)))
+			{
+				Test->AddError(FString::Printf(TEXT("Deck %d-%d plenum link: foot or head is off the navmesh"), Lower, Lower + 1));
+				continue;
+			}
+			UNavigationPath* Link = Nav->FindPathToLocationSynchronously(World, Foot.Location, Head.Location, Pawn);
+			const bool bComplete = Link && Link->IsValid() && !Link->IsPartial();
+			const float Length = bComplete ? Link->GetPathLength() : -1.0f;
+			Test->TestTrue(FString::Printf(TEXT("Deck %d-%d plenum ramp is the path between the plenums (%.0f cm)"), Lower, Lower + 1, Length),
+				bComplete && Length < 2000.0f);
+		}
+	}
 
 	struct FLeg { FString Name; AActor* Target; };
 	const TArray<FLeg> Legs = {
@@ -197,14 +234,8 @@ bool FAssertCorvetteRoutes::Update()
 	int32 Barriers = 0, Bypassable = 0;
 	for (TActorIterator<AObstructionBarrier> It(World); It; ++It) { ++Barriers; if (It->bBypassable) { ++Bypassable; } }
 	Test->TestTrue(FString::Printf(TEXT("The corvette has obstruction barriers (%d, %d bypassable)"), Barriers, Bypassable), Barriers >= 2 && Bypassable >= 1);
-	int32 Welded = 0;
-	for (TActorIterator<AWeldableBulkheadDoor> It(World); It; ++It)
-	{
-		if (!It->ActorHasTag(TEXT("CorvetteWeldedDoor"))) continue;
-		++Welded;
-		Test->TestTrue(FString::Printf(TEXT("%s is welded shut and impassable"), *It->GetName()), It->bWeldedShut && !It->IsPassable());
-	}
-	Test->TestTrue(FString::Printf(TEXT("The corvette has a welded door to cut free (%d)"), Welded), Welded >= 1);
+	Test->TestTrue(FString::Printf(TEXT("Every welded door was welded shut and impassable before the crew cut it (%d of %d)"), WeldedShutAndImpassable, WeldedAtStart), WeldedAtStart > 0 && WeldedShutAndImpassable == WeldedAtStart);
+	Test->TestTrue(FString::Printf(TEXT("The corvette has welded doors to cut free (%d)"), WeldedAtStart), WeldedAtStart >= 1);
 	int32 Supplies = 0;
 	for (TActorIterator<AActor> It(World); It; ++It) { if (It->ActorHasTag(TEXT("CorvetteSupply"))) { ++Supplies; } }
 	Test->TestTrue(FString::Printf(TEXT("The corvette has supplies to find (%d)"), Supplies), Supplies >= 20);

@@ -1,4 +1,5 @@
 #include "Net/UnrealNetwork.h"
+#include "Ship/ShipThrustGravity.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -72,6 +73,9 @@ AQuickDemoMissionDirector::AQuickDemoMissionDirector()
 {
     PrimaryActorTick.bCanEverTick = false;
     bReplicates = true;
+    // No root component, so distance relevancy has nothing to measure; every client needs the
+    // completed list regardless of where they stand.
+    bAlwaysRelevant = true;
 }
 
 void AQuickDemoMissionDirector::DefineObjectives(UMissionObjectiveSubsystem* Missions)
@@ -269,6 +273,10 @@ void AQuickDemoMissionDirector::RestoreCheckpointState()
 
 void AQuickDemoMissionDirector::ApplyRestoredWorldState(const TArray<FName>& CompletedObjectiveIds)
 {
+    if (CompletedObjectiveIds.Contains(QuickDemoObjectives::RestorePower))
+    {
+        for (TActorIterator<AShipThrustGravity> It(GetWorld()); It; ++It) { It->ApplyThrust(); }
+    }
     if (CompletedObjectiveIds.Contains(QuickDemoObjectives::SuitUp))
     {
         if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
@@ -466,7 +474,8 @@ AQuickDemoSuitStation::AQuickDemoSuitStation()
     Activity.DisplayName = NSLOCTEXT("QuickDemo", "SuitStationActivity", "Seal pressure suit");
     Activity.DurationSeconds = 2.5f;
     Activity.bBloomSensitive = false;
-    RemainingUses = 1;
+    // No count: a crew that comes back to reseal a suit is surviving, not cheating.
+    RemainingUses = -1;
     CooldownSeconds = 0.0f;
 
     StarterSuit = QuickDemoObjectives::MakeStarterSuit();
@@ -532,10 +541,13 @@ void AQuickDemoBreachStation::OnActivityCompleted_Implementation(APawn* Player)
         return;
     }
 
-    if (AHazardZoneActor* Hazard = Cast<AHazardZoneActor>(TargetActor))
+    for (TActorIterator<AHazardZoneActor> It(GetWorld()); It; ++It)
     {
-        Hazard->SetActorTickEnabled(false);
-        Hazard->ZoneBounds->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        if (*It == TargetActor || It->ActorHasTag(TEXT("QuickDemoVacuumHazard")))
+        {
+            It->SetActorTickEnabled(false);
+            It->ZoneBounds->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        }
     }
     AQuickDemoMissionDirector::CompleteActiveObjective(this, QuickDemoObjectives::SealBreach);
 }

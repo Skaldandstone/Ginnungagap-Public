@@ -24,6 +24,7 @@
 #include "GameFramework/PlayerController.h"
 #include "HazardZoneActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/SurvivalPlayerController.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "Meta/MenuManagerSubsystem.h"
@@ -359,6 +360,11 @@ bool FWalkCryoExit::Update()
 				case EQuickDemoOpeningPhase::ClimbOut: CryoWalk::Capture(TEXT("Open_03_climb_out")); break;
 				default: break;
 				}
+			}
+			// Awake in the tube, the crew presses the release: the pod does not open itself.
+			if (OpeningPhase == EQuickDemoOpeningPhase::Wake)
+			{
+				if (ASurvivalPlayerController* ReleasePC = Cast<ASurvivalPlayerController>(UGameplayStatics::GetPlayerController(World, 0))) { ReleasePC->PressInteract(); }
 			}
 			if (!Opening->IsComplete() && !bExpired)
 			{

@@ -74,6 +74,11 @@ namespace RoomTour
 			{
 				Stops.Add({ FString::Printf(TEXT("Side_%s"), *It->GetName()), It->GetActorLocation() });
 			}
+			// Every ramp, trunk and service link, from its foot: the rails have to sit on it.
+			if (It->ActorHasTag(TEXT("CorvetteRamp")))
+			{
+				Stops.Add({ FString::Printf(TEXT("Ramp_%s"), *It->GetActorNameOrLabel()), It->GetActorLocation() });
+			}
 			// The observation deck's glass wall, from inside the room: what is outside the ship.
 			if (It->GetActorNameOrLabel().Contains(TEXT("_Window_1")))
 			{
@@ -149,7 +154,11 @@ bool FTourRooms::Update()
 		// A window is looked *through*: the camera stands inside the room, three and a half metres
 		// back from the glass, rather than wherever the longest clear run is (which, with the hull
 		// open behind the glass, is outside the ship).
-		const FVector Spot = Stop.Label.StartsWith(TEXT("Space_")) ? Stop.Target + FVector(0.0f, -350.0f, 60.0f) : RoomTour::PickCameraSpot(World, Stop.Target);
+		// A ramp is looked at from its foot (the ramps climb toward -X), standing on the landing
+		// beside the lane, so the whole run and both rails are in frame.
+		const FVector Spot = Stop.Label.StartsWith(TEXT("Space_")) ? Stop.Target + FVector(0.0f, -350.0f, 60.0f)
+			: Stop.Label.StartsWith(TEXT("Ramp_")) ? Stop.Target + FVector(620.0f, 140.0f, 60.0f)
+			: RoomTour::PickCameraSpot(World, Stop.Target);
 		const FRotator Look = (Stop.Target + FVector(0.0f, 0.0f, 110.0f) - Spot).Rotation();
 		if (!Camera.IsValid())
 		{

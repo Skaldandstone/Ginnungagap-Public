@@ -49,6 +49,35 @@
 #include "Stealth/PlayerVisibilityComponent.h"
 #include "Stealth/NoisePerceptionSubsystem.h"
 
+namespace
+{
+    /**
+     * A MetaHuman assembled actor spawns with static scene components, and a static component
+     * cannot be moved in game: attached to the character it stayed exactly where the character
+     * first stood, a second body standing at the spawn point while the crew walked away (James
+     * saw "random suits" in the casualty station; the survey walk listed two faces on deck 3 while
+     * the crew was on deck 11). Every scene component is made movable and the actor snapped back
+     * onto its holder.
+     */
+    void TetherChildActor(UChildActorComponent* Holder)
+    {
+        AActor* Child = Holder ? Holder->GetChildActor() : nullptr;
+        if (!Child) return;
+        for (USceneComponent* Scene : TInlineComponentArray<USceneComponent*>(Child))
+        {
+            if (Scene && Scene->Mobility != EComponentMobility::Movable) Scene->SetMobility(EComponentMobility::Movable);
+        }
+        if (Child->GetRootComponent() && Child->GetRootComponent()->GetAttachParent() != Holder)
+        {
+            Child->AttachToComponent(Holder, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        }
+        else if (Child->GetRootComponent())
+        {
+            Child->GetRootComponent()->SetRelativeTransform(FTransform::Identity);
+        }
+    }
+}
+
 ACoopSurvivalCharacter::ACoopSurvivalCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -266,6 +295,11 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
 
     FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
     FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+    // Forward of the oversuit's chest: at 10 cm the suit's own collar and shoulders sat across
+    // the bottom of the frame whenever the crew looked down at a floor console (the survey walk's
+    // "own body in view" finding); the eye is at the visor, not the back of the helmet.
+    // Ten centimetres forward: further, and the eye trace stood past what a wall console offers to
+    // look at. The suit no longer sits across the frame because the owner does not see it at all.
     FirstPersonCamera->SetRelativeLocation(FVector(10.0f, 0.0f, 68.0f));
     FirstPersonCamera->bUsePawnControlRotation = true;
     FirstPersonCamera->SetAutoActivate(true);
@@ -380,8 +414,11 @@ void ACoopSurvivalCharacter::HandleMountedWeaponChanged(AShipboardWeapon* Weapon
     else
     {
         WeaponMountComponent->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-        WeaponMountComponent->SetRelativeLocation(FVector(46.0f, 18.0f, -15.0f));
-        WeaponMountComponent->SetRelativeRotation(FRotator::ZeroRotator);
+        // Held like a tool, not carried like a tray: the powertool's length runs along its own X, and
+        // at yaw 0 that lay across the bottom of the frame. Turned to point down the view, lifted
+        // into the lower right where a right hand holds it.
+        WeaponMountComponent->SetRelativeLocation(FVector(42.0f, 24.0f, -10.0f));
+        WeaponMountComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
         if (Anim && HoldAnimation)
         {
             Anim->StopSlotAnimation(0.3f, TEXT("DefaultSlot"));
@@ -1027,6 +1064,7 @@ void ACoopSurvivalCharacter::ApplyMetaHumanVisual(ECharacterFacePreset FacePrese
         MetaHumanVisual->SetChildActorClass(VisualClass);
     }
 
+    TetherChildActor(MetaHumanVisual);
     AActor* VisualActor = MetaHumanVisual->GetChildActor();
     if (!VisualActor)
     {
@@ -1186,6 +1224,8 @@ void ACoopSurvivalCharacter::ToggleMagneticBoots()
 void ACoopSurvivalCharacter::SetMagneticBootsEnabled(bool bEnabled)
 {
     if (bEnabled && (bIsDead || SuitIntegrity <= 0.0f)) return;
+    // The boots are part of the pressure suit: nothing to switch on in a cryo bodysuit.
+    if (bEnabled && !bPressureOversuitEquipped) return;
     if (bEnabled)
     {
         FHitResult Hit;
@@ -1202,6 +1242,11 @@ void ACoopSurvivalCharacter::SetMagneticBootsEnabled(bool bEnabled)
         {
             Movement->GravityScale = 0.0f;
             Movement->SetMovementMode(MOVE_Flying);
+        }
+        // Under drive the deck is still down: the ship's gravity takes the character back next tick.
+        if (UZeroGGravityComponent* ShipGravity = FindComponentByClass<UZeroGGravityComponent>())
+        {
+            ShipGravity->Reassert();
         }
     }
     UpdateMagneticSuitVisuals();
@@ -1549,6 +1594,12 @@ void ACoopSurvivalCharacter::ReleaseAllMagneticSystems()
         Movement->GravityScale = 0.0f;
         Movement->SetMovementMode(MOVE_Flying);
     }
+    // A respawn releases everything, and under drive gravity that left the crew floating for the
+    // rest of the session (found by the survey walk): the ship's gravity is applied again next tick.
+    if (UZeroGGravityComponent* ShipGravity = FindComponentByClass<UZeroGGravityComponent>())
+    {
+        ShipGravity->Reassert();
+    }
     UpdateMagneticSuitVisuals();
 }
 
@@ -1617,6 +1668,10 @@ void ACoopSurvivalCharacter::UpdateFirstPersonHeadVisibility()
     {
         static const TSet<FName> HeadSlots = { TEXT("Head"), TEXT("Eyelash"), TEXT("Tongue"), TEXT("Upper_Teeth"), TEXT("Lower_Teeth"),
             TEXT("HeadCap"), TEXT("SM_Helm"), TEXT("MS_Visor"), TEXT("Helmet"), TEXT("Visor") };
+        // The whole suit, not only its head: looking down at a floor console put the collar and
+        // shoulders across the bottom of the frame (the survey walk's "own body in view"). First
+        // person is the view from inside the visor; the suit is what everyone else sees.
+        PrimaryOversuitMesh->SetOwnerNoSee(bHideFromOwner);
         USkeletalMesh* Oversuit = PrimaryOversuitMesh->GetSkeletalMeshAsset();
         const TArray<FSkeletalMaterial>& Materials = Oversuit->GetMaterials();
         if (const FSkeletalMeshRenderData* Render = Oversuit->GetResourceForRendering())
@@ -1849,6 +1904,8 @@ void ACoopSurvivalCharacter::ConfigureCharacterModelLayers()
         }
     }
 
+    TetherChildActor(MetaHumanActorComponent);
+    TetherChildActor(MetaHumanVisual);
     AActor* MetaHumanActor = MetaHumanActorComponent ? MetaHumanActorComponent->GetChildActor() : nullptr;
     UpdateFirstPersonHeadVisibility();
     if (!MetaHumanActor || !CryoBodysuitMesh || !CryoBodysuitMesh->GetSkeletalMeshAsset())
@@ -1922,7 +1979,7 @@ void ACoopSurvivalCharacter::ConfigureCharacterModelLayers()
                 Component->SetSkeletalMesh(FittedCryoBodysuit);
                 Component->SetLeaderPoseComponent(MetaHumanBodyDriver);
                 // Under a worn oversuit the garment stays hidden (see SetUndersuitGarmentHidden).
-                const bool bOversuitWorn = bPressureOversuitEquipped || ResolvePrimaryOversuitMesh() != nullptr;
+                const bool bOversuitWorn = bPressureOversuitEquipped;
                 Component->SetHiddenInGame(bOversuitWorn, false);
             }
             else
@@ -2037,7 +2094,8 @@ void ACoopSurvivalCharacter::ApplyPressureSuitVisuals()
     PressureSuitDynamicMaterials.Reset();
 
     USkeletalMesh* DesiredPrimaryOversuit = ResolvePrimaryOversuitMesh();
-    const bool bHasPrimaryOversuit = DesiredPrimaryOversuit != nullptr;
+    // The oversuit is worn only once it is equipped at the rack: the crew wake in the bodysuit.
+    const bool bHasPrimaryOversuit = DesiredPrimaryOversuit != nullptr && bPressureOversuitEquipped;
     if (PrimaryOversuitMesh)
     {
         PrimaryOversuitMesh->SetSkeletalMesh(DesiredPrimaryOversuit);
@@ -2100,9 +2158,10 @@ void ACoopSurvivalCharacter::ApplyPressureSuitVisuals()
         // The primitives and early modular pieces are a development fallback only. A complete
         // primary oversuit (either the swappable role mesh or the equipped pressure oversuit)
         // owns the silhouette and must never be visually layered with them.
-        const bool bOversuitVisible = bPressureOversuitEquipped || bHasPrimaryOversuit;
-        Part->SetVisibility(!bOversuitVisible, true);
-        if (bOversuitVisible)
+        const bool bOversuitVisible = bHasPrimaryOversuit;
+        // Unsuited, no parts at all: the bodysuit shows. Suited without the role mesh, the fallback.
+        Part->SetVisibility(bPressureOversuitEquipped && !bOversuitVisible, true);
+        if (bOversuitVisible || !bPressureOversuitEquipped)
         {
             continue;
         }

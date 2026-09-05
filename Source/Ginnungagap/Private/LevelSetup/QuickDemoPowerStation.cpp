@@ -5,6 +5,7 @@
 #include "EngineUtils.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Ship/ModularShipRoom.h"
+#include "Ship/ShipThrustGravity.h"
 
 AQuickDemoPowerStation::AQuickDemoPowerStation()
 {
@@ -58,5 +59,11 @@ void AQuickDemoPowerStation::OnActivityCompleted_Implementation(APawn* Player)
         }
     }
 
+    // The bus feeds the drive: the ship goes back under thrust and the deck is "down" again for
+    // everyone aboard (their zero-g components read the propulsion subsystem on their next tick).
+    for (TActorIterator<AShipThrustGravity> It(GetWorld()); It; ++It)
+    {
+        It->ApplyThrust();
+    }
     AQuickDemoMissionDirector::CompleteActiveObjective(this, TEXT("QD_RestorePower"));
 }

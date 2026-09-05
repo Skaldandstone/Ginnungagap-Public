@@ -283,7 +283,13 @@ bool AObstructionBarrier::ResolveWith(EObstructionVerb Verb, APawn* Player)
 	// into a one-way door, and the point of choosing between three costs is that the route is now
 	// yours for the rest of the run.
 	Blocker->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	VisualMesh->SetVisibility(false, true);
+	// The thing that was in the way is still there. Cut, it lies where it fell, beside the gap
+	// the tool made; squeezed past, it has not moved at all.
+	if (Verb == EObstructionVerb::Cut)
+	{
+		VisualMesh->AddLocalOffset(CutVisualOffset);
+		VisualMesh->AddLocalRotation(CutVisualRotation);
+	}
 
 	// Getting past something that was in the way is worth a sound. Confirm rather than
 	// ObjectiveComplete: clearing an obstruction is progress, not an objective.

@@ -72,6 +72,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Obstruction")
 	bool bBypassable = true;
 
+	/**
+	 * Where the visual ends up once it has been cut: a barrier does not vanish, it is dropped
+	 * beside the way through. Relative to its authored pose. A squeeze leaves it exactly as it was.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Obstruction|Cleared")
+	FVector CutVisualOffset = FVector(0.0f, 70.0f, -105.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Obstruction|Cleared")
+	FRotator CutVisualRotation = FRotator(0.0f, 0.0f, 62.0f);
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Obstruction")
 	bool bCleared = false;
 

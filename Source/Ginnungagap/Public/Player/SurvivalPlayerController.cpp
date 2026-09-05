@@ -1,5 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+#include "Ship/CryoPodSystem.h"
+#include "EngineUtils.h"
 #include "SurvivalPlayerController.h"
 #include "Components/InputComponent.h"
 #include "CoopSurvivalCharacter.h"
@@ -227,6 +229,18 @@ void ASurvivalPlayerController::OnInteract()
         }
         if (UInteractionComponent* Interaction = SurvivalCharacter->GetInteractionComponent())
         {
+            // Inside a cryo pod nothing is in focus but the tube they are in: E releases it.
+            if (!Interaction->HasFocusedInteractable())
+            {
+                for (TActorIterator<ACryoPodSystem> It(GetWorld()); It; ++It)
+                {
+                    if (It->bIsOccupied && It->OccupyingCharacter.Get() == SurvivalCharacter)
+                    {
+                        Interaction->ServerTryInteract(*It);
+                        return;
+                    }
+                }
+            }
             Interaction->TryInteract();
         }
 		return;

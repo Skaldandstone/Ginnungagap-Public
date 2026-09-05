@@ -376,6 +376,20 @@ bool FPlayEveryStation::Update()
 				Test->TestFalse(FString::Printf(TEXT("During the %s (a body activity) the view is third person"), *Step.Name), Pawn->IsFirstPersonView());
 				bCheckedThirdPerson = true;
 			}
+			// A tool path (welding, cutting a weld) is steered, not pressed: the seam wanders and
+			// the torch has to follow it, which a player does by looking up and down. Nudge the
+			// torch toward the seam every tick, the way a hand tracking a line does.
+			if (Activity->UsesToolPath())
+			{
+				const FPlayerActivitySnapshot& Snap = Activity->GetSnapshot();
+				Activity->SubmitToolDelta(FVector2D(0.0f, FMath::Clamp((Snap.SeamOffset - Snap.ToolOffset.Y) * 6.0f, -1.5f, 1.5f)));
+				if (!bCheckedThirdPerson && Snap.Progress > 0.2f)
+				{
+					Test->TestTrue(FString::Printf(TEXT("While cutting %s the torch stays on the seam (accuracy %.2f)"), *Step.Name, Snap.ToolAccuracy), Snap.ToolAccuracy > 0.0f);
+					bCheckedThirdPerson = true;
+				}
+				return false;
+			}
 			// Answer whatever the prompt asks for, at a human-ish cadence. Primary goes through the
 			// same Interact handler a player's E key does; the others through their bound actions.
 			if (Now - PhaseAt >= 0.25)

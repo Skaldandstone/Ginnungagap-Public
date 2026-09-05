@@ -11,7 +11,10 @@ AShipThrustGravity::AShipThrustGravity()
 void AShipThrustGravity::BeginPlay()
 {
 	Super::BeginPlay();
-	ApplyThrust();
+	if (bEngagedAtStart)
+	{
+		ApplyThrust();
+	}
 }
 
 void AShipThrustGravity::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -27,6 +30,7 @@ void AShipThrustGravity::ApplyThrust()
 		if (UShipPropulsionSubsystem* Propulsion = World->GetSubsystem<UShipPropulsionSubsystem>())
 		{
 			Propulsion->SetShipThrust(ThrustDirection, Acceleration);
+			bEngaged = true;
 		}
 	}
 }
@@ -38,6 +42,7 @@ void AShipThrustGravity::CutThrust()
 		if (UShipPropulsionSubsystem* Propulsion = World->GetSubsystem<UShipPropulsionSubsystem>())
 		{
 			Propulsion->StopShipThrust();
+			bEngaged = false;
 		}
 	}
 }

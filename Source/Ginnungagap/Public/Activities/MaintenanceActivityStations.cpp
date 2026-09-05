@@ -191,3 +191,14 @@ AMechanicalOverrideStation::AMechanicalOverrideStation()
     CompletionEffect = EMaintenanceActivityEffect::ToggleMechanicalOverride;
     ConfigurePreset(EPlayerActivityType::MechanicalOverride, EActivityMechanic::Timed, NSLOCTEXT("Activities", "MechanicalOverride", "Crank mechanical override"), 5.0f);
 }
+
+bool AMechanicalOverrideStation::CanStartActivity_Implementation(APawn* Player) const
+{
+    if (!Super::CanStartActivity_Implementation(Player)) return false;
+    if (bRequiresPressureSuit)
+    {
+        const ACoopSurvivalCharacter* Crew = Cast<ACoopSurvivalCharacter>(Player);
+        if (!Crew || !Crew->bPressureOversuitEquipped) return false;
+    }
+    return true;
+}

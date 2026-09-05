@@ -189,6 +189,9 @@ struct FPlayerActivitySnapshot
 
     UPROPERTY(BlueprintReadOnly, Category="Activity")
     float ToolAccuracy = 1.0f;
+    /** -1..1 where the seam runs right now; the tool has to be kept on it as it wanders. */
+    UPROPERTY(BlueprintReadOnly, Category="Activity")
+    float SeamOffset = 0.0f;
 
     /** Normalized Bloom disruption applied to this session. */
     UPROPERTY(BlueprintReadOnly, Category="Activity")

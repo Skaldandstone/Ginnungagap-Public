@@ -22,12 +22,16 @@ Re-runnable: the map is recreated from scratch every time.
     UnrealEditor-Cmd.exe <project> -ExecutePythonScript=tools/build_corvette_thrust_stack.py -NullRHI
 """
 import math
+import random
 import unreal
 
 MAP_DIR = "/Game/Assets/Maps/ShipProduction"
 MAP_NAME = "L_Corvette_ThrustStack"
 MAP = f"{MAP_DIR}/{MAP_NAME}"
 PREFIX = "CVT_"
+# Which rooms are damaged and how, and how the furniture falls: a different ship each regenerate
+# when the seed changes.
+BUILD_SEED = 7
 
 KIT = "/Game/Modular_Scifi_Mechanic_Base/Mesh/SM"
 ENGI = "/Game/ModSci_Engineer/Meshes"
@@ -59,6 +63,25 @@ MAIN = (0.0, 1500.0, 1000.0, 1800.0)
 SECOND = (1500.0, 2400.0, 1000.0, 1800.0)
 SERVICE = (1400.0, 2400.0, 0.0, 600.0)
 MAIN_DOOR_X, SECOND_DOOR_X, SERVICE_DOOR_X = 750.0, 1950.0, 1750.0
+
+# The plan is the same shell on every deck; what varies is where it is cut. Three door plans cycle
+# up the stack so no two neighbouring decks read alike from the ramp; some decks join their two
+# rooms with a hatch (a loop through the deck instead of two dead ends off the corridor); two are
+# one open bay; and three deck pairs are linked a second way, by a ramp through the service
+# plenums, so the trunk is not the only way up the ship.
+DOOR_PLANS = [(750.0, 1950.0, 1750.0), (450.0, 2150.0, 1550.0), (1050.0, 1750.0, 2050.0)]
+ROOM_HATCH_DECKS = {2, 4, 8, 9}          # a door in the main/second partition
+OPEN_BAY_DECKS = {6, 11}                 # the partition stands open across most of its length
+HATCH_Y = 1240.0                         # aft end of the partition, clear of the side stations (the plotter core sat beside a fore hatch)
+OPEN_BAY_GAP = (1150.0, 1700.0)
+SERVICE_RAMP_DECKS = {2, 6, 9}           # the lower deck of each plenum link (up to deck + 1)
+SERVICE_RAMP_X0, SERVICE_RAMP_X1 = 1500.0, 2200.0    # head (upper deck) and foot (lower deck)
+SERVICE_LANE = (0.0, 300.0)
+SERVICE_LANDING = (300.0, 600.0)
+
+
+def door_plan(deck):
+    return DOOR_PLANS[(deck - 1) % len(DOOR_PLANS)]
 
 DECKS = [
     (1, "Power & Distribution", "power"),
@@ -156,6 +179,23 @@ class Kit:
         self.nitrogen = load(f"{ENGP}/SM_NitrogenTank_Covered")
         self.toolbox = load(f"{ENGP}/SM_Toolbox")
         self.ceiling_frame = load(f"{ENGI}/SM_Ceiling_HB_A")
+        # Sci-fi Rooms and Corridors (Denys Rutkovskyi): 300 cm glass walls, rails, light fixtures and
+        # furniture. The industrial shell stays the Modular SciFi kit; these dress it.
+        RC = "/Game/SciFiRoomsCorridors/Meshes"
+        self.rc_glass = load(f"{RC}/SM_WallGlass01")          # 203 wide x 243 tall pane, min x -53
+        self.rc_glass_wide = load(f"{RC}/SM_WallGlass02")     # 406 wide
+        self.rc_rail = load(f"{RC}/SM_Railing01")             # 300 long along Y, 20 tall
+        self.rc_light_bar = load(f"{RC}/SM_Light02")          # 44 cm bar, glows
+        self.rc_light_round = load(f"{RC}/SM_Light03")        # 12 cm puck
+        self.rc_bed = load(f"{RC}/SM_Bed01")                  # 220 x 97 x 109, origin at the head end
+        self.rc_table = load(f"{RC}/SM_Table01")              # 154 x 92 x 68
+        self.rc_chair = load(f"{RC}/SM_Chair01")              # 40 x 46 x 80
+        self.rc_shelf = load(f"{RC}/SM_Shelf01")              # 85 x 83 x 189, origin at a corner
+        self.rc_locker = load(f"{RC}/SM_Shelf02")             # 54 x 52 x 68
+        self.rc_bin = load(f"{RC}/SM_Bin01")                  # 24 x 24 x 48
+        self.rc_pillar = load(f"{RC}/SM_Pillar01")            # 24 x 50 x 300
+        # Sign plates: the engine cube in the kit wall material, a dark panel behind the lettering.
+        self.sign_material = load(f"{KIT}/../Material/M_WALL_01") or (self.wall[0].get_material(0) if self.wall[0] else None)
         self.duct_run = load(f"{ENGI}/SM_AirDuct_Mid")   # a 3.6 m duct section: fallen, it fills a corridor
         self.rail = load(f"{ENGI}/SM_Rail_A")             # 164 x 8 x 78, pivot at the bottom centre
         self.alarm = load(f"{ENGP}/SM_AlarmLight")
@@ -212,7 +252,7 @@ def floor_area(x0, x1, y0, y1, z_top, name, skip=None, mesh=None):
     """300 cm tiles over a rectangle, top surface at z_top; skip(x0,x1,y0,y1) says which to leave out."""
     mesh = mesh or K.floor
     tile = 300.0
-    nx, ny = int(round((x1 - x0) / tile)), int(round((y1 - y0) / tile))
+    nx, ny = max(1, int(round((x1 - x0) / tile))), max(1, int(round((y1 - y0) / tile)))
     sx, sy = (x1 - x0) / nx / tile, (y1 - y0) / ny / tile
     made = 0
     for i in range(nx):
@@ -240,23 +280,28 @@ def ceiling_area(x0, x1, y0, y1, z_underside, name, skip=None):
             place(K.ceiling, ((tx0 + tx1) * 0.5, (ty0 + ty1) * 0.5, z_underside + 50.0), (0, 0, 0), (sx, sy, 1.0), f"{name}_{i}_{j}")
 
 
-def ramp(deck, z_bottom):
-    """The trunk ramp: floor tiles pitched from (x=RAMP_X1, z_bottom) up to (x=RAMP_X0, z_bottom + pitch)."""
+def ramp(deck, z_bottom, x_foot=RAMP_X1, x_head=RAMP_X0, lane=RAMP_LANE, name="Ramp"):
+    """A ramp: floor tiles pitched from (x=x_foot, z_bottom) up to (x=x_head, z_bottom + pitch),
+    climbing toward -X in the given y lane. The trunk's by default; the plenum links pass theirs."""
     rise = DECK_PITCH
-    length = math.hypot(RAMP_RUN, rise)
-    angle = math.degrees(math.atan2(rise, RAMP_RUN))
+    run = x_foot - x_head
+    length = math.hypot(run, rise)
+    angle = math.degrees(math.atan2(rise, run))
     n = 3
     seg = length / n
-    lane_y = (RAMP_LANE[0] + RAMP_LANE[1]) * 0.5
-    lane_w = RAMP_LANE[1] - RAMP_LANE[0]
+    lane_y = (lane[0] + lane[1]) * 0.5
+    lane_w = lane[1] - lane[0]
     cos_a, sin_a = math.cos(math.radians(angle)), math.sin(math.radians(angle))
     for i in range(n):
         s_ = (i + 0.5) * seg
-        x = RAMP_X1 - s_ * cos_a
+        x = x_foot - s_ * cos_a
         z = z_bottom + s_ * sin_a
         # Tile top is 20 above its origin; drop the origin along the slope normal so the top rides the line.
         loc = (x - FLOOR_T * sin_a, lane_y, z - FLOOR_T * cos_a)
-        place(K.floor_grate, loc, (0.0, angle, 180.0), (seg / 300.0, lane_w / 300.0, 1.0), f"D{deck:02d}_Ramp_{i}")
+        tile = place(K.floor_grate, loc, (0.0, angle, 180.0), (seg / 300.0, lane_w / 300.0, 1.0), f"D{deck:02d}_{name}_{i}")
+        if tile and i == 1:
+            # The look tour stops at every ramp's middle tile.
+            tile.set_editor_property("tags", [unreal.Name("CorvetteRamp")])
     # A rail down the ramp's open side (the landing is the other way; the hull is behind the
     # far side), riding the slope.
     if K.rail:
@@ -264,11 +309,23 @@ def ramp(deck, z_bottom):
         rail_seg = length / rail_n
         for i in range(rail_n):
             s_ = (i + 0.5) * rail_seg
-            place(K.rail, (RAMP_X1 - s_ * cos_a, RAMP_LANE[1] - 6.0, z_bottom + s_ * sin_a + FLOOR_T), (0.0, angle, 0.0),
-                  (rail_seg / 164.0, 1.0, 1.0), f"D{deck:02d}_RampRail_{i}")
+            # Yaw 180 like the tiles: pitch raises the mesh's +X, and the ramp climbs toward -X. At yaw 0
+            # each rail tilted against the slope, one end in the air and the other under the grating.
+            place(K.rail, (x_foot - s_ * cos_a, lane[1] - 6.0, z_bottom + s_ * sin_a + FLOOR_T), (0.0, angle, 180.0),
+                  (rail_seg / 164.0, 1.0, 1.0), f"D{deck:02d}_{name}Rail_{i}")
     # A rail along the ramp's open side so the eye reads the edge (no collision).
-    place(K.pipe, ((RAMP_X0 + RAMP_X1) * 0.5, RAMP_LANE[1] + 6.0, z_bottom + rise * 0.5 + 95.0), (0.0, angle, 180.0),
-          (length / 200.0, 0.6, 0.6), f"D{deck:02d}_RampRail", collide=False)
+    place(K.pipe, ((x_head + x_foot) * 0.5, lane[1] + 6.0, z_bottom + rise * 0.5 + 95.0), (0.0, angle, 180.0),
+          (length / 200.0, 0.6, 0.6), f"D{deck:02d}_{name}Rail", collide=False)
+
+
+def edge_rail(deck, x0, x1, y, z, name):
+    """A rail along the open edge of a floor over a ramp hole."""
+    if not K.rail:
+        return
+    rail_n = max(1, int(round((x1 - x0) / 164.0)))
+    rail_seg = (x1 - x0) / rail_n
+    for i in range(rail_n):
+        place(K.rail, (x0 + (i + 0.5) * rail_seg, y, z + FLOOR_T), (0.0, 0.0, 0.0), (rail_seg / 164.0, 1.0, 1.0), f"D{deck:02d}_{name}_{i}")
 
 
 # --- gameplay helpers -----------------------------------------------------------------------------
@@ -336,9 +393,20 @@ def spawn_door(bulkhead_class, x, y, z_floor, yaw, name, seal=False, tags=()):
     label(door, name)
     door.set_editor_property("tags", [unreal.Name("CorvetteDoor")] + [unreal.Name(t) for t in tags])
     try:
-        door.set_editor_property("frame_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_FRAME_01_OUTSIDE"))
-        door.set_editor_property("left_leaf_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_01_LEFT"))
-        door.set_editor_property("right_leaf_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_01_RIGHT"))
+        # A real bulkhead: Fab's "Sci-fi New Door" (CGGame) as portal and leaves, imported by
+        # tools/import_fab_scifi_door.py. Its leaves are 100 x 270 each, so the portal's native
+        # opening is 200 wide; the kit frame stays the fallback if the import is missing.
+        fab_portal, fab_left, fab_right = load("/Game/Fab_SciFiDoor/Meshes/Prtal_Door"), load("/Game/Fab_SciFiDoor/Meshes/Left_Door"), load("/Game/Fab_SciFiDoor/Meshes/Right_Door")
+        if fab_portal and fab_left and fab_right:
+            door.set_editor_property("frame_mesh_asset", fab_portal)
+            door.set_editor_property("left_leaf_mesh_asset", fab_left)
+            door.set_editor_property("right_leaf_mesh_asset", fab_right)
+            door.set_editor_property("frame_native_opening_width", 200.0)
+            door.set_editor_property("frame_native_opening_height", 270.0)
+        else:
+            door.set_editor_property("frame_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_FRAME_01_OUTSIDE"))
+            door.set_editor_property("left_leaf_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_01_LEFT"))
+            door.set_editor_property("right_leaf_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_01_RIGHT"))
         door.set_editor_property("lintel_mesh_asset", load(f"{KIT}/SRTUCTURE/DOOR_FRAME/SM_DOOR_FRAME_02_UP"))
         door.set_editor_property("doorway_width", DOORWAY_WIDTH)
         door.set_editor_property("doorway_height", DOORWAY_HEIGHT)
@@ -363,7 +431,9 @@ def spawn_door(bulkhead_class, x, y, z_floor, yaw, name, seal=False, tags=()):
 
 
 def spawn_station(cls, x, y, z_floor, yaw, name, target=None, display=None, mount="WALL_PANEL", condition="FAULTED", rarity="SPECIALIZED", seed=7, wear=0.3, tags=()):
-    station = actors.spawn_actor_from_class(cls, unreal.Vector(x, y, z_floor + 90.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
+    # The terminal mesh (SM_COMPUTER_02) reaches 41 cm below its origin: at z + 90 every station
+    # hung half a metre off the deck. Its feet are on the deck now, its top at 121.
+    station = actors.spawn_actor_from_class(cls, unreal.Vector(x, y, z_floor + 41.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
     label(station, name)
     if target is not None:
         station.set_editor_property("target_actor", target)
@@ -375,7 +445,7 @@ def spawn_station(cls, x, y, z_floor, yaw, name, target=None, display=None, moun
     try:
         station.configure_procedural_station(unreal.Name(f"CVT-{name}"), unreal.Name(name), seed, 0,
                                              enum_value(unreal.ActivityStationMount, mount), enum_value(unreal.ActivityStationCondition, condition),
-                                             enum_value(unreal.ActivityStationRarity, rarity), wear, 1)
+                                             enum_value(unreal.ActivityStationRarity, rarity), wear, -1)
     except Exception as error:
         unreal.log_warning(f"procedural station config failed on {name}: {error}")
     if tags:
@@ -393,30 +463,53 @@ def spawn_beacon(objective_id, text, x, y, z_floor, yaw, code):
 
 
 def spawn_sign(text, x, y, z_floor, yaw, code, big=False, both_sides=False):
-    """A text sign. Text renders mirrored from behind, so a sign read from either side of a line
-    (the trunk's) is two signs back to back."""
-    sign = actors.spawn_actor_from_class(unreal.TextRenderActor, unreal.Vector(x, y, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
-    label(sign, f"Sign_{code}")
-    comp = sign.get_component_by_class(unreal.TextRenderComponent)
-    comp.set_editor_property("text", text)
-    comp.set_editor_property("world_size", 22.0 if big else 15.0)
-    comp.set_editor_property("text_render_color", unreal.Color(r=120, g=226, b=211) if big else unreal.Color(r=150, g=165, b=170))
-    comp.set_editor_property("horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
+    """A text sign on a plate. Text renders two-sided and reads mirrored from behind, so every sign
+    gets an opaque plate at its back; a sign read from either side of a line (the trunk's) is two
+    signs on the two faces of one plate."""
+    size = 22.0 if big else 15.0
+    colour = unreal.Color(r=120, g=226, b=211) if big else unreal.Color(r=150, g=165, b=170)
+    width, height = max(120.0, len(text) * size * 0.62), size * 2.2
+    # The sign's facing: text faces its local +X.
+    rad = math.radians(yaw)
+    nx, ny = math.cos(rad), math.sin(rad)
+    plate = load("/Engine/BasicShapes/Cube")
+    if plate:
+        cube = actors.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(x, y, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
+        label(cube, f"SignPlate_{code}")
+        comp = cube.static_mesh_component
+        comp.set_static_mesh(plate)
+        comp.set_editor_property("can_ever_affect_navigation", False)
+        comp.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
+        cube.set_actor_scale3d(unreal.Vector(0.04, width / 100.0, height / 100.0))
+        if K.sign_material:
+            comp.set_material(0, K.sign_material)
+
+    def one(face_yaw, suffix):
+        fx, fy = math.cos(math.radians(face_yaw)), math.sin(math.radians(face_yaw))
+        sign = actors.spawn_actor_from_class(unreal.TextRenderActor, unreal.Vector(x + fx * 3.0, y + fy * 3.0, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=face_yaw, roll=0.0))
+        label(sign, f"Sign_{code}{suffix}")
+        comp = sign.get_component_by_class(unreal.TextRenderComponent)
+        comp.set_editor_property("text", text)
+        comp.set_editor_property("world_size", size)
+        comp.set_editor_property("text_render_color", colour)
+        comp.set_editor_property("horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
+        comp.set_editor_property("vertical_alignment", unreal.VerticalTextAligment.EVRTA_TEXT_CENTER)
+        return sign
+
+    sign = one(yaw, "")
     if both_sides:
-        back = actors.spawn_actor_from_class(unreal.TextRenderActor, unreal.Vector(x, y, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=yaw + 180.0, roll=0.0))
-        label(back, f"Sign_{code}_Back")
-        bc = back.get_component_by_class(unreal.TextRenderComponent)
-        bc.set_editor_property("text", text)
-        bc.set_editor_property("world_size", 22.0 if big else 15.0)
-        bc.set_editor_property("text_render_color", comp.get_editor_property("text_render_color"))
-        bc.set_editor_property("horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
+        one(yaw + 180.0, "_Back")
     return sign
 
 
 # --- the deck -------------------------------------------------------------------------------------
 
 def build_deck(deck, name, kind, bulkhead_class, state):
+    global MAIN_DOOR_X, SECOND_DOOR_X, SERVICE_DOOR_X
+    MAIN_DOOR_X, SECOND_DOOR_X, SERVICE_DOOR_X = door_plan(deck)
     z = deck_floor_z(deck)
+    plenum_ramp_up = deck in SERVICE_RAMP_DECKS          # this plenum's ramp climbs to the deck above
+    plenum_hole = (deck - 1) in SERVICE_RAMP_DECKS       # the deck below's ramp arrives in this plenum
     top = z + WALL_H
     ceiling_under = top - 50.0
     code = f"CVT-D{deck:02d}"
@@ -446,16 +539,28 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     floor_area(CORRIDOR[0], CORRIDOR[1], CORRIDOR[2], CORRIDOR[3], z, f"D{deck:02d}_CorridorFloor")
     floor_area(*MAIN, z, f"D{deck:02d}_MainFloor")
     floor_area(*SECOND, z, f"D{deck:02d}_SecondFloor")
-    floor_area(*SERVICE, z, f"D{deck:02d}_ServiceFloor", mesh=K.floor_grate)
+    if plenum_hole:
+        # Laid as pieces around the hole the ramp from below rises through: a landing strip along
+        # the corridor side, a head strip to step off onto, and the far end past the foot.
+        floor_area(SERVICE[0], SERVICE[1], SERVICE_LANDING[0], SERVICE_LANDING[1], z, f"D{deck:02d}_ServiceLanding", mesh=K.floor_grate)
+        floor_area(SERVICE[0], SERVICE_RAMP_X0, SERVICE_LANE[0], SERVICE_LANE[1], z, f"D{deck:02d}_ServiceHead", mesh=K.floor_grate)
+        floor_area(SERVICE_RAMP_X1, SERVICE[1], SERVICE_LANE[0], SERVICE_LANE[1], z, f"D{deck:02d}_ServiceFootEnd", mesh=K.floor_grate)
+        edge_rail(deck, SERVICE_RAMP_X0 + 180.0, SERVICE_RAMP_X1, SERVICE_LANE[1] + 6.0, z, "ServiceEdgeRail")
+    else:
+        floor_area(*SERVICE, z, f"D{deck:02d}_ServiceFloor", mesh=K.floor_grate)
     if has_ramp:
         ramp(deck, z)
+    if plenum_ramp_up:
+        ramp(deck, z, x_foot=SERVICE_RAMP_X1, x_head=SERVICE_RAMP_X0, lane=SERVICE_LANE, name="ServiceRamp")
     # Ceilings: open over the ramp lane so the ramp can rise through, and over the top deck's trunk
     # too (it reads as the shaft continuing to the sensor mast).
     ceiling_area(TRUNK[0], TRUNK[1], TRUNK[2], TRUNK[3], ceiling_under, f"D{deck:02d}_TrunkCeiling", skip=in_ramp_lane if has_ramp else None)
     ceiling_area(CORRIDOR[0], CORRIDOR[1], CORRIDOR[2], CORRIDOR[3], ceiling_under, f"D{deck:02d}_CorridorCeiling")
     ceiling_area(*MAIN, ceiling_under, f"D{deck:02d}_MainCeiling")
     ceiling_area(*SECOND, ceiling_under, f"D{deck:02d}_SecondCeiling")
-    ceiling_area(*SERVICE, ceiling_under, f"D{deck:02d}_ServiceCeiling")
+    def in_service_lane(x0, x1, y0, y1):
+        return x0 < SERVICE_RAMP_X1 and x1 > SERVICE_RAMP_X0 and y0 < SERVICE_LANE[1] and y1 > SERVICE_LANE[0]
+    ceiling_area(*SERVICE, ceiling_under, f"D{deck:02d}_ServiceCeiling", skip=in_service_lane if plenum_ramp_up else None)
 
     # Hull walls, decorated face inward.
     wall_run("x", 0.0, 0.0, FOOT_X, +1, z, name=f"D{deck:02d}_HullAft", variant=deck)
@@ -474,8 +579,13 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     service_gap = [(SERVICE_DOOR_X - DOOR_GAP * 0.5, SERVICE_DOOR_X + DOOR_GAP * 0.5)]
     wall_run("x", CORRIDOR[2], SERVICE[0], FOOT_X, +1, z, gaps=service_gap, name=f"D{deck:02d}_CorridorAft", variant=deck, inset=PARTITION)
     wall_run("x", CORRIDOR[2], SERVICE[0], FOOT_X, -1, z, gaps=service_gap, name=f"D{deck:02d}_ServiceFore", variant=deck + 1, inset=PARTITION)
-    wall_run("y", MAIN[1], MAIN[2], MAIN[3], -1, z, name=f"D{deck:02d}_MainStbd", variant=deck, inset=PARTITION)
-    wall_run("y", MAIN[1], MAIN[2], MAIN[3], +1, z, name=f"D{deck:02d}_SecondPort", variant=deck + 1, inset=PARTITION)
+    partition_gaps = []
+    if deck in ROOM_HATCH_DECKS:
+        partition_gaps = [(HATCH_Y - DOOR_GAP * 0.5, HATCH_Y + DOOR_GAP * 0.5)]
+    elif deck in OPEN_BAY_DECKS:
+        partition_gaps = [OPEN_BAY_GAP]
+    wall_run("y", MAIN[1], MAIN[2], MAIN[3], -1, z, gaps=partition_gaps, name=f"D{deck:02d}_MainStbd", variant=deck, inset=PARTITION)
+    wall_run("y", MAIN[1], MAIN[2], MAIN[3], +1, z, gaps=partition_gaps, name=f"D{deck:02d}_SecondPort", variant=deck + 1, inset=PARTITION)
     wall_run("y", TRUNK[1], TRUNK[2], TRUNK[3], -1, z, name=f"D{deck:02d}_TrunkStbd", variant=deck + 2, inset=PARTITION)
     wall_run("y", TRUNK[1], TRUNK[2], TRUNK[3], +1, z, name=f"D{deck:02d}_ServicePort", variant=deck, inset=PARTITION)
 
@@ -486,8 +596,38 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     state["rooms"][code] = main
 
     # Doors.
-    main_door = spawn_door(bulkhead_class, MAIN_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}",
-                           seal=(kind == "cic"), tags=(["QuickDemoCICDoor"] if kind == "cic" else []))
+    main_door_class = unreal.WeldableBulkheadDoor if kind == "breach" else bulkhead_class
+    main_door = spawn_door(main_door_class, MAIN_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}",
+                           seal=(kind == "cic"), tags=(["QuickDemoCICDoor"] if kind == "cic" else (["CorvetteWeldedDoor"] if kind == "breach" else [])))
+    if kind == "breach":
+        # Comms was welded shut from the corridor when it lost pressure: the crew cut their way in.
+        main_door.set_editor_property("welded_shut", True)
+    if kind == "cryo":
+        # The casualty station is the one room with air. Its door is locked against the vacuum in
+        # the corridor beyond (the Comms rupture vented this deck's corridor); the override panel
+        # on the room side refuses anyone who is not sealed in a suit.
+        main_door.set_editor_property("locked", True)
+        main_door.set_editor_property("locked_reason", unreal.Text("vacuum beyond: suit up, then override from the panel"))
+        cryo_override = spawn_station(unreal.MechanicalOverrideStation, MAIN_DOOR_X + 360.0, MAIN[2] + PARTITION + 40.0, z, 90.0, "CryoDoorOverride",
+                                      target=main_door, display="Override casualty station door", condition="WORN", rarity="ROUTINE",
+                                      tags=("QuickDemoGameplay", "CorvetteOverride", code))
+        cryo_override.set_editor_property("requires_pressure_suit", True)
+        vacuum = actors.spawn_actor_from_class(unreal.HazardZoneActor, unreal.Vector((CORRIDOR[0] + CORRIDOR[1]) * 0.5, (CORRIDOR[2] + CORRIDOR[3]) * 0.5, z + 200.0), unreal.Rotator())
+        label(vacuum, "CorridorVacuum_D03")
+        vacuum.set_editor_property("tags", [unreal.Name("QuickDemoVacuumHazard"), unreal.Name(code)])
+        venv = unreal.PhysicsEnvironmentState()
+        venv.set_editor_property("ambient_pressure_k_pa", 0.3); venv.set_editor_property("vacuum_zone", True); venv.set_editor_property("temperature_c", -60.0)
+        vacuum.set_editor_property("environment_state", venv)
+        vacuum.get_editor_property("zone_bounds").set_box_extent(unreal.Vector((CORRIDOR[1] - CORRIDOR[0]) * 0.5, (CORRIDOR[3] - CORRIDOR[2]) * 0.5, 200.0))
+        no_nav(vacuum.get_editor_property("zone_bounds"))
+    if kind == "workshop":
+        # Engineering Control's door lost its bus with the main power: the corridor's override
+        # panel winds it open by hand.
+        main_door.set_editor_property("locked", True)
+        main_door.set_editor_property("locked_reason", unreal.Text("no bus: override from the corridor panel"))
+        spawn_station(unreal.MechanicalOverrideStation, MAIN_DOOR_X + 380.0, CORRIDOR[3] - PARTITION - 40.0, z, -90.0, "EngineeringOverride",
+                      target=main_door, display="Override Engineering Control door", condition="WORN", rarity="ROUTINE",
+                      tags=("QuickDemoGameplay", "CorvetteOverride", code))
     if kind == "cic":
         # Sealed and locked: its own panel refuses, the access station in the corridor releases it.
         main_door.set_editor_property("locked", True)
@@ -498,6 +638,8 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     else:
         spawn_door(bulkhead_class, SECOND_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}-B")
     spawn_door(bulkhead_class, SERVICE_DOOR_X, CORRIDOR[2], z, 0.0, f"Door_{code}-S")
+    if deck in ROOM_HATCH_DECKS:
+        spawn_door(bulkhead_class, MAIN[1], HATCH_Y, z, 90.0, f"Door_{code}-H", tags=("CorvetteRoomHatch",))
     state["doors"][code] = main_door
 
     # Lights: one per room (utility, dark until power), corridor fixtures, the trunk.
@@ -513,6 +655,8 @@ def build_deck(deck, name, kind, bulkhead_class, state):
         place(K.lamp, (lx, 800.0, ceiling_under - 8.0), (0, 0, 0), (0.6, 1.0, 1.0), f"D{deck:02d}_CorridorLamp_{i}", collide=False)
     spawn_room_light(f"{code}-T", 550.0, 450.0, z, cool, 0.0, radius=900.0)
     place(K.lamp, (cx, cy, ceiling_under - 8.0), (0, 0, 90.0), (0.8, 1.0, 1.0), f"D{deck:02d}_MainLamp", collide=False)
+    kit_light(cx, cy, ceiling_under, f"{deck:02d}", 0)
+    kit_light((SECOND[0] + SECOND[1]) * 0.5, cy, ceiling_under, f"{deck:02d}", 1)
     # Practicals: dim amber everywhere, the casualty station brighter and cooler (it is the bay
     # the sleeper wakes in and the one room on its own circuit).
     bay = kind == "cryo"
@@ -527,14 +671,23 @@ def build_deck(deck, name, kind, bulkhead_class, state):
 
     # Signs at the room doors.
     # Text faces its local +X; -90 turns it to face -Y, toward a reader in the corridor.
-    spawn_sign(f"{code} // {name.upper()}", MAIN_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, code, big=True)
-    spawn_sign(f"{code}-B // {SECOND_NAMES[deck].upper()}", SECOND_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, f"{code}-B")
-    spawn_sign(f"DECK {deck:02d}", 550.0, LANDING[1] - 60.0, z, -90.0, f"{code}-T", big=True, both_sides=True)
+    # Signs sit on walls, plate to the panel. The corridor's fore wall face is at y=950 and the
+    # aft hull's inward face at y=53: the room-door signs go beside their doors on the former,
+    # the trunk's deck and ramp signs onto the latter, read from the landing.
+    wall_fore = CORRIDOR[3] - PARTITION - 3.0
+    hull_aft = WALL_D + 3.0
+    spawn_sign(f"{code} // {name.upper()}", MAIN_DOOR_X - 260.0, wall_fore, z, -90.0, code, big=True)
+    spawn_sign(f"{code}-B // {SECOND_NAMES[deck].upper()}", SECOND_DOOR_X - 260.0, wall_fore, z, -90.0, f"{code}-B")
+    spawn_sign(f"DECK {deck:02d}", 550.0, hull_aft, z, 90.0, f"{code}-T", big=True)
     # Wayfinding at the trunk: what the ramp beside you leads to.
     if has_ramp:
-        spawn_sign(f"UP  >  DECK {deck + 1:02d}", RAMP_X1 + 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Up", both_sides=True)
+        spawn_sign(f"UP  >  DECK {deck + 1:02d}", RAMP_X1 + 120.0, hull_aft, z, 90.0, f"{code}-Up")
     if has_hole:
-        spawn_sign(f"DOWN  >  DECK {deck - 1:02d}", RAMP_X0 - 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Down", both_sides=True)
+        spawn_sign(f"DOWN  >  DECK {deck - 1:02d}", RAMP_X0 - 120.0, hull_aft, z, 90.0, f"{code}-Down")
+    if plenum_ramp_up:
+        spawn_sign(f"SERVICE WAY  >  DECK {deck + 1:02d}", SERVICE_RAMP_X1 + 100.0, hull_aft, z, 90.0, f"{code}-SvcUp")
+    if plenum_hole:
+        spawn_sign(f"SERVICE WAY  >  DECK {deck - 1:02d}", SERVICE_RAMP_X0 - 60.0, hull_aft, z, 90.0, f"{code}-SvcDown")
 
     # Dressing by role, then the gameplay of the deck.
     dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state)
@@ -544,7 +697,9 @@ def side_station(cls, deck, code, z, name, display, port=False, dy=0.0, conditio
     """Optional work on a deck's side wall: a real activity station off the objective chain, so
     every deck has something to do besides walk through it."""
     cy = (MAIN[2] + MAIN[3]) * 0.5
-    x = MAIN[0] + 120.0 if port else MAIN[1] - 120.0
+    # Back to the wall: the port hull's inward face is at WALL_D, the partition's at MAIN[1] - PARTITION,
+    # and the terminal is 38 cm deep from its origin.
+    x = WALL_D + 40.0 if port else MAIN[1] - PARTITION - 40.0
     station = spawn_station(cls, x, cy + dy, z, 0.0 if port else 180.0, name, display=display, condition=condition, rarity=rarity, mount=mount,
                             tags=("QuickDemoGameplay", "CorvetteSideStation", code))
     # A work light over each side station: they sit on the side walls, away from the room's
@@ -722,14 +877,93 @@ def spawn_ambient(cue_name, x, y, z, code, volume=0.35, radius=1400.0):
     return sound
 
 
+def kit_light(x, y, z_ceiling_under, code, i, colour=None, intensity=90.0):
+    """A real ceiling fixture where the room's practical light is: the kit's light bar, glowing,
+    with a soft point light under it. Replaces a bare bulb hanging in the air."""
+    if K.rc_light_bar:
+        place(K.rc_light_bar, (x, y, z_ceiling_under - 2.0), (0, 0, 0), (2.4, 2.4, 1.0), f"D{code}_Fixture_{i}", collide=False)
+
+
+def furnish(deck, kind, z, seed):
+    """Furniture by what the deck is for, from the Rooms and Corridors kit: bunks in the marine
+    ready room, a mess in the commons, plotting tables in tactical, lockers and shelving in the
+    workshop and the casualty station. Seeded so a regenerate shuffles the details, not the plan."""
+    rng = random.Random(seed * 7919 + deck)
+    cx, cy = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
+    sx, sy = (SECOND[0] + SECOND[1]) * 0.5, (SECOND[2] + SECOND[3]) * 0.5
+    name = f"D{deck:02d}"
+    # The second room, by deck: what is kept there.
+    if kind == "marine" and K.rc_bed:
+        for i in range(3):
+            place(K.rc_bed, (SECOND[0] + 120.0 + i * 260.0, SECOND[3] - WALL_D - 8.0, z), (0, 0, -90.0), (1, 1, 1), f"{name}_Bunk_{i}")
+        for i in range(2):
+            place(K.rc_locker, (SECOND[0] + 180.0 + i * 300.0, SECOND[2] + PARTITION + 30.0, z), (0, 0, 0), (1, 1, 1), f"{name}_KitLocker_{i}")
+    elif kind == "commons" and K.rc_table:
+        for i, (tx, ty) in enumerate(((cx - 300.0, cy + 120.0), (cx + 300.0, cy + 120.0), (cx, cy - 220.0))):
+            place(K.rc_table, (tx, ty, z), (0, 0, rng.choice((0.0, 90.0))), (1, 1, 1), f"{name}_MessTable_{i}")
+            for j, (dx, dy) in enumerate(((-110.0, 0.0), (110.0, 0.0))):
+                place(K.rc_chair, (tx + dx, ty + dy, z), (0, 0, 90.0 if dx < 0 else -90.0), (1, 1, 1), f"{name}_MessChair_{i}_{j}")
+        for i in range(3):
+            place(K.rc_bin, (SECOND[0] + 100.0 + i * 120.0, SECOND[2] + PARTITION + 30.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_{i}")
+    elif kind in ("tactical", "cic") and K.rc_table:
+        place(K.rc_table, (sx, sy, z), (0, 0, 0), (1.3, 1.3, 1.0), f"{name}_PlotTable")
+        for j, (dx, dy) in enumerate(((-140.0, 0.0), (140.0, 0.0), (0.0, -90.0))):
+            place(K.rc_chair, (sx + dx, sy + dy, z), (0, 0, (90.0, -90.0, 0.0)[j]), (1, 1, 1), f"{name}_PlotChair_{j}")
+    elif kind in ("workshop", "power", "sensors") and K.rc_shelf:
+        for i in range(2):
+            place(K.rc_shelf, (SECOND[0] + 60.0 + i * 420.0, SECOND[3] - WALL_D - 90.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Shelving_{i}")
+        place(K.rc_bin, (SECOND[1] - 120.0, SECOND[2] + PARTITION + 40.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_0")
+    elif kind in ("cryo", "security", "observation") and K.rc_locker:
+        for i in range(3):
+            place(K.rc_locker, (SECOND[0] + 120.0 + i * 200.0, SECOND[3] - WALL_D - 30.0, z), (0, 0, 180.0), (1, 1, 1), f"{name}_Locker_{i}")
+    # Pillars at the partition ends, so the rooms read as framed structure rather than boxes.
+    if K.rc_pillar:
+        for i, py in enumerate((MAIN[2] + PARTITION + 30.0, MAIN[3] - WALL_D - 80.0)):
+            place(K.rc_pillar, (MAIN[1] - PARTITION - 14.0, py, z), (0, 0, 90.0), (1, 1, 1.0), f"{name}_Pillar_{i}")
+
+
+def damage(deck, kind, z, seed):
+    """Seeded damage in the second room of some decks, distinguishable at a glance (art guide):
+    arcing (a torn-open electrical box, a dropped cable run, a dead fixture and a flickering red
+    warning), or impact (a toppled barrel, a fallen duct section, dust light). The chain decks'
+    authored damage is untouched; only the rooms off the chain vary run to run."""
+    rng = random.Random(seed * 104729 + deck * 31)
+    if kind in ("cryo", "breach", "cic"):
+        return
+    roll = rng.random()
+    sx, sy = (SECOND[0] + SECOND[1]) * 0.5, (SECOND[2] + SECOND[3]) * 0.5
+    name = f"D{deck:02d}"
+    if roll < 0.4:
+        # Arcing.
+        place(K.electric_box, (sx - 200.0, SECOND[2] + PARTITION + 60.0, z + 20.0), (0, 35.0, 0), (1, 1, 1), f"{name}_DamageBox", collide=False)
+        place(K.cable, (sx - 120.0, sy - 80.0, z + 8.0), (0, 0, rng.uniform(0, 180)), (1.4, 1.2, 1.0), f"{name}_DamageCable", collide=False)
+        arc = actors.spawn_actor_from_class(unreal.PointLight, unreal.Vector(sx - 160.0, SECOND[2] + PARTITION + 80.0, z + 90.0), unreal.Rotator())
+        label(arc, f"{name}_DamageArc")
+        lc = arc.get_component_by_class(unreal.PointLightComponent)
+        lc.set_editor_property("intensity", 260.0); lc.set_editor_property("attenuation_radius", 500.0)
+        lc.set_editor_property("light_color", unreal.Color(r=255, g=90, b=40))
+        arc.set_editor_property("tags", [unreal.Name("CorvetteDamage"), unreal.Name("Arcing")])
+    elif roll < 0.7:
+        # Impact.
+        place(K.barrel, (sx + 150.0, sy + 60.0, z + 11.0), (88.0, 0, rng.uniform(0, 360)), (1, 1, 1), f"{name}_DamageBarrel")
+        place(K.duct_run, (sx - 60.0, sy + 200.0, z + 10.0), (0, 0, rng.uniform(-30, 30)), (0.5, 1.0, 1.0), f"{name}_DamageDuct", collide=False)
+    # else: untouched, so not every room is wrecked.
+
+
 def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state):
     cx, cy = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
     sx, sy = (SECOND[0] + SECOND[1]) * 0.5, (SECOND[2] + SECOND[3]) * 0.5
     vx, vy = (SERVICE[0] + SERVICE[1]) * 0.5, (SERVICE[2] + SERVICE[3]) * 0.5
     back_y = MAIN[3] - 120.0   # along the fore hull wall of the main room
     # Every service plenum: machinery and cabling.
-    place(K.generator, (vx - 300.0, vy, z), (0, 0, 90.0), (0.8, 0.8, 0.8), f"D{deck:02d}_ServiceGen")
-    place(K.electric_box, (vx + 250.0, SERVICE[2] + 90.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceBox")
+    linked = deck in SERVICE_RAMP_DECKS or (deck - 1) in SERVICE_RAMP_DECKS
+    if linked:
+        # The lane is the ramp's; the machinery stands along the corridor-side wall.
+        place(K.generator, (SERVICE[0] + 160.0, SERVICE_LANDING[1] - 110.0, z), (0, 0, 0), (0.7, 0.7, 0.7), f"D{deck:02d}_ServiceGen")
+        place(K.electric_box, (SERVICE[1] - 120.0, SERVICE_LANDING[1] - 90.0, z), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_ServiceBox")
+    else:
+        place(K.generator, (vx - 300.0, vy, z), (0, 0, 90.0), (0.8, 0.8, 0.8), f"D{deck:02d}_ServiceGen")
+        place(K.electric_box, (vx + 250.0, SERVICE[2] + 90.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceBox")
     place(K.cable, (vx, SERVICE[2] + 70.0, z + 300.0), (0, 0, 0), (1.5, 1, 1), f"D{deck:02d}_ServiceCable", collide=False)
     place(K.duct, (vx + 450.0, vy, z + 330.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceDuct", collide=False)
     # Every secondary room: storage.
@@ -767,7 +1001,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         items = [i for i in (load(p) for p in ("/Game/Assets/Gameplay/FieldSupplies/Data/Items/DA_Item_FieldRepairKit", "/Game/Assets/Gameplay/FieldSupplies/Data/Items/DA_Item_TraumaKit")) if i]
         if items:
             bench.set_editor_property("granted_items", items)
-        repair = actors.spawn_actor_from_class(unreal.QuickDemoSuitRepairBench, unreal.Vector(cx + 300.0, back_y, z + 90.0), unreal.Rotator(pitch=0.0, yaw=180.0, roll=0.0))
+        repair = actors.spawn_actor_from_class(unreal.QuickDemoSuitRepairBench, unreal.Vector(cx + 300.0, MAIN[3] - WALL_D - 40.0, z + 41.0), unreal.Rotator(pitch=0.0, yaw=-90.0, roll=0.0))
         label(repair, "SuitRepairBench")
         repair.get_editor_property("mesh").set_static_mesh(K.terminal)
         # (No second toolbox: one is the bench, and two would send the player to the wrong one.)
@@ -845,11 +1079,13 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         wc.set_editor_property("intensity", 0.0); wc.set_editor_property("attenuation_radius", 950.0)
         wc.set_editor_property("light_color", unreal.Color(r=255, g=20, b=8)); wc.set_visibility(False)
         warning.set_editor_property("tags", [unreal.Name("QuickDemoUtilityLight"), unreal.Name(code)])
-        patch = spawn_station(unreal.QuickDemoBreachStation, cx - 300.0, back_y, z, 180.0, "BreachPatch", target=hazard, condition="FAULTED", rarity="CRITICAL", wear=0.25)
+        patch = spawn_station(unreal.QuickDemoBreachStation, cx - 300.0, MAIN[3] - WALL_D - 40.0, z, -90.0, "BreachPatch", target=hazard, condition="FAULTED", rarity="CRITICAL", wear=0.25)
         # Racks flank the door, not the doorway itself: the middle of the aft wall stays clear so
         # the room is enterable (a rack across the door left 66 cm and no navmesh into the room).
         for i, dx in enumerate((-550.0, 550.0)):
-            place(K.ice_computer, (cx + dx, cy - 250.0, z + 78.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CommsRack_{i}")
+            # Against the aft wall, well clear of the door and the walk to the patch: the survey's
+            # character caught its shoulder on a rack standing in the room.
+            place(K.ice_computer, (cx + dx * 1.1, MAIN[2] + PARTITION + 40.0, z + 78.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CommsRack_{i}")
         # The rupture itself: the fore hull is torn open beside the patch station (the hull panels
         # there are left out at the wall run), a buckled plate hangs into the room, stars show
         # through, and an unseen wall keeps the crew aboard.
@@ -863,12 +1099,14 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_beacon("QD_SealBreach", "HULL BREACH", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "cic":
         # Off the door frame and the sign, out in the corridor, so the eye-line finds the panel.
-        access = spawn_station(unreal.QuickDemoCICAccessStation, MAIN_DOOR_X + 380.0, CORRIDOR[3] - 110.0, z, 180.0, "CICAccess", target=main_door, rarity="SPECIALIZED", wear=0.35)
+        access = spawn_station(unreal.QuickDemoCICAccessStation, MAIN_DOOR_X + 380.0, CORRIDOR[3] - PARTITION - 40.0, z, -90.0, "CICAccess", target=main_door, rarity="SPECIALIZED", wear=0.35)
         main.set_editor_property("maintenance_anchor", access)
         console = spawn_station(unreal.QuickDemoCICConsole, cx, cy + 120.0, z, 180.0, "CICConsole", mount="FLOOR_CONSOLE", rarity="CRITICAL", wear=0.3)
         main.set_editor_property("system_anchor", console)
-        place(K.circular, (cx - 63.0, back_y - 40.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_TacticalTable")
-        place(K.control_panel, (cx, back_y - 40.0, z + 90.0), (0, 0, 180.0), (0.8, 0.8, 0.8), f"D{deck:02d}_TacticalPlot", collide=False)
+        # The plotting table stands to port of the console, not behind it: the console sits on the
+        # deck now and a table on its eye-line took the prompt away.
+        place(K.circular, (cx - 380.0, back_y - 60.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_TacticalTable")
+        place(K.control_panel, (cx - 320.0, back_y - 60.0, z + 90.0), (0, 0, 180.0), (0.8, 0.8, 0.8), f"D{deck:02d}_TacticalPlot", collide=False)
         for i, dx in enumerate((-500.0, 500.0)):
             place(K.computer, (cx + dx, cy - 200.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CICDesk_{i}")
         place(K.wall_display, (cx, MAIN[3] - WALL_D, z), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_CICDisplay", collide=False)
@@ -876,7 +1114,8 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     elif kind == "tactical":
         place(K.circular, (cx - 75.0, cy, z), (0, 0, 0), (1.2, 1.2, 1.0), f"D{deck:02d}_PlottingTable")
         for i, dx in enumerate((-450.0, 450.0)):
-            place(K.control_panel or K.computer2, (cx + dx, back_y, z + 80.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_Plotter_{i}")
+            # SM_ControlPanel01 stands on its origin; SM_COMPUTER_02 reaches 41 below it.
+            place(K.control_panel or K.computer2, (cx + dx, MAIN[3] - WALL_D - 40.0, z + (0.0 if K.control_panel else 41.0)), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_Plotter_{i}")
         side_station(unreal.ComponentReplacementStation, deck, code, z, "PlotterCore", "Replace plotter core", dy=200.0)
     elif kind == "observation":
         # A glass wall to space along the fore hull.
@@ -893,7 +1132,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     elif kind == "sensors":
         for i, dx in enumerate((-500.0, -167.0, 167.0, 500.0)):
             place(K.ice_computer, (cx + dx, back_y, z + 78.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_SensorRack_{i}")
-        place(K.computer2, (cx, cy - 150.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
+        place(K.computer2, (cx, cy - 150.0, z + 41.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
         side_station(unreal.SensorCalibrationStation, deck, code, z, "SensorCalibration", "Calibrate sensor suite", dy=200.0)
 
     # Supplies. Two spots inside every main room's aft corners, clear of the door, the side
@@ -913,6 +1152,8 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         supply(b, MAIN[1] - 350.0, MAIN[2] + 300.0, z, code)
     if kind in ("marine", "breach", "observation"):
         oxygen_canister(300.0, 800.0, z, code)
+    furnish(deck, kind, z, BUILD_SEED)
+    damage(deck, kind, z, BUILD_SEED)
     # The ship's sound: a hum in every main room, the corridor drone along the corridor, and a
     # deeper machine note where the machinery is.
     cx_, cy_ = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
@@ -929,8 +1170,23 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_barrier(SERVICE_DOOR_X, SERVICE[3] - 90.0, z, 0.0, "PlenumCrawl", "Collapsed duct: crawl through", False, 0.0, 9.0,
                       squeeze_entrapment=0.15, allow_cut=False,
                       visual=K.duct_run, visual_offset=(0.0, 180.0, -60.0), visual_rotation=(0.0, 0.0, 90.0), visual_scale=(1.0, 1.4, 1.0))
+    if kind == "commons":
+        # A conduit bundle down across the ramp head from the marine deck: no way past but the tool.
+        conduit = spawn_barrier(230.0, 345.0, z, 0.0, "ConduitBarrier", "Fallen conduit bundle", False, 7.0, 0.0,
+                                visual=K.cable, visual_offset=(0.0, 0.0, -40.0), visual_rotation=(0.0, 0.0, 90.0), visual_scale=(1.6, 2.2, 2.2))
+        conduit.get_editor_property("blocker").set_box_extent(unreal.Vector(60.0, 245.0, 160.0))
+        options = conduit.get_editor_property("options")
+        squeeze = options[unreal.ObstructionVerb.SQUEEZE]
+        squeeze.set_editor_property("allowed", False)
+        options[unreal.ObstructionVerb.SQUEEZE] = squeeze
+        conduit.set_editor_property("options", options)
+    if kind == "observation":
+        # A ruptured coolant line across the ramp head: squeeze past it, and the line may catch you.
+        coolant = spawn_barrier(230.0, 345.0, z, 0.0, "CoolantBarrier", "Ruptured coolant line", True, 9.0, 5.0, squeeze_entrapment=0.4,
+                                visual=K.pipe, visual_offset=(0.0, 0.0, -30.0), visual_rotation=(15.0, 0.0, 90.0), visual_scale=(2.4, 1.2, 1.2))
+        coolant.get_editor_property("blocker").set_box_extent(unreal.Vector(60.0, 245.0, 160.0))
     if kind == "tactical":
-        spawn_barrier(1100.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
+        spawn_barrier(1400.0, 800.0, z, 0.0, "CorridorDebris", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
                       visual=K.duct_run, visual_offset=(0.0, 185.0, -120.0), visual_rotation=(18.0, 0.0, 90.0), visual_scale=(1.05, 1.0, 1.0))
 
 
@@ -1012,6 +1268,8 @@ def build():
     label(drive, "DriveThrustGravity")
     drive.set_editor_property("thrust_direction", unreal.Vector(0.0, 0.0, 1.0))
     drive.set_editor_property("acceleration", 9800.0)
+    # Dead until the main bus is back: the crew wake in zero-g and float to the suit rack.
+    drive.set_editor_property("engaged_at_start", False)
     drive.set_editor_property("tags", [unreal.Name("CorvetteShip")])
 
     saved = les.save_current_level()

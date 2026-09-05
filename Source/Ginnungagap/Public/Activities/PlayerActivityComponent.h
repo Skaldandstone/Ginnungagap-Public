@@ -38,6 +38,8 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Activity")
     const FPlayerActivitySnapshot& GetSnapshot() const { return Snapshot; }
+    /** What the active activity is being done to (a station, a door), or null between activities. */
+    AActor* GetActivitySource() const { return ActivitySource; }
 
     UPROPERTY(BlueprintAssignable, Category="Activity")
     FOnPlayerActivityChanged OnActivityChanged;
@@ -76,6 +78,11 @@ private:
 
     UPROPERTY(Replicated)
     TObjectPtr<AActor> ActivitySource;
+
+    /** The crouch-walk loop played on the body during a squeeze or crawl, and whether it is playing. */
+    UPROPERTY()
+    TObjectPtr<class UAnimSequenceBase> CrawlLoop;
+    bool bCrawlPosePlaying = false;
 
     FPlayerActivityDefinition ActiveDefinition;
     uint8 PreviousMovementMode = 0;

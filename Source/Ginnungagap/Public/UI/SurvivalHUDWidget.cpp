@@ -756,7 +756,9 @@ void USurvivalHUDWidget::RefreshAllStats()
         }
         else
         {
-            Footing = FString::Printf(TEXT("MAG  BOOTS %s"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"));
+            // Zero-g. The boots are the suit's: without it there is nothing to switch on.
+            Footing = !OwningCharacter->bPressureOversuitEquipped ? TEXT("ZERO-G  //  NO SUIT, NO BOOTS")
+                : FString::Printf(TEXT("ZERO-G  //  MAG BOOTS %s  [M]"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"));
         }
         MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("%s\nGRIP L %s  R %s  //  %s"), *Footing,
             OwningCharacter->IsLeftMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"),
@@ -932,9 +934,19 @@ void USurvivalHUDWidget::RefreshAllStats()
             ? FString::Printf(TEXT("  //  BLOOM NOISE %d%%"), FMath::RoundToInt(ActivityState.BloomInterference * 100.0f)) : FString();
         if (ActivityState.Mechanic == EActivityMechanic::ToolPath)
         {
-            SetInteractionPrompt(FString::Printf(TEXT("%s  //  SEAM %d%%  //  ACCURACY %d%%%s  //  AIM TO CORRECT  //  [ X ] CANCEL"),
-                *ActivityState.DisplayName.ToString().ToUpper(), Percent,
-                FMath::RoundToInt(ActivityState.ToolAccuracy * 100.0f), *BloomWarning));
+            // The seam and the torch on one track: | is where the seam runs, ^ is the torch. Move
+            // the view up and down to keep the torch on the seam as it wanders.
+            FString Track;
+            const int32 Cells = 21;
+            const int32 SeamCell = FMath::Clamp(FMath::RoundToInt((ActivityState.SeamOffset + 1.0f) * 0.5f * (Cells - 1)), 0, Cells - 1);
+            const int32 ToolCell = FMath::Clamp(FMath::RoundToInt((ActivityState.ToolOffset.Y + 1.0f) * 0.5f * (Cells - 1)), 0, Cells - 1);
+            for (int32 Cell = 0; Cell < Cells; ++Cell)
+            {
+                Track += (Cell == ToolCell && Cell == SeamCell) ? TEXT("#") : Cell == ToolCell ? TEXT("^") : Cell == SeamCell ? TEXT("|") : TEXT("-");
+            }
+            const TCHAR* Steer = ActivityState.ToolAccuracy > 0.0f ? TEXT("ON THE SEAM") : (ActivityState.ToolOffset.Y < ActivityState.SeamOffset ? TEXT("SEAM IS UP: LOOK UP") : TEXT("SEAM IS DOWN: LOOK DOWN"));
+            SetInteractionPrompt(FString::Printf(TEXT("%s  //  WELD %d%%  //  [%s]  //  %s%s  //  [ X ] CANCEL"),
+                *ActivityState.DisplayName.ToString().ToUpper(), Percent, *Track, Steer, *BloomWarning));
         }
         else if (bFullMinigame)
         {

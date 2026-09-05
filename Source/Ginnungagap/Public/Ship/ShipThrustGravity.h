@@ -26,6 +26,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ship")
 	float Acceleration = 9800.0f;
 
+	/**
+	 * Whether the drive is already burning when the map starts. Off on the corvette: the ship is
+	 * dead when the crew wake, they float out of cryo, and the deck becomes "down" only when the
+	 * main bus is restored (the power station calls ApplyThrust).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ship")
+	bool bEngagedAtStart = true;
+
+	UFUNCTION(BlueprintPure, Category = "Ship")
+	bool IsEngaged() const { return bEngaged; }
+
 	UFUNCTION(BlueprintCallable, Category = "Ship")
 	void ApplyThrust();
 
@@ -34,5 +45,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	bool bEngaged = false;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

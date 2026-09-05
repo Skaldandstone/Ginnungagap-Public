@@ -147,6 +147,7 @@ ACryoPodSystem::ACryoPodSystem()
     VerticalPod->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
     VerticalPod->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
     VerticalPod->SetCollisionProfileName(TEXT("BlockAll"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderFinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (VerticalPodFinder.Succeeded())
     {
         VerticalPod->SetStaticMesh(VerticalPodFinder.Object);
@@ -158,6 +159,53 @@ ACryoPodSystem::ACryoPodSystem()
                 Generated->SetVisibility(false, true);
                 Generated->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             }
+        }
+        // The one-piece pod is opaque and can only open by lifting whole; it stays as the tube's
+        // backing (turned to the rear, half sunk) and the standing tube is built in front of it.
+        VerticalPod->SetVisibility(false);
+        VerticalPod->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+        const float TubeRadius = 62.0f, TubeHeight = 205.0f;
+        TubeBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TubeBase"));
+        TubeBase->SetupAttachment(RootComponent);
+        TubeBase->SetStaticMesh(CylinderFinder.Succeeded() ? CylinderFinder.Object : CubeFinder.Object);
+        TubeBase->SetRelativeLocation(FVector(0.0f, 0.0f, 6.0f));
+        TubeBase->SetRelativeScale3D(FVector(TubeRadius * 2.0f / 100.0f * 1.12f, TubeRadius * 2.0f / 100.0f * 1.12f, 0.12f));
+        TubeBase->SetCollisionProfileName(TEXT("BlockAll"));
+        if (FrameMaterialFinder.Succeeded()) TubeBase->SetMaterial(0, FrameMaterialFinder.Object);
+
+        TubeGlass = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TubeGlass"));
+        TubeGlass->SetupAttachment(RootComponent);
+        TubeGlass->SetStaticMesh(CylinderFinder.Succeeded() ? CylinderFinder.Object : CubeFinder.Object);
+        TubeGlass->SetRelativeLocation(FVector(0.0f, 0.0f, 12.0f + TubeHeight * 0.5f));
+        TubeGlass->SetRelativeScale3D(FVector(TubeRadius * 2.0f / 100.0f, TubeRadius * 2.0f / 100.0f, TubeHeight / 100.0f));
+        TubeGlass->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        TubeGlass->SetCastShadow(false);
+        if (GlassMaterialFinder.Succeeded()) TubeGlass->SetMaterial(0, GlassMaterialFinder.Object);
+
+        TubeCap = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TubeCap"));
+        TubeCap->SetupAttachment(TubeGlass);
+        TubeCap->SetStaticMesh(CylinderFinder.Succeeded() ? CylinderFinder.Object : CubeFinder.Object);
+        // The cap rides the glass, seated on its top face (the cylinder mesh is 100 tall about its centre).
+        TubeCap->SetRelativeLocation(FVector(0.0f, 0.0f, 53.0f));
+        TubeCap->SetRelativeScale3D(FVector(1.12f, 1.12f, 0.06f));
+        TubeCap->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        if (FrameMaterialFinder.Succeeded()) TubeCap->SetMaterial(0, FrameMaterialFinder.Object);
+
+        for (int32 Rib = 0; Rib < 3; ++Rib)
+        {
+            UStaticMeshComponent* RibMesh = CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("TubeRib%d"), Rib));
+            RibMesh->SetupAttachment(RootComponent);
+            RibMesh->SetStaticMesh(CubeFinder.Object);
+            // Three ribs round the back and sides; the front (+X, the door) stays clear glass.
+            const float Angle = 100.0f + Rib * 80.0f;
+            const FVector Around(FMath::Cos(FMath::DegreesToRadians(Angle)), FMath::Sin(FMath::DegreesToRadians(Angle)), 0.0f);
+            RibMesh->SetRelativeLocation(Around * (TubeRadius + 4.0f) + FVector(0.0f, 0.0f, 12.0f + TubeHeight * 0.5f));
+            RibMesh->SetRelativeRotation(FRotator(0.0f, Angle, 0.0f));
+            RibMesh->SetRelativeScale3D(FVector(0.06f, 0.10f, TubeHeight / 100.0f + 0.1f));
+            RibMesh->SetCollisionProfileName(TEXT("BlockAll"));
+            if (FrameMaterialFinder.Succeeded()) RibMesh->SetMaterial(0, FrameMaterialFinder.Object);
+            TubeRibs.Add(RibMesh);
         }
     }
     else
@@ -304,7 +352,11 @@ void ACryoPodSystem::ApplyLidPose()
     // the wake-up is watched for, in third person, before the crew steps out.
     if (VerticalPod && UsesVerticalPod())
     {
-        VerticalPod->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f + EasedAlpha * 150.0f));
+        // The tube stays on the deck; the glass and its cap lift clear of the sleeper's head.
+        if (TubeGlass)
+        {
+            TubeGlass->SetRelativeLocation(FVector(0.0f, 0.0f, 12.0f + 205.0f * 0.5f + EasedAlpha * 215.0f));
+        }
     }
 }
 
