@@ -55,6 +55,13 @@ plenum doorway that can only be crawled through, and the observation deck's seco
 shut, cut free with the tool. The observation deck's glass looks out on stars. Rails guard the
 ramps and the landing edges; the trunk signs say which deck each ramp leads to.
 
+## Co-op
+
+The menu's Co-op mode hosts the corvette as a listen server. From the command line, the packaged
+game hosts with `Ginnungagap.exe /Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack?listen`
+and a second copy joins with `Ginnungagap.exe <host-ip>:7777`. Both loading the ship and the
+join hand-shake are verified; two players working the objective chain together is not yet.
+
 ## What the tests prove
 
 `Ginnungagap.Smoke.CorvetteRoutesReachable` proves the trunk barrier cuts the climb and, past it,
