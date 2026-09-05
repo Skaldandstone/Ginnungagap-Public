@@ -157,6 +157,7 @@ class Kit:
         self.toolbox = load(f"{ENGP}/SM_Toolbox")
         self.ceiling_frame = load(f"{ENGI}/SM_Ceiling_HB_A")
         self.duct_run = load(f"{ENGI}/SM_AirDuct_Mid")   # a 3.6 m duct section: fallen, it fills a corridor
+        self.rail = load(f"{ENGI}/SM_Rail_A")             # 164 x 8 x 78, pivot at the bottom centre
         self.alarm = load(f"{ENGP}/SM_AlarmLight")
         self.portable_light = load(f"{ENGP}/SM_PortableLight")
         self.distrib = load(f"{ENGI}/SM_ElectricDistribBox")
@@ -256,6 +257,15 @@ def ramp(deck, z_bottom):
         # Tile top is 20 above its origin; drop the origin along the slope normal so the top rides the line.
         loc = (x - FLOOR_T * sin_a, lane_y, z - FLOOR_T * cos_a)
         place(K.floor_grate, loc, (0.0, angle, 180.0), (seg / 300.0, lane_w / 300.0, 1.0), f"D{deck:02d}_Ramp_{i}")
+    # A rail down the ramp's open side (the landing is the other way; the hull is behind the
+    # far side), riding the slope.
+    if K.rail:
+        rail_n = max(1, int(round(length / 164.0)))
+        rail_seg = length / rail_n
+        for i in range(rail_n):
+            s_ = (i + 0.5) * rail_seg
+            place(K.rail, (RAMP_X1 - s_ * cos_a, RAMP_LANE[1] - 6.0, z_bottom + s_ * sin_a + FLOOR_T), (0.0, angle, 0.0),
+                  (rail_seg / 164.0, 1.0, 1.0), f"D{deck:02d}_RampRail_{i}")
     # A rail along the ramp's open side so the eye reads the edge (no collision).
     place(K.pipe, ((RAMP_X0 + RAMP_X1) * 0.5, RAMP_LANE[1] + 6.0, z_bottom + rise * 0.5 + 95.0), (0.0, angle, 180.0),
           (length / 200.0, 0.6, 0.6), f"D{deck:02d}_RampRail", collide=False)
@@ -382,13 +392,24 @@ def spawn_beacon(objective_id, text, x, y, z_floor, yaw, code):
     return beacon
 
 
-def spawn_sign(text, x, y, z_floor, yaw, code, big=False):
+def spawn_sign(text, x, y, z_floor, yaw, code, big=False, both_sides=False):
+    """A text sign. Text renders mirrored from behind, so a sign read from either side of a line
+    (the trunk's) is two signs back to back."""
     sign = actors.spawn_actor_from_class(unreal.TextRenderActor, unreal.Vector(x, y, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=yaw, roll=0.0))
     label(sign, f"Sign_{code}")
     comp = sign.get_component_by_class(unreal.TextRenderComponent)
     comp.set_editor_property("text", text)
     comp.set_editor_property("world_size", 22.0 if big else 15.0)
     comp.set_editor_property("text_render_color", unreal.Color(r=120, g=226, b=211) if big else unreal.Color(r=150, g=165, b=170))
+    comp.set_editor_property("horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
+    if both_sides:
+        back = actors.spawn_actor_from_class(unreal.TextRenderActor, unreal.Vector(x, y, z_floor + 230.0), unreal.Rotator(pitch=0.0, yaw=yaw + 180.0, roll=0.0))
+        label(back, f"Sign_{code}_Back")
+        bc = back.get_component_by_class(unreal.TextRenderComponent)
+        bc.set_editor_property("text", text)
+        bc.set_editor_property("world_size", 22.0 if big else 15.0)
+        bc.set_editor_property("text_render_color", comp.get_editor_property("text_render_color"))
+        bc.set_editor_property("horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
     return sign
 
 
@@ -401,6 +422,16 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     code = f"CVT-D{deck:02d}"
     has_hole = deck > 1          # the ramp from the deck below arrives in the ramp lane
     has_ramp = deck < len(DECKS)
+
+    # The landing's edge over the ramp hole: a rail from just past the ramp head to the foot, so
+    # a step off the landing is not a drop of up to a deck onto the ramp below.
+    if has_hole and K.rail:
+        edge_x0, edge_x1 = RAMP_X0 + 180.0, RAMP_X1
+        rail_n = max(1, int(round((edge_x1 - edge_x0) / 164.0)))
+        rail_seg = (edge_x1 - edge_x0) / rail_n
+        for i in range(rail_n):
+            place(K.rail, (edge_x0 + (i + 0.5) * rail_seg, RAMP_LANE[1] + 6.0, z + FLOOR_T), (0.0, 0.0, 0.0),
+                  (rail_seg / 164.0, 1.0, 1.0), f"D{deck:02d}_LandingRail_{i}")
 
     def in_ramp_lane(x0, x1, y0, y1):
         return x0 < RAMP_X1 and x1 > RAMP_X0 and y0 < RAMP_LANE[1] and y1 > RAMP_LANE[0]
@@ -498,12 +529,12 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     # Text faces its local +X; -90 turns it to face -Y, toward a reader in the corridor.
     spawn_sign(f"{code} // {name.upper()}", MAIN_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, code, big=True)
     spawn_sign(f"{code}-B // {SECOND_NAMES[deck].upper()}", SECOND_DOOR_X - 260.0, CORRIDOR[3] - 90.0, z, -90.0, f"{code}-B")
-    spawn_sign(f"DECK {deck:02d}", 550.0, LANDING[1] - 60.0, z, -90.0, f"{code}-T", big=True)
+    spawn_sign(f"DECK {deck:02d}", 550.0, LANDING[1] - 60.0, z, -90.0, f"{code}-T", big=True, both_sides=True)
     # Wayfinding at the trunk: what the ramp beside you leads to.
     if has_ramp:
-        spawn_sign(f"UP  >  DECK {deck + 1:02d}", RAMP_X1 + 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Up")
+        spawn_sign(f"UP  >  DECK {deck + 1:02d}", RAMP_X1 + 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Up", both_sides=True)
     if has_hole:
-        spawn_sign(f"DOWN  >  DECK {deck - 1:02d}", RAMP_X0 - 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Down")
+        spawn_sign(f"DOWN  >  DECK {deck - 1:02d}", RAMP_X0 - 120.0, RAMP_LANE[1] + 40.0, z, -90.0, f"{code}-Down", both_sides=True)
 
     # Dressing by role, then the gameplay of the deck.
     dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state)

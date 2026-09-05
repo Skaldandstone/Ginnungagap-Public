@@ -50,8 +50,10 @@ and returns to first person after. Cutting with the tool stays first person. Tab
 Every deck has something to do besides: a side station on a room wall (battery recovery, armory
 override, turret service, suit patching, scrubber service, plotter core, decontamination, sensor
 calibration), field supplies in the aft corners of each main room and loose oxygen in some
-corridors, a fallen duct across the tactical corridor, and the observation deck's secondary room
-welded shut, cut free with the tool. The observation deck's glass looks out on stars.
+corridors, a fallen duct across the tactical corridor, a collapsed duct run in the marine deck's
+plenum doorway that can only be crawled through, and the observation deck's secondary room welded
+shut, cut free with the tool. The observation deck's glass looks out on stars. Rails guard the
+ramps and the landing edges; the trunk signs say which deck each ramp leads to.
 
 ## What the tests prove
 
