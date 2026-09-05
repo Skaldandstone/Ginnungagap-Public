@@ -1,3 +1,4 @@
+#include "Net/UnrealNetwork.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -73,34 +74,8 @@ AQuickDemoMissionDirector::AQuickDemoMissionDirector()
     bReplicates = true;
 }
 
-void AQuickDemoMissionDirector::BeginPlay()
+void AQuickDemoMissionDirector::DefineObjectives(UMissionObjectiveSubsystem* Missions)
 {
-    Super::BeginPlay();
-
-    if (!HasAuthority() || !GetGameInstance())
-    {
-        return;
-    }
-
-    // This level is generated and dressed by scripts that save from headless sessions, which
-    // cannot rebuild navigation, and Dynamic runtime generation trusts whatever navmesh was saved.
-    // The demo shipped that way with nothing able to path anywhere; found when the player start
-    // stopped projecting after a scripted repair. A full rebuild from live geometry takes seconds
-    // with the job count raised, and makes the map self-healing regardless of how it was saved.
-    if (UNavigationSystemV1* Navigation = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld()))
-    {
-        Navigation->SetMaxSimultaneousTileGenerationJobsCount(16);
-        Navigation->Build();
-    }
-
-    UMissionObjectiveSubsystem* Missions = GetGameInstance()->GetSubsystem<UMissionObjectiveSubsystem>();
-    if (!Missions)
-    {
-        return;
-    }
-
-    Missions->ResetAllObjectives();
-    Missions->OnObjectiveChanged.AddDynamic(this, &AQuickDemoMissionDirector::HandleObjectiveChanged);
     Missions->AddObjective(QuickDemoObjectives::MakeObjective(
         QuickDemoObjectives::SuitUp,
         // "Suit up" contradicted what the player could see: they wake already wearing the cryo
@@ -129,6 +104,49 @@ void AQuickDemoMissionDirector::BeginPlay()
 		NSLOCTEXT("QuickDemo", "CICTitle", "Bring the Combat Information Center online"),
 		NSLOCTEXT("QuickDemo", "CICDescription", "Crank the CIC door override, enter the command room, and boot the tactical console."),
         EMissionObjectiveType::Investigate, QuickDemoObjectives::SealBreach));
+
+}
+
+void AQuickDemoMissionDirector::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (!GetGameInstance())
+    {
+        return;
+    }
+
+    // Every machine defines the chain, because the mission subsystem is a game-instance
+    // subsystem and does not replicate: a client that never defined the objectives had a HUD
+    // stuck on MISSION INITIALIZING and beacons with nothing to show. State is the server's;
+    // it arrives as the replicated completed list below.
+    UMissionObjectiveSubsystem* Missions = GetGameInstance()->GetSubsystem<UMissionObjectiveSubsystem>();
+    if (!Missions)
+    {
+        return;
+    }
+    Missions->ResetAllObjectives();
+    Missions->OnObjectiveChanged.AddDynamic(this, &AQuickDemoMissionDirector::HandleObjectiveChanged);
+    DefineObjectives(Missions);
+
+    if (!HasAuthority())
+    {
+        OnRep_CompletedObjectives();
+        UE_LOG(LogTemp, Display, TEXT("Quick-demo mission mirrored on client (%d objectives completed so far)."), ReplicatedCompletedObjectives.Num());
+        return;
+    }
+
+
+    // This level is generated and dressed by scripts that save from headless sessions, which
+    // cannot rebuild navigation, and Dynamic runtime generation trusts whatever navmesh was saved.
+    // The demo shipped that way with nothing able to path anywhere; found when the player start
+    // stopped projecting after a scripted repair. A full rebuild from live geometry takes seconds
+    // with the job count raised, and makes the map self-healing regardless of how it was saved.
+    if (UNavigationSystemV1* Navigation = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld()))
+    {
+        Navigation->SetMaxSimultaneousTileGenerationJobsCount(16);
+        Navigation->Build();
+    }
 
     // The ship starts with its main bus down, which until now it did not.
     //
@@ -171,6 +189,11 @@ void AQuickDemoMissionDirector::EndPlay(const EEndPlayReason::Type EndPlayReason
 
 void AQuickDemoMissionDirector::HandleObjectiveChanged(FName ObjectiveId, EMissionObjectiveState NewState)
 {
+    if (HasAuthority() && NewState == EMissionObjectiveState::Completed)
+    {
+        ReplicatedCompletedObjectives.AddUnique(ObjectiveId);
+        ForceNetUpdate();
+    }
     if (!HasAuthority() || bRestoringCheckpoint || NewState != EMissionObjectiveState::Completed)
     {
         return;
@@ -236,6 +259,8 @@ void AQuickDemoMissionDirector::RestoreCheckpointState()
     bRestoringCheckpoint = false;
     if (bRestored)
     {
+        for (const FName& Id : CompletedObjectiveIds) { ReplicatedCompletedObjectives.AddUnique(Id); }
+        ForceNetUpdate();
         ApplyRestoredWorldState(CompletedObjectiveIds);
         UE_LOG(LogTemp, Display, TEXT("Quick-demo checkpoint restored with %d completed objectives."),
             CompletedObjectiveIds.Num());
@@ -305,6 +330,24 @@ void AQuickDemoMissionDirector::ApplyRestoredWorldState(const TArray<FName>& Com
             }
         }
     }
+}
+
+void AQuickDemoMissionDirector::OnRep_CompletedObjectives()
+{
+    UGameInstance* GameInstance = GetGameInstance();
+    UMissionObjectiveSubsystem* Missions = GameInstance ? GameInstance->GetSubsystem<UMissionObjectiveSubsystem>() : nullptr;
+    if (!Missions || ReplicatedCompletedObjectives.IsEmpty())
+    {
+        return;
+    }
+    // Completion without rewards, and the subsystem activates whatever is next.
+    Missions->RestoreCompletedObjectives(ReplicatedCompletedObjectives);
+}
+
+void AQuickDemoMissionDirector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AQuickDemoMissionDirector, ReplicatedCompletedObjectives);
 }
 
 bool AQuickDemoMissionDirector::IsObjectiveActive(const UObject* WorldContext, FName ObjectiveId)

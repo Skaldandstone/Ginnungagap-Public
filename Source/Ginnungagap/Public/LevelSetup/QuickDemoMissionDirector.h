@@ -52,8 +52,19 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+    /** The chain's definitions, identical on every machine. */
+    void DefineObjectives(class UMissionObjectiveSubsystem* Missions);
+
+    /** Objectives the server has completed, in order; clients mirror them into their own subsystem. */
+    UPROPERTY(ReplicatedUsing=OnRep_CompletedObjectives)
+    TArray<FName> ReplicatedCompletedObjectives;
+
+    UFUNCTION()
+    void OnRep_CompletedObjectives();
+
     UFUNCTION()
     void HandleObjectiveChanged(FName ObjectiveId, EMissionObjectiveState NewState);
 
