@@ -20,6 +20,7 @@ toward the engines.
 | --- | --- |
 | W A S D, mouse | Move, look |
 | E | Interact: stations, doors, pickups, the pod |
+| L | Wrist lamp on the suit's left forearm (suit only) |
 | F | Cycle the approach at an obstruction (cut or squeeze) |
 | Tab (right stick click) | First or third person |
 | H (D-pad down) | Use a carried supply: the first one that would do anything (oxygen when low, a kit when hurt) |
@@ -35,12 +36,22 @@ and the view hands over to first person with the visor HUD. Squeezing through a 
 obstruction's squeeze, and any crawl space to come) is watched in third person for its duration
 and returns to first person after. Cutting with the tool stays first person. Tab toggles at will.
 
+## Light
+
+Dead ship, dead lights. The casualty station has the cryo tubes' blue glow and nothing else; the
+suit's wrist lamp (L) is the crew's light from the rack on. Restoring power at the drive brings the
+emergency bus up: every fixture and practical aboard, dull red-amber, flickering, with dropouts and
+a slow beacon pulse. The mission director runs that (`BringUpEmergencyLighting`), live from the
+power station and again on a checkpoint restore.
+
 ## The chain
 
 1. **Casualty station (deck 3).** The ship is dead: no drive, no gravity. You wake inside the
    tube, in third person; when it comes awake, press E to release it and float out. Suit up at
-   the rack on the port wall (the cryo bodysuit is not pressure-rated), then M toggles the suit's
-   magnetic boots so you can walk the deck. The room's door is locked against the vacuum in the
+   the rack on the port wall (the Space Marshal hangs on a rail by each locker; the cryo bodysuit
+   is not pressure-rated), then M toggles the suit's magnetic boots so you can walk the deck and L
+   the wrist lamp. The ship is dark: the pods' blue glow is the bay's only light until you carry
+   your own, and nothing else aboard lights until the bus is back. The room's door is locked against the vacuum in the
    corridor beyond; the override panel by the door refuses anyone not sealed in a suit.
 2. **Engineering control (deck 2).** Down the trunk (floating, or on the boots). The room's door
    lost its bus with the main power: the override panel in the corridor winds it open. The

@@ -1,4 +1,5 @@
 #include "CryoPodSystem.h"
+#include "Components/PointLightComponent.h"
 #include "../CoopSurvivalCharacter.h"
 #include "../Bloom/BloomDirector.h"
 #include "TimerManager.h"
@@ -148,6 +149,14 @@ ACryoPodSystem::ACryoPodSystem()
     VerticalPod->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
     VerticalPod->SetCollisionProfileName(TEXT("BlockAll"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderFinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+    Glow = CreateDefaultSubobject<UPointLightComponent>(TEXT("Glow"));
+    Glow->SetupAttachment(RootComponent);
+    Glow->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+    Glow->SetLightColor(FLinearColor(0.22f, 0.52f, 1.0f));
+    Glow->SetIntensity(1100.0f);
+    Glow->SetAttenuationRadius(800.0f);
+    Glow->SetCastShadows(false);
+
     if (VerticalPodFinder.Succeeded())
     {
         VerticalPod->SetStaticMesh(VerticalPodFinder.Object);

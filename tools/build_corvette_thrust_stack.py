@@ -384,6 +384,8 @@ def spawn_practical(code, x, y, z_floor, intensity, colour=None, radius=800.0, h
     comp.set_light_color(colour or unreal.LinearColor(1.0, 0.62, 0.32, 1.0))
     comp.set_editor_property("intensity", intensity)
     comp.set_editor_property("cast_shadows", False)
+    # Dark until power is restored; the director brings practicals up dull and flickering.
+    comp.set_visibility(False)
     light.set_editor_property("tags", [unreal.Name("CorvettePractical"), unreal.Name(code)])
     return light
 
@@ -646,7 +648,9 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     cx, cy = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5
     warm = unreal.LinearColor(1.0, 0.749, 0.486, 1.0)
     cool = unreal.LinearColor(0.725, 0.863, 0.922, 1.0)
-    main_light = spawn_room_light(code, cx, cy, z, warm if kind == "cryo" else cool, 220.0 if kind == "cryo" else 0.0, emergency=(kind == "cryo"))
+    # Every room light is a utility light, dark until the bus is back: the cryo bay has only the
+    # pods' own blue glow before the crew suit up and light their way with the wrist lamp.
+    main_light = spawn_room_light(code, cx, cy, z, cool, 0.0)
     main.set_editor_property("identity_light", main_light)
     second.set_editor_property("identity_light", spawn_room_light(f"{code}-B", (SECOND[0] + SECOND[1]) * 0.5, cy, z, cool, 0.0))
     service.set_editor_property("identity_light", spawn_room_light(f"{code}-S", (SERVICE[0] + SERVICE[1]) * 0.5, 300.0, z, cool, 0.0, radius=1200.0))
@@ -662,7 +666,7 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     bay = kind == "cryo"
     spawn_practical(code, cx, cy, z, 1600.0 if bay else 320.0, colour=unreal.LinearColor(0.85, 0.92, 1.0, 1.0) if bay else None, radius=1300.0 if bay else 800.0)
     if bay:
-        spawn_practical(f"{code}-Pods", cx, MAIN[3] - 260.0, z, 700.0, colour=unreal.LinearColor(0.75, 0.88, 1.0, 1.0), radius=900.0, height=260.0)
+        pass  # the pods light themselves (blue glow on ACryoPodSystem)
     spawn_practical(f"{code}-B", (SECOND[0] + SECOND[1]) * 0.5, cy, z, 220.0)
     spawn_practical(f"{code}-S", (SERVICE[0] + SERVICE[1]) * 0.5, 300.0, z, 180.0, radius=1000.0)
     for i, lx in enumerate((400.0, 1200.0, 2000.0)):
@@ -1260,7 +1264,8 @@ def build():
     unreal.SystemLibrary.execute_console_command(None, "RebuildNavigation")
     sky = actors.spawn_actor_from_class(unreal.SkyLight, unreal.Vector(FOOT_X * 0.5, FOOT_Y * 0.5, height + 500.0), unreal.Rotator())
     label(sky, "SkyLight")
-    sky.get_component_by_class(unreal.SkyLightComponent).set_editor_property("intensity", 0.15)
+    # Near nothing: a dead ship is dark, and the only fill is what the lamp and the fixtures throw.
+    sky.get_component_by_class(unreal.SkyLightComponent).set_editor_property("intensity", 0.02)
     spawn_space(height)
     # Under drive: the stack's "down" is toward the engines. The ship is zero-g until something
     # thrusts, and the crew would float off every deck.

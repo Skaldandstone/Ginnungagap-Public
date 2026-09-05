@@ -758,7 +758,8 @@ void USurvivalHUDWidget::RefreshAllStats()
         {
             // Zero-g. The boots are the suit's: without it there is nothing to switch on.
             Footing = !OwningCharacter->bPressureOversuitEquipped ? TEXT("ZERO-G  //  NO SUIT, NO BOOTS")
-                : FString::Printf(TEXT("ZERO-G  //  MAG BOOTS %s  [M]"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"));
+                : FString::Printf(TEXT("ZERO-G  //  MAG BOOTS %s  [M]  //  LAMP %s  [L]"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"),
+                    OwningCharacter->IsWristLampOn() ? TEXT("ON") : TEXT("OFF"));
         }
         MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("%s\nGRIP L %s  R %s  //  %s"), *Footing,
             OwningCharacter->IsLeftMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"),

@@ -31,6 +31,7 @@
 #include "Components/ChildActorComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequenceBase.h"
@@ -258,6 +259,20 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
     LeftBootMagnetLight = AddMagnetLight(TEXT("LeftBootMagnetLight"), TEXT("foot_l"), FVector(8, 0, -3), MagnetRed, 1800.0f, 75.0f);
     RightBootMagnetLight = AddMagnetLight(TEXT("RightBootMagnetLight"), TEXT("foot_r"), FVector(8, 0, -3), MagnetRed, 1800.0f, 75.0f);
     LeftGloveMagnetLight = AddMagnetLight(TEXT("LeftGloveMagnetLight"), TEXT("hand_l"), FVector::ZeroVector, FLinearColor(1.0f, 0.08f, 0.025f), 950.0f, 105.0f);
+    // The wrist lamp: a spot on the left forearm, thrown the way the hand points (a bone's X
+    // runs down its length), off until the crew are in the suit and switch it on.
+    WristLamp = CreateDefaultSubobject<USpotLightComponent>(TEXT("WristLamp"));
+    WristLamp->SetupAttachment(GetMesh(), TEXT("hand_l"));
+    WristLamp->SetRelativeLocation(FVector(-6.0f, 0.0f, 2.0f));
+    WristLamp->SetRelativeRotation(FRotator::ZeroRotator);
+    WristLamp->SetLightColor(FLinearColor(0.92f, 0.95f, 1.0f));
+    WristLamp->SetIntensity(6500.0f);
+    WristLamp->SetAttenuationRadius(3200.0f);
+    WristLamp->SetInnerConeAngle(18.0f);
+    WristLamp->SetOuterConeAngle(34.0f);
+    WristLamp->SetCastShadows(true);
+    WristLamp->SetVisibility(false);
+
     RightGloveMagnetLight = AddMagnetLight(TEXT("RightGloveMagnetLight"), TEXT("hand_r"), FVector::ZeroVector, FLinearColor(1.0f, 0.08f, 0.025f), 950.0f, 105.0f);
 
     auto AddWearable = [this](const TCHAR* Name, const TCHAR* AssetPath, const FName Bone,
@@ -478,6 +493,7 @@ void ACoopSurvivalCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
     PlayerInputComponent->BindAction(TEXT("PrimaryFire"), IE_Pressed, this, &ACoopSurvivalCharacter::HandlePrimaryWeaponFire);
     PlayerInputComponent->BindAction(TEXT("ToggleWeaponModification"), IE_Pressed, this, &ACoopSurvivalCharacter::ToggleUnsafeWeaponModification);
     PlayerInputComponent->BindAction(TEXT("ToggleMagneticBoots"), IE_Pressed, this, &ACoopSurvivalCharacter::ToggleMagneticBoots);
+    PlayerInputComponent->BindAction(TEXT("ToggleWristLamp"), IE_Pressed, this, &ACoopSurvivalCharacter::ToggleWristLamp);
     PlayerInputComponent->BindAction(TEXT("MagneticGloveGrip"), IE_Pressed, this, &ACoopSurvivalCharacter::BeginMagneticGloveGrip);
     PlayerInputComponent->BindAction(TEXT("MagneticGloveGrip"), IE_Released, this, &ACoopSurvivalCharacter::EndMagneticGloveGrip);
     PlayerInputComponent->BindAction(TEXT("RightMagneticGloveGrip"), IE_Pressed, this, &ACoopSurvivalCharacter::BeginRightMagneticGloveGrip);
@@ -522,6 +538,7 @@ void ACoopSurvivalCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
     DOREPLIFETIME(ACoopSurvivalCharacter, bPressureOversuitEquipped);
     DOREPLIFETIME(ACoopSurvivalCharacter, MetaHumanCharacterClass);
     DOREPLIFETIME(ACoopSurvivalCharacter, bMagneticBootsEnabled);
+    DOREPLIFETIME(ACoopSurvivalCharacter, bWristLampOn);
     DOREPLIFETIME(ACoopSurvivalCharacter, bMagneticGlovesActive);
     DOREPLIFETIME(ACoopSurvivalCharacter, bLeftMagneticGloveActive);
     DOREPLIFETIME(ACoopSurvivalCharacter, bRightMagneticGloveActive);
@@ -1216,6 +1233,39 @@ bool ACoopSurvivalCharacter::FindMetalSurface(const FVector& Start, const FVecto
     return IsMetalSurface(OutHit);
 }
 
+void ACoopSurvivalCharacter::ToggleWristLamp()
+{
+    SetWristLampOn(!bWristLampOn);
+}
+
+void ACoopSurvivalCharacter::SetWristLampOn(bool bOn)
+{
+    // The lamp is in the suit's sleeve: nothing to switch on in a cryo bodysuit.
+    if (bOn && !bPressureOversuitEquipped) return;
+    bWristLampOn = bOn;
+    UpdateWristLampVisuals();
+    if (!HasAuthority()) ServerSetWristLamp(bOn);
+}
+
+void ACoopSurvivalCharacter::ServerSetWristLamp_Implementation(bool bOn)
+{
+    bWristLampOn = bOn && bPressureOversuitEquipped;
+    UpdateWristLampVisuals();
+}
+
+void ACoopSurvivalCharacter::OnRep_WristLamp()
+{
+    UpdateWristLampVisuals();
+}
+
+void ACoopSurvivalCharacter::UpdateWristLampVisuals()
+{
+    if (WristLamp)
+    {
+        WristLamp->SetVisibility(bWristLampOn && bPressureOversuitEquipped);
+    }
+}
+
 void ACoopSurvivalCharacter::ToggleMagneticBoots()
 {
     SetMagneticBootsEnabled(!bMagneticBootsEnabled);
@@ -1802,6 +1852,7 @@ void ACoopSurvivalCharacter::SetPressureOversuitEquipped(bool bEquipped)
 {
     bPressureOversuitEquipped = bEquipped;
     ApplyPressureSuitVisuals();
+    UpdateWristLampVisuals();
     if (!HasAuthority())
     {
         ServerSetPressureOversuitEquipped(bEquipped);
@@ -1812,11 +1863,13 @@ void ACoopSurvivalCharacter::ServerSetPressureOversuitEquipped_Implementation(bo
 {
     bPressureOversuitEquipped = bEquipped;
     ApplyPressureSuitVisuals();
+    UpdateWristLampVisuals();
 }
 
 void ACoopSurvivalCharacter::OnRep_PressureOversuitEquipped()
 {
     ApplyPressureSuitVisuals();
+    UpdateWristLampVisuals();
 }
 
 void ACoopSurvivalCharacter::SetMetaHumanCharacterClass(TSubclassOf<AActor> NewCharacterClass)

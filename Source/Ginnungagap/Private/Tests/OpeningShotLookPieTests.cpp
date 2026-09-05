@@ -288,6 +288,57 @@ bool FCaptureSuitedThirdPerson::Update()
 }
 
 /**
+ * The suit rack in the cryo bay, from two and a half metres in front: the Space Marshal hanging
+ * from its rail beside the locker, before anyone has taken it. One still, then the view returns.
+ */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FCaptureSuitRack, FAutomationTestBase*, Test);
+
+bool FCaptureSuitRack::Update()
+{
+	static int32 Phase = 0;
+	static double PhaseAt = -1.0;
+	static TWeakObjectPtr<ACameraActor> Camera;
+	UWorld* World = OpeningLook::FindPieWorld();
+	ACoopSurvivalCharacter* Character = World ? Cast<ACoopSurvivalCharacter>(UGameplayStatics::GetPlayerPawn(World, 0)) : nullptr;
+	APlayerController* PC = World ? UGameplayStatics::GetPlayerController(World, 0) : nullptr;
+	AQuickDemoSuitStation* Rack = nullptr;
+	if (World) { for (TActorIterator<AQuickDemoSuitStation> It(World); It; ++It) { Rack = *It; break; } }
+	if (!Character || !PC || !Rack)
+	{
+		Phase = 0; PhaseAt = -1.0;
+		return true;
+	}
+	const double Now = World->GetTimeSeconds();
+	if (Phase == 0)
+	{
+		const FVector Target = Rack->GetActorLocation() + Rack->GetActorForwardVector() * 55.0f;
+		const FVector Eye = Target + Rack->GetActorForwardVector() * 250.0f - Rack->GetActorRightVector() * 90.0f + FVector(0, 0, 10.0f);
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ACameraActor* Cam = World->SpawnActor<ACameraActor>(Eye, (Target - Eye).Rotation(), Params);
+		Camera = Cam;
+		if (Cam) { PC->SetViewTargetWithBlend(Cam, 0.0f); }
+		if (Rack->RackSuit) { Rack->RackSuit->PrestreamTextures(6.0f, true); }
+		UE_LOG(LogTemp, Display, TEXT("RACKLOOK rack %s at %s, suit visible %d taken %d"), *Rack->GetName(), *Rack->GetActorLocation().ToCompactString(),
+			Rack->RackSuit && Rack->RackSuit->IsVisible() ? 1 : 0, Rack->bSuitTaken ? 1 : 0);
+		Phase = 1; PhaseAt = Now;
+		return false;
+	}
+	if (Phase == 1)
+	{
+		if (Now - PhaseAt < 2.5) { return false; }
+		FScreenshotRequest::RequestScreenshot(TEXT("Opening_9_suit_rack"), false, false, false, FIntRect(), true);
+		Phase = 2; PhaseAt = Now;
+		return false;
+	}
+	if (Now - PhaseAt < 0.3) { return false; }
+	PC->SetViewTargetWithBlend(Character, 0.0f);
+	if (Camera.IsValid()) { Camera->Destroy(); }
+	Phase = 0; PhaseAt = -1.0;
+	return true;
+}
+
+/**
  * The hold pose from each candidate hold animation, one still each, with the hand's position in
  * camera space logged: the numbers pick the variant (forward, slightly right, a little below the
  * eye), the stills confirm it.
@@ -376,6 +427,7 @@ bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureToolInHand(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FSweepHoldPose(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureSuitedThirdPerson(this));
+	ADD_LATENT_AUTOMATION_COMMAND(FCaptureSuitRack(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;

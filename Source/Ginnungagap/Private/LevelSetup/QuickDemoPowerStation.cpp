@@ -35,7 +35,16 @@ void AQuickDemoPowerStation::OnActivityCompleted_Implementation(APawn* Player)
     // white (0.72, 0.88, 1.0) and drop every room into Nominal's cold blue, so the moment read as
     // the ship being fine. It is not fine. Same colour as the room state so the corridor fixtures
     // and the rooms agree.
-    for (TActorIterator<APointLight> It(GetWorld()); It; ++It)
+    // The director owns the emergency bus (dull, flickering, with dropouts); without one, the
+    // fixtures come up steady red as they always did.
+    bool bDirectorLit = false;
+    for (TActorIterator<AQuickDemoMissionDirector> It(GetWorld()); It; ++It)
+    {
+        It->BringUpEmergencyLighting();
+        bDirectorLit = true;
+        break;
+    }
+    for (TActorIterator<APointLight> It(GetWorld()); !bDirectorLit && It; ++It)
     {
         APointLight* Light = *It;
         if (Light && Light->ActorHasTag(UtilityLightTag))

@@ -54,6 +54,27 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+public:
+    /**
+     * The emergency bus: every utility light and practical aboard comes up dull red-amber and
+     * flickers, with the odd dropout and a slow beacon pulse, from the moment power is restored.
+     * Called live by the power station and again on a checkpoint restore.
+     */
+    UFUNCTION(BlueprintCallable, Category="Quick Demo")
+    void BringUpEmergencyLighting();
+
+private:
+    void TickEmergencyFlicker();
+
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<class UPointLightComponent>> EmergencyLights;
+    TArray<float> EmergencyBaseIntensity;
+    FTimerHandle EmergencyFlickerTimer;
+    float EmergencyClock = 0.0f;
+    TArray<float> EmergencyDropoutUntil;
+
+public:
+
 private:
     /** The chain's definitions, identical on every machine. */
     void DefineObjectives(class UMissionObjectiveSubsystem* Missions);

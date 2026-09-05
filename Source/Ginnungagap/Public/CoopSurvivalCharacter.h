@@ -170,6 +170,12 @@ public:
     UFUNCTION(BlueprintPure, Category="Zero G|Magnetic Suit")
     bool AreMagneticBootsEnabled() const { return bMagneticBootsEnabled; }
 
+    /** The lamp built into the pressure suit's left wrist: the crew's own light on a dead ship. Suit only. */
+    void ToggleWristLamp();
+    void SetWristLampOn(bool bOn);
+    bool IsWristLampOn() const { return bWristLampOn; }
+    void UpdateWristLampVisuals();
+
     /** Holds a glove magnet against the metal under the reticle and reels the player toward it. */
     UFUNCTION(BlueprintCallable, Category="Zero G|Magnetic Suit")
     void BeginMagneticGloveGrip();
@@ -613,6 +619,18 @@ private:
     TWeakObjectPtr<UPrimitiveComponent> RightGloveGripComponent;
     bool bHasValidMagneticTarget = false;
     bool bThrusterFuelLockedOut = false;
+
+    UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
+    TObjectPtr<class USpotLightComponent> WristLamp;
+
+    UPROPERTY(ReplicatedUsing=OnRep_WristLamp, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category="Appearance|Pressure Suit")
+    bool bWristLampOn = false;
+
+    UFUNCTION()
+    void OnRep_WristLamp();
+
+    UFUNCTION(Server, Reliable)
+    void ServerSetWristLamp(bool bOn);
 
     UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
     TObjectPtr<UPointLightComponent> LeftBootMagnetLight;

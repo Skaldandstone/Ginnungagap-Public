@@ -105,6 +105,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
     TArray<TObjectPtr<class UStaticMeshComponent>> TubeRibs;
 
+    /** The tube's own cold blue glow: the one light the casualty station has until the bus is back. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
+    TObjectPtr<class UPointLightComponent> Glow;
+
     UFUNCTION(BlueprintPure, Category = "Cryo Pod|Visual")
     bool UsesVerticalPod() const;
 

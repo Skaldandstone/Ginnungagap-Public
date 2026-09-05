@@ -294,20 +294,9 @@ void AQuickDemoMissionDirector::ApplyRestoredWorldState(const TArray<FName>& Com
 
     if (CompletedObjectiveIds.Contains(QuickDemoObjectives::RestorePower))
     {
-        for (TActorIterator<APointLight> It(GetWorld()); It; ++It)
-        {
-            if (It->ActorHasTag(TEXT("QuickDemoUtilityLight")))
-            {
-                if (UPointLightComponent* Light = It->GetComponentByClass<UPointLightComponent>())
-                {
-                    // The same emergency red the power station brings up live, so a resumed run
-                    // lands in the same ship the player left.
-                    Light->SetVisibility(true);
-                    Light->SetIntensity(280.0f);
-                    Light->SetLightColor(FLinearColor(1.0f, 0.16f, 0.06f));
-                }
-            }
-        }
+        // The same emergency bus the power station brings up live, so a resumed run lands in
+        // the same ship the player left.
+        BringUpEmergencyLighting();
         for (TActorIterator<AModularShipRoom> It(GetWorld()); It; ++It)
         {
             if (It->ActorHasTag(TEXT("QuickDemoShipRoom")))
@@ -353,6 +342,54 @@ void AQuickDemoMissionDirector::OnRep_CompletedObjectives()
     }
     // Completion without rewards, and the subsystem activates whatever is next.
     Missions->RestoreCompletedObjectives(ReplicatedCompletedObjectives);
+}
+
+void AQuickDemoMissionDirector::BringUpEmergencyLighting()
+{
+    EmergencyLights.Reset();
+    EmergencyBaseIntensity.Reset();
+    EmergencyDropoutUntil.Reset();
+    for (TActorIterator<APointLight> It(GetWorld()); It; ++It)
+    {
+        UPointLightComponent* Light = It->GetComponentByClass<UPointLightComponent>();
+        if (!Light) continue;
+        if (It->ActorHasTag(TEXT("QuickDemoUtilityLight")))
+        {
+            // The fixtures: dull red, a third of what a live bus would give.
+            Light->SetVisibility(true);
+            Light->SetLightColor(FLinearColor(1.0f, 0.16f, 0.06f));
+            EmergencyLights.Add(Light);
+            EmergencyBaseIntensity.Add(120.0f);
+        }
+        else if (It->ActorHasTag(TEXT("CorvettePractical")))
+        {
+            // The practicals: their own amber, at less than half strength.
+            Light->SetVisibility(true);
+            EmergencyLights.Add(Light);
+            EmergencyBaseIntensity.Add(FMath::Max(Light->Intensity, 60.0f) * 0.4f);
+        }
+    }
+    EmergencyDropoutUntil.Init(0.0f, EmergencyLights.Num());
+    EmergencyClock = 0.0f;
+    TickEmergencyFlicker();
+    GetWorldTimerManager().SetTimer(EmergencyFlickerTimer, this, &AQuickDemoMissionDirector::TickEmergencyFlicker, 0.09f, true);
+}
+
+void AQuickDemoMissionDirector::TickEmergencyFlicker()
+{
+    EmergencyClock += 0.09f;
+    for (int32 i = 0; i < EmergencyLights.Num(); ++i)
+    {
+        UPointLightComponent* Light = EmergencyLights[i];
+        if (!Light) continue;
+        const float Phase = i * 1.73f;
+        // A low flicker, a slow beacon pulse every couple of seconds, and the odd dropout.
+        float Level = 0.62f + 0.18f * FMath::Sin(EmergencyClock * 5.3f + Phase) + 0.12f * FMath::Sin(EmergencyClock * 13.1f + Phase * 2.3f);
+        if (FMath::Fmod(EmergencyClock + Phase * 0.31f, 2.6f) < 0.22f) Level *= 1.9f;
+        if (EmergencyDropoutUntil[i] > EmergencyClock) Level = 0.04f;
+        else if (FMath::FRand() < 0.012f) EmergencyDropoutUntil[i] = EmergencyClock + FMath::FRandRange(0.2f, 0.7f);
+        Light->SetIntensity(EmergencyBaseIntensity[i] * FMath::Clamp(Level, 0.0f, 2.0f));
+    }
 }
 
 void AQuickDemoMissionDirector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -507,7 +544,7 @@ AQuickDemoSuitStation::AQuickDemoSuitStation()
     RackSuit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     RackSuit->SetGenerateOverlapEvents(false);
     RackSuit->SetCastShadow(true);
-    RackSuit->SetVisibilityBasedAnimTickOption(EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered);
+    RackSuit->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 }
 
 void AQuickDemoSuitStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
