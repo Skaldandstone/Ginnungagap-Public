@@ -1512,6 +1512,29 @@ void ACoopSurvivalCharacter::UpdateGloveGrip(EMagneticGloveHand Hand, float Delt
     }
 }
 
+bool ACoopSurvivalCharacter::UseBestSupply()
+{
+    if (!HasAuthority())
+    {
+        ServerUseBestSupply();
+        return true;
+    }
+    if (!InventoryComponent) return false;
+    for (const FInventoryStack& Stack : InventoryComponent->GetStacks())
+    {
+        if (Stack.Item && InventoryComponent->CanUseItem(Stack.Item))
+        {
+            return InventoryComponent->UseItem(Stack.Item);
+        }
+    }
+    return false;
+}
+
+void ACoopSurvivalCharacter::ServerUseBestSupply_Implementation()
+{
+    UseBestSupply();
+}
+
 void ACoopSurvivalCharacter::ReleaseAllMagneticSystems()
 {
     bRotationThrusterActive = false;

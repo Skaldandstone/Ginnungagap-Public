@@ -22,6 +22,7 @@ toward the engines.
 | E | Interact: stations, doors, pickups, the pod |
 | F | Cycle the approach at an obstruction (cut or squeeze) |
 | Tab (right stick click) | First or third person |
+| H (D-pad down) | Use a carried supply: the first one that would do anything (oxygen when low, a kit when hurt) |
 | Enter | Restart the ship |
 
 The HUD shows these for the first thirty seconds.

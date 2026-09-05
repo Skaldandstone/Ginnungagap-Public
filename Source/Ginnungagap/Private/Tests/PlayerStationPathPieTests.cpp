@@ -242,6 +242,9 @@ bool FPlayEveryStation::Update()
 		// Taken: the pickup destroyed itself. The item must have landed in the inventory.
 		const UInventoryComponent* Inventory = Pawn->GetInventoryComponent();
 		Test->TestTrue(FString::Printf(TEXT("After taking %s the inventory holds something"), *Step.Name), Inventory && Inventory->GetUsedSlotCount() > 0);
+		// The H key: uses the first supply that would do anything. A crew at full health with a full
+		// tank has nothing to spend it on, so this only reports.
+		Test->AddInfo(FString::Printf(TEXT("STATIONPATH use supply: %s"), Pawn->UseBestSupply() ? TEXT("spent one") : TEXT("nothing to spend it on")));
 		Test->AddInfo(FString::Printf(TEXT("STATIONPATH %s: taken, %.1fs"), *Step.Name, Now - StartedAt));
 		++Index; Phase = 0; PhaseAt = -1.0; Presses = 0;
 		return false;

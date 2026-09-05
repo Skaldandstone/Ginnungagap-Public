@@ -125,6 +125,7 @@ void ASurvivalPlayerController::SetupInputComponent()
     ProgressionBinding.bExecuteWhenPaused = true;
     InputComponent->BindAction(TEXT("RestartDemo"), IE_Pressed, this, &ASurvivalPlayerController::OnRestartDemo);
     InputComponent->BindAction(TEXT("ToggleView"), IE_Pressed, this, &ASurvivalPlayerController::OnToggleView);
+    InputComponent->BindAction(TEXT("UseSupply"), IE_Pressed, this, &ASurvivalPlayerController::OnUseSupply);
 }
 
 void ASurvivalPlayerController::OnMove_Forward(float Value)
@@ -283,6 +284,14 @@ void ASurvivalPlayerController::OnActivityCancel()
         if (UPlayerActivityComponent* Activity = SurvivalCharacter->GetPlayerActivityComponent()) Activity->CancelActivity();
 	if (APawn* ControlledPawn = GetPawn())
 		if (UAntagonistActivityComponent* Activity = ControlledPawn->FindComponentByClass<UAntagonistActivityComponent>()) Activity->CancelActivity();
+}
+
+void ASurvivalPlayerController::OnUseSupply()
+{
+    if (ACoopSurvivalCharacter* Crew = Cast<ACoopSurvivalCharacter>(GetPawn()))
+    {
+        Crew->UseBestSupply();
+    }
 }
 
 void ASurvivalPlayerController::OnToggleView()

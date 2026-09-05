@@ -64,6 +64,7 @@ private:
     void OnToggleProgressionMenu();
     void OnRestartDemo();
     void OnToggleView();
+    void OnUseSupply();
     void SetupAntagonistActivityWidget(APawn* InPawn);
 
 public:

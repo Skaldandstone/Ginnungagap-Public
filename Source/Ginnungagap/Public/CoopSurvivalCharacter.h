@@ -277,6 +277,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Inventory")
     UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 
+    /** Uses the first carried supply that would do something now (oxygen when low, a kit when hurt); the H key. */
+    UFUNCTION(BlueprintCallable, Category="Inventory")
+    bool UseBestSupply();
+
+    UFUNCTION(Server, Reliable)
+    void ServerUseBestSupply();
+
     UFUNCTION(BlueprintPure, Category="Weapon")
     UWeaponMountComponent* GetWeaponMountComponent() const { return WeaponMountComponent; }
 

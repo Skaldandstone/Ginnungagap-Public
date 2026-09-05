@@ -17,6 +17,8 @@
 #include "Public/Ship/ShipHelmSystem.h"
 #include "Public/Ship/ShipPropulsionSubsystem.h"
 #include "Public/Ship/ShipSystemActor.h"
+#include "Inventory/ItemDefinition.h"
+#include "Inventory/InventoryComponent.h"
 #include "Mission/MissionObjectiveSubsystem.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "StatusEffects/PlayerStatusEffectComponent.h"
@@ -174,6 +176,13 @@ void USurvivalHUDWidget::BuildWidgetTree()
     ControlsHintText->SetColorAndOpacity(FSlateColor(FLinearColor(HudCyan.R, HudCyan.G, HudCyan.B, 0.85f)));
     ControlsHintText->SetJustification(ETextJustify::Center);
     AnchorTopLeft(RootCanvas, ControlsHintText, FVector2D(560.0f, 1000.0f), FVector2D(800.0f, 26.0f));
+
+    // What the crew carries, in the equipment panel, and the key that spends it.
+    SuppliesText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SuppliesText"));
+    SuppliesText->SetText(FText::FromString(TEXT("SUPPLIES  //  none")));
+    SuppliesText->SetColorAndOpacity(FSlateColor(HudCyan));
+    SuppliesText->SetAutoWrapText(true);
+    AnchorTopLeft(RootCanvas, SuppliesText, FVector2D(1508.0f, 898.0f), FVector2D(340.0f, 58.0f));
 
     auto AddStatLabel = [&](const TCHAR* Name, const TCHAR* Label, float Y, TObjectPtr<UTextBlock>& OutLabel)
     {
@@ -752,6 +761,23 @@ void USurvivalHUDWidget::RefreshAllStats()
         MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("%s\nGRIP L %s  R %s  //  %s"), *Footing,
             OwningCharacter->IsLeftMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"),
             OwningCharacter->IsRightMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"), Target)));
+    }
+    if (SuppliesText)
+    {
+        FString Carried;
+        bool bUsable = false;
+        if (const UInventoryComponent* Inventory = OwningCharacter->GetInventoryComponent())
+        {
+            for (const FInventoryStack& Stack : Inventory->GetStacks())
+            {
+                if (!Stack.Item) continue;
+                const FString Name = Stack.Item->DisplayName.IsEmpty() ? Stack.Item->ItemId.ToString() : Stack.Item->DisplayName.ToString();
+                Carried += FString::Printf(TEXT("%s%s x%d"), Carried.IsEmpty() ? TEXT("") : TEXT("  ·  "), *Name.ToUpper(), Stack.Quantity);
+                bUsable |= Inventory->CanUseItem(Stack.Item);
+            }
+        }
+        SuppliesText->SetText(FText::FromString(Carried.IsEmpty() ? TEXT("SUPPLIES  //  none")
+            : FString::Printf(TEXT("SUPPLIES  //  %s%s"), *Carried, bUsable ? TEXT("   [H] USE") : TEXT(""))));
     }
     if (ThrusterFuelBar)
     {
