@@ -242,6 +242,10 @@ void AQuickDemoOpeningSequence::ServerAdmitCrew()
             Character->SetActorHiddenInGame(true);
         }
         Wake.ServerPhase = EQuickDemoOpeningPhase::Asleep;
+        UE_LOG(LogTemp, Display, TEXT("Opening %s: %s sleeps in %s (occupied=%d by %s), placed at %s, hidden=%d, first person=%d, vertical=%d"),
+            *GetName(), *Character->GetName(), *Chosen->GetName(), Chosen->bIsOccupied ? 1 : 0,
+            Chosen->OccupyingCharacter.IsValid() ? *Chosen->OccupyingCharacter->GetName() : TEXT("nobody"),
+            *Character->GetActorLocation().ToCompactString(), Character->IsHidden() ? 1 : 0, Character->IsFirstPersonView() ? 1 : 0, bVertical ? 1 : 0);
         CrewWakes.Add(Wake);
         ForceNetUpdate();
         UE_LOG(LogTemp, Display, TEXT("Opening %s admitted %s into %s (skipped=%d, %d wakes)"), *GetName(), *Character->GetName(), *Chosen->GetName(), bSkipped ? 1 : 0, CrewWakes.Num());
@@ -273,6 +277,12 @@ void AQuickDemoOpeningSequence::ServerAdvanceCrew()
         }
         if (Wake.ServerPhase == EQuickDemoOpeningPhase::Wake && Wake.ReleasedServerTime < 0.0f)
         {
+            if (Wake.Pod && FMath::Fmod(Elapsed, 5.0f) < 0.05f)
+            {
+                UE_LOG(LogTemp, Display, TEXT("Opening %s: %s awake in %s, waiting for the release (occupied=%d by %s, pawn at %s)"), *GetName(),
+                    *Character->GetName(), *Wake.Pod->GetName(), Wake.Pod->bIsOccupied ? 1 : 0,
+                    Wake.Pod->OccupyingCharacter.IsValid() ? *Wake.Pod->OccupyingCharacter->GetName() : TEXT("nobody"), *Character->GetActorLocation().ToCompactString());
+            }
             const bool bReleased = !Wake.Pod || !Wake.Pod->bIsOccupied;
             const bool bOverdue = Elapsed - PhaseStartSeconds(EQuickDemoOpeningPhase::Wake) > WakeAutoReleaseSeconds;
             if (bReleased || bOverdue)

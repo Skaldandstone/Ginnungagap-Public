@@ -1,6 +1,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Ship/ShipThrustGravity.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
+#include "LevelSetup/QuickDemoOpeningSequence.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
@@ -261,6 +262,13 @@ void AQuickDemoMissionDirector::RestoreCheckpointState()
     }
 
     const TArray<FName> CompletedObjectiveIds = Checkpoints->GetCheckpointRecord().CompletedObjectiveIds;
+    // A resumed run does not wake in the pod: the opening stands down before the checkpoint moves
+    // the crew, or it would hold them asleep in a tube two decks from where they actually are and
+    // the release could never reach it.
+    for (TActorIterator<AQuickDemoOpeningSequence> It(GetWorld()); It; ++It)
+    {
+        It->Skip();
+    }
     bRestoringCheckpoint = true;
     const bool bRestored = Checkpoints->RestoreCheckpoint(GetWorld(), PlayerPawn);
     bRestoringCheckpoint = false;

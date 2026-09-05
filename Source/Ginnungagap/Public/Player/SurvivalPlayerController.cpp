@@ -235,6 +235,8 @@ void ASurvivalPlayerController::OnInteract()
             {
                 if (It->bIsOccupied && It->OccupyingCharacter.Get() == SurvivalCharacter)
                 {
+                    UE_LOG(LogTemp, Display, TEXT("Interact: %s releases %s (pawn at %s, pod at %s)"), *SurvivalCharacter->GetName(), *It->GetName(),
+                        *SurvivalCharacter->GetActorLocation().ToCompactString(), *It->GetActorLocation().ToCompactString());
                     Interaction->ServerTryInteract(*It);
                     return;
                 }

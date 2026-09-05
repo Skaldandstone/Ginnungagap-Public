@@ -421,6 +421,9 @@ bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 {
 	AutomationOpenMap(GinnungagapTestMap::Path());
 	ToolboxShaders::Preload();
+	// A checkpoint left by an earlier run (the keyboard test saves one) would resume the crew mid-
+	// mission and skip the opening; this test is about the opening, so it starts clean.
+	UGameplayStatics::DeleteGameInSlot(TEXT("GinnungagapShipCheckpoint"), 0);
 	ADD_LATENT_AUTOMATION_COMMAND(FWaitForShadersToFinishCompilingInGame());
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureOpeningPhases(this));
