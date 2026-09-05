@@ -229,16 +229,14 @@ void ASurvivalPlayerController::OnInteract()
         }
         if (UInteractionComponent* Interaction = SurvivalCharacter->GetInteractionComponent())
         {
-            // Inside a cryo pod nothing is in focus but the tube they are in: E releases it.
-            if (!Interaction->HasFocusedInteractable())
+            // Inside a cryo pod E releases the tube they are in, whatever the eye-line trace has
+            // found through the glass (the console on the wall behind it, as often as not).
+            for (TActorIterator<ACryoPodSystem> It(GetWorld()); It; ++It)
             {
-                for (TActorIterator<ACryoPodSystem> It(GetWorld()); It; ++It)
+                if (It->bIsOccupied && It->OccupyingCharacter.Get() == SurvivalCharacter)
                 {
-                    if (It->bIsOccupied && It->OccupyingCharacter.Get() == SurvivalCharacter)
-                    {
-                        Interaction->ServerTryInteract(*It);
-                        return;
-                    }
+                    Interaction->ServerTryInteract(*It);
+                    return;
                 }
             }
             Interaction->TryInteract();

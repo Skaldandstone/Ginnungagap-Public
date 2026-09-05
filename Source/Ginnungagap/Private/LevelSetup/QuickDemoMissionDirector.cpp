@@ -2,6 +2,9 @@
 #include "Ship/ShipThrustGravity.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "Weapons/ShipboardWeapon.h"
 #include "Weapons/ShipboardWeaponDefinition.h"
@@ -479,6 +482,46 @@ AQuickDemoSuitStation::AQuickDemoSuitStation()
     CooldownSeconds = 0.0f;
 
     StarterSuit = QuickDemoObjectives::MakeStarterSuit();
+
+    // The rack: a rail across the front of the locker and the suit hanging from it. The station
+    // sits with its back to the wall and +X into the room; the suit faces the room too.
+    static ConstructorHelpers::FObjectFinder<USkeletalMesh> SuitAsset(
+        TEXT("/Game/Characters/PlayerSuits/PrimaryOversuits/SpaceMarshalManny/SK_SpaceMarshal_Manny.SK_SpaceMarshal_Manny"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> RailMaterial(
+        TEXT("/Game/LevelPrototyping/Materials/MI_PrototypeGrid_TopDark.MI_PrototypeGrid_TopDark"));
+    RackRail = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RackRail"));
+    RackRail->SetupAttachment(Mesh);
+    if (CubeAsset.Succeeded()) RackRail->SetStaticMesh(CubeAsset.Object);
+    if (RailMaterial.Succeeded()) RackRail->SetMaterial(0, RailMaterial.Object);
+    RackRail->SetRelativeLocation(FVector(55.0f, 0.0f, 110.0f));
+    RackRail->SetRelativeScale3D(FVector(0.05f, 1.1f, 0.05f));
+    RackRail->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    RackSuit = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RackSuit"));
+    RackSuit->SetupAttachment(Mesh);
+    if (SuitAsset.Succeeded()) RackSuit->SetSkeletalMesh(SuitAsset.Object);
+    // The station's origin is a metre up the wall; the suit's is at its boots. Hung a hand below
+    // the rail, boots clear of the deck, facing the room (the mesh faces +Y at rest).
+    RackSuit->SetRelativeLocation(FVector(55.0f, 0.0f, -96.0f));
+    RackSuit->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+    RackSuit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    RackSuit->SetGenerateOverlapEvents(false);
+    RackSuit->SetCastShadow(true);
+    RackSuit->SetVisibilityBasedAnimTickOption(EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered);
+}
+
+void AQuickDemoSuitStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AQuickDemoSuitStation, bSuitTaken);
+}
+
+void AQuickDemoSuitStation::OnRep_SuitTaken()
+{
+    if (RackSuit)
+    {
+        RackSuit->SetVisibility(!bSuitTaken, true);
+    }
 }
 
 bool AQuickDemoSuitStation::CanStartActivity_Implementation(APawn* Player) const
@@ -510,6 +553,12 @@ void AQuickDemoSuitStation::OnActivityCompleted_Implementation(APawn* Player)
     {
         Character->SetPressureSuitRole(SuitRole);
         Character->SetPressureOversuitEquipped(true);
+    }
+    if (!bSuitTaken)
+    {
+        bSuitTaken = true;
+        OnRep_SuitTaken();
+        ForceNetUpdate();
     }
 
     Super::OnActivityCompleted_Implementation(Player);

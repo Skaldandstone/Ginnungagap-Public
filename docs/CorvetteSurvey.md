@@ -1,39 +1,39 @@
 # Corvette survey
 
-Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-05 15:17 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
+Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-05 15:40 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
 
 ## The walk
 
 | # | Leg | Deck | Where | Path (m) | Walk (s) | Snags | Outcome |
 |---|-----|------|-------|----------|----------|-------|---------|
-| 1 | suit rack | 3 | (120, 1200, 960) | 2.9 | 0 | 0 | arrived, played |
+| 1 | suit rack | 3 | (120, 1200, 960) | 2.9 | 1 | 0 | arrived, played |
 | 2 | workshop bench | 2 | (1300, 1400, 522) | 44.5 | 7 | 0 | arrived, played |
 | 3 | power station | 1 | (750, 1250, 41) | 34.2 | 0 | 0 | arrived, played |
 | 4 | breach patch | 7 | (450, 1707, 2621) | no path | 28 | 0 | arrived, played |
 | 5 | CIC access panel | 8 | (830, 910, 3051) | 30.1 | 5 | 0 | arrived, played |
 | 6 | CIC console | 8 | (750, 1520, 3051) | 10.6 | 2 | 0 | arrived, played |
-| 7 | back to the breach patch | 7 | (450, 1707, 2621) | no path | 0 | 0 | arrived |
-| 8 | back to the power station | 1 | (750, 1250, 41) | 147.2 | 25 | 0 | arrived |
-| 9 | back to the workshop bench | 2 | (1300, 1400, 522) | 34.2 | 6 | 0 | arrived |
+| 7 | back to the breach patch | 7 | (450, 1707, 2621) | no path | 1 | 0 | arrived |
+| 8 | back to the power station | 1 | (750, 1250, 41) | 147.3 | 25 | 0 | arrived |
+| 9 | back to the workshop bench | 2 | (1300, 1400, 522) | 34.3 | 6 | 0 | arrived |
 | 10 | back to the suit rack | 3 | (120, 1200, 960) | 44.0 | 8 | 0 | arrived |
 | 11 | side: CVT_BatteryRecovery | 1 | (1410, 1200, 41) | 58.9 | 10 | 0 | arrived |
-| 12 | side: CVT_ArmoryOverride | 4 | (93, 1600, 1331) | 75.6 | 13 | 0 | arrived |
+| 12 | side: CVT_ArmoryOverride | 4 | (93, 1600, 1331) | 75.5 | 13 | 0 | arrived |
 | 13 | side: CVT_SuitPatching | 5 | (93, 1250, 1761) | 34.4 | 7 | 0 | arrived |
 | 14 | side: CVT_TurretService | 5 | (1410, 1200, 1761) | 9.5 | 2 | 0 | arrived |
-| 15 | side: CVT_ScrubberService | 6 | (1410, 1600, 2191) | 43.2 | 8 | 0 | arrived |
+| 15 | side: CVT_ScrubberService | 6 | (1410, 1600, 2191) | 43.2 | 7 | 0 | arrived |
 | 16 | side: CVT_Door_CVT-D07 | 7 | (750, 1000, 2560) | no path | 15 | 1 | arrived with snags |
 | 17 | side: CVT_PlotterCore | 9 | (1410, 1600, 3481) | 55.5 | 9 | 0 | arrived |
-| 18 | side: CVT_Door_CVT-D10-B | 10 | (1950, 1000, 3850) | 40.1 | 10 | 0 | arrived |
-| 19 | side: CVT_ObsDecon | 10 | (93, 1200, 3911) | 16.8 | 3 | 0 | arrived |
-| 20 | side: CVT_SensorCalibration | 11 | (1410, 1600, 4341) | 39.9 | 7 | 0 | arrived |
+| 18 | side: CVT_Door_CVT-D10-B | 10 | (1950, 1000, 3850) | 40.2 | 9 | 0 | arrived |
+| 19 | side: CVT_ObsDecon | 10 | (93, 1200, 3911) | 16.9 | 3 | 0 | arrived |
+| 20 | side: CVT_SensorCalibration | 11 | (1410, 1600, 4341) | 39.8 | 7 | 0 | arrived |
 
 ## Collision and movement findings
 
-- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
-- Blocked: no complete path from (583, 1393, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
-- Blocked: no complete path from (1240, 1475, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (583, 1392, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1239, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 7) on the way to side: CVT_Door_CVT-D07; cut through with the tool.
-- Snag: stuck at (961, 854, 2678) (deck 7) on the way to side: CVT_Door_CVT-D07, 1.6 m short, against nothing solid (a navmesh or path-following stall).
+- Snag: stuck at (962, 854, 2678) (deck 7) on the way to side: CVT_Door_CVT-D07, 1.6 m short, against nothing solid (a navmesh or path-following stall).
 
 ## Asset audit
 
@@ -90,24 +90,21 @@ Also aboard: 38 bulkhead doors (sliding leaves animate, sound on open/close), 2 
 
 | Floating prop | Class | Deck | Where | Mesh | Under it (cm) | Nearest wall (cm) |
 |---------------|-------|------|-------|------|---------------|-------------------|
-| CVT_D04_DamageBarrel | StaticMeshActor | 4 | (2100, 1460, 1330) | SM_BARREL_01 | 29 | 268 |
-| CVT_D05_DamageBarrel | StaticMeshActor | 5 | (2100, 1460, 1760) | SM_BARREL_01 | 29 | 247 |
-| CVT_D11_DamageBarrel | StaticMeshActor | 11 | (2100, 1460, 4340) | SM_BARREL_01 | 29 | 245 |
-| (3 floating props in all) | | | | | | |
+| (0 floating props in all) | | | | | | |
 
-Figures at the end of the walk; the crew stands at (1179, 1508, 4398).
+Figures at the end of the walk; the crew stands at (1172, 1501, 4398).
 | Figure | Class | Deck | Where | Mesh | Attached to |
 |--------|-------|------|-------|------|-------------|
-| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1179, 1508, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
-| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1179, 1508, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1172, 1501, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1172, 1501, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
 
 ## Next work drawn from this survey
 
 - 44 activity stations are static props with a text prompt: each wants a purpose-built asset with an animation for its activity (panel opening, lever, weld arc, console boot).
 - 1 placed meshes render with the engine default material (grey, reads as collision).
-- Floating props: (3 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
-- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
-- Blocked: no complete path from (583, 1393, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
-- Blocked: no complete path from (1240, 1475, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
+- Floating props: (0 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
+- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (583, 1392, 3108) to back to the breach patch; nearest obstacle CVT_CorridorDebris (Fallen cable tray, 13.1 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1239, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (2.6 m from the path's end). A player cuts, squeezes or overrides here.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 7) on the way to side: CVT_Door_CVT-D07; cut through with the tool.
 - Every snag, penetration and floor gap above is a place to stand in the editor and look.

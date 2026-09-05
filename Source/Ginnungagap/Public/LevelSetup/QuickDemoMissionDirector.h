@@ -150,6 +150,24 @@ public:
 
     virtual bool CanStartActivity_Implementation(APawn* Player) const override;
     virtual void OnActivityCompleted_Implementation(APawn* Player) override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+    /**
+     * The suit itself, hanging from a rail in front of the locker: the Space Marshal the crew will
+     * wear, in its rest pose, so the rack reads as a rack and not a cabinet with a prompt. Taken
+     * down (hidden everywhere) the first time a crew member suits up here.
+     */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quick Demo|Rack")
+    TObjectPtr<class USkeletalMeshComponent> RackSuit;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quick Demo|Rack")
+    TObjectPtr<class UStaticMeshComponent> RackRail;
+
+    UPROPERTY(ReplicatedUsing = OnRep_SuitTaken, BlueprintReadOnly, Category = "Quick Demo|Rack")
+    bool bSuitTaken = false;
+
+    UFUNCTION()
+    void OnRep_SuitTaken();
 };
 
 /** Hull-patching activity that removes the demo vacuum zone when complete. */
