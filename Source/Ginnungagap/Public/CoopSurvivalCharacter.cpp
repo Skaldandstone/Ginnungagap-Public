@@ -456,10 +456,10 @@ void ACoopSurvivalCharacter::HandleMountedWeaponChanged(AShipboardWeapon* Weapon
             // tool rides the camera, lower right, pointing down the view, the way the empty mount
             // does. Third person hands it to the hand, where the hold pose carries it.
             WeaponMountComponent->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            // The mount is the tool's nose; turned to point down the view its body runs back toward
-            // the eye, so the nose sits well forward and the body fills the lower right.
-            WeaponMountComponent->SetRelativeLocation(FVector(90.0f, 21.0f, -26.0f));
-            WeaponMountComponent->SetRelativeRotation(FRotator(-6.0f, 180.0f, 0.0f));
+            // The mount is the tool's tail and its nose (the yellow end) runs down +X, so at yaw 0
+            // it points down the view; the tail sits a forearm out, lower right.
+            WeaponMountComponent->SetRelativeLocation(FVector(44.0f, 22.0f, -17.0f));
+            WeaponMountComponent->SetRelativeRotation(FRotator(2.0f, -6.0f, 0.0f));
         }
         else
         {
