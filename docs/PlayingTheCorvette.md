@@ -44,6 +44,14 @@ emergency bus up: every fixture and practical aboard, dull red-amber, flickering
 a slow beacon pulse. The mission director runs that (`BringUpEmergencyLighting`), live from the
 power station and again on a checkpoint restore.
 
+## Body and suit
+
+Adrift with the boots off the crew hang in a slow float; the boots take hold and the walk comes
+back. The tool is carried in the right hand (an additive hold over the walk) in third person and
+rides the camera in first. Below sixty percent suit integrity the chest seam vents vapour, thicker
+the worse it gets, until it is patched. Half the seeded room collapses are crawled under, on hands
+and knees in third person; the rest are cut or squeezed.
+
 ## The chain
 
 1. **Casualty station (deck 3).** The ship is dead: no drive, no gravity. You wake inside the

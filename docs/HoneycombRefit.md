@@ -78,3 +78,12 @@ them from another project that has them), then run `tools/import_lyra_anims.py` 
 and `tools/retarget_ue4_anims.py` if the retargeted clips ever need rebuilding. Without them the
 generator still builds the ship (the kit dressing is skipped where a mesh is missing) and the
 activities fall back to Lyra's crouch idle or nothing.
+
+## Done 2026-09-06 (overnight)
+
+Standing glass cryo tube, unsuited wake facing the bay door, Space Marshal on its rack, dark ship
+with the tubes' flickering glow and a wrist lamp, emergency bus flicker on power restore, sealed
+locked doors that no longer cut the navmesh, hanging smoke in the rooms with air, seeded collapses
+and corridor trays off the chain (half of them crawls), zero-g float pose, tool hold as a true
+additive, first-person tool on the camera, suit leak vapour, survey opening sealed doors. Still to
+do from the order of work: the honeycomb cells (step 4) and the visor art (step 6).
