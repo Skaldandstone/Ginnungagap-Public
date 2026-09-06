@@ -1013,19 +1013,23 @@ def furnish(deck, kind, z, seed):
     # The second room, by deck: what is kept there.
     if kind == "marine" and K.rc_bed:
         for i in range(3):
-            place(K.rc_bed, (SECOND[0] + 120.0 + i * 260.0, SECOND[3] - WALL_D - 58.0, z), (0, 0, -90.0), (1, 1, 1), f"{name}_Bunk_{i}")
+            place(K.rc_bed, (SECOND[0] + 120.0 + i * 260.0, SECOND[3] - WALL_D - 78.0, z), (0, 0, -90.0), (1, 1, 1), f"{name}_Bunk_{i}")
         for i in range(2):
             place(K.rc_locker, (SECOND[0] + 180.0 + i * 300.0, SECOND[2] + PARTITION + 30.0, z), (0, 0, 0), (1, 1, 1), f"{name}_KitLocker_{i}")
     elif kind == "commons" and K.rc_table:
-        for i, (tx, ty) in enumerate(((cx - 300.0, cy + 120.0), (cx + 300.0, cy + 120.0), (cx, cy - 220.0))):
-            place(K.rc_table, (tx, ty, z), (0, 0, rng.choice((0.0, 90.0))), (1, 1, 1), f"{name}_MessTable_{i}")
-            for j, (dx, dy) in enumerate(((-110.0, 0.0), (110.0, 0.0))):
-                place(K.rc_chair, (tx + dx, ty + dy, z), (0, 0, 90.0 if dx < 0 else -90.0), (1, 1, 1), f"{name}_MessChair_{i}_{j}")
+        # Mess tables bolted along the fore hull wall, chairs on the room side: nothing loose in
+        # the middle of a room that manoeuvres under thrust.
+        for i, tx in enumerate((cx - 430.0, cx, cx + 430.0)):
+            ty = MAIN[3] - WALL_D - 52.0
+            place(K.rc_table, (tx, ty, z), (0, 0, 0.0), (1, 1, 1), f"{name}_MessTable_{i}")
+            for j, dx in enumerate((-55.0, 55.0)):
+                place(K.rc_chair, (tx + dx, ty - 78.0, z), (0, 0, 90.0), (1, 1, 1), f"{name}_MessChair_{i}_{j}")
         for i in range(3):
             place(K.rc_bin, (SECOND[0] + 100.0 + i * 120.0, SECOND[2] + PARTITION + 16.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_{i}")
     elif kind in ("tactical", "cic") and K.rc_table:
+        sy = SECOND[3] - WALL_D - 70.0
         place(K.rc_table, (sx, sy, z), (0, 0, 0), (1.3, 1.3, 1.0), f"{name}_PlotTable")
-        for j, (dx, dy) in enumerate(((-140.0, 0.0), (140.0, 0.0), (0.0, -90.0))):
+        for j, (dx, dy) in enumerate(((-140.0, -40.0), (140.0, -40.0), (0.0, -96.0))):
             place(K.rc_chair, (sx + dx, sy + dy, z), (0, 0, (90.0, -90.0, 0.0)[j]), (1, 1, 1), f"{name}_PlotChair_{j}")
     elif kind in ("workshop", "power", "sensors") and K.rc_shelf:
         for i in range(2):
@@ -1155,7 +1159,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         label(repair, "SuitRepairBench")
         repair.get_editor_property("mesh").set_static_mesh(K.terminal)
         # (No second toolbox: one is the bench, and two would send the player to the wrong one.)
-        place(K.table, (cx + 550.0, cy, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_Table")
+        place(K.table, (MAIN[1] - PARTITION - 92.0, cy, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_Table")
         spawn_beacon("QD_ReachWorkshop", "ENGINEERING CONTROL", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "cryo":
         pod_class = unreal.CryoPodSystem
@@ -1177,8 +1181,8 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         # its collision, and at quarter scale its floor trim sheet reads as a white slab.
         # The table against the corridor-side wall, clear of the door and the override panel; the
         # capsule against the aft wall. Nothing stands in the middle of the bay but the crew.
-        place(K.table, (cx + 540.0, MAIN[2] + PARTITION + 70.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_TreatmentTable")
-        place(K.toolbox, (cx + 580.0, MAIN[2] + PARTITION + 70.0, z + 92.0), (0, 0, -20.0), (0.9, 0.9, 0.9), f"D{deck:02d}_TraumaKit", collide=False)
+        place(K.table, (cx - 330.0, MAIN[2] + PARTITION + 70.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_TreatmentTable")
+        place(K.toolbox, (cx - 290.0, MAIN[2] + PARTITION + 70.0, z + 92.0), (0, 0, -20.0), (0.9, 0.9, 0.9), f"D{deck:02d}_TraumaKit", collide=False)
         place(K.lab_capsule, (MAIN[1] - PARTITION - 50.0, cy, z), (0, 0, 0), (0.6, 0.6, 0.6), f"D{deck:02d}_MedCapsule")
         start = actors.spawn_actor_from_class(unreal.PlayerStart, unreal.Vector(cx - 250.0, back_y - 300.0, z + 100.0), unreal.Rotator(pitch=0.0, yaw=90.0, roll=0.0))
         label(start, "PlayerStart_Casualty")
@@ -1196,23 +1200,23 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         trunk.get_editor_property("blocker").set_box_extent(unreal.Vector(60.0, 245.0, 160.0))
         for i, dx in enumerate((-350.0, 0.0, 350.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ArmoryLocker_{i}", collide=False)
-        place(K.computer, (cx, cy - 100.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
+        place(K.computer, (cx - 420.0, MAIN[2] + PARTITION + 55.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SecurityDesk")
         place(K.alarm, (MAIN_DOOR_X + 200.0, CORRIDOR[3] - 60.0, z + 300.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_Alarm", collide=False)
         side_station(unreal.MechanicalOverrideStation, deck, code, z, "ArmoryOverride", "Override armory lock", port=True, dy=200.0)
     elif kind == "marine":
         for i, dx in enumerate((-450.0, -150.0, 150.0, 450.0)):
             place(K.locker, (cx + dx, back_y, z + 100.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_GearLocker_{i}", collide=False)
-        place(K.table, (cx, cy, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_BriefingTable")
+        place(K.table, (cx, MAIN[3] - WALL_D - 62.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_BriefingTable")
         place(K.oxygen, (MAIN[0] + 100.0, cy + 250.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_O2")
         side_station(unreal.TurretServiceStation, deck, code, z, "TurretService", "Service point-defence turret", dy=-200.0)
         side_station(unreal.SuitPatchingStation, deck, code, z, "SuitPatching", "Patch pressure suit", port=True, dy=-150.0)
     elif kind == "commons":
         for i, dx in enumerate((-400.0, 0.0, 400.0)):
-            place(K.crate, (cx + dx, back_y - 20.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_GearCrate_{i}")
+            place(K.crate, (MAIN[1] - PARTITION - 60.0, cy - 320.0 + i * 130.0, z), (0, 0, 0.0), (1, 1, 1), f"D{deck:02d}_GearCrate_{i}")
         if not K.rc_table:
             place(K.table, (cx, cy - 150.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_MessTable")
         for i, dx in enumerate((-160.0, 160.0)):
-            place(K.chair, (cx + dx, cy - 150.0, z), (0, 0, 90.0 if dx < 0 else -90.0), (1, 1, 1), f"D{deck:02d}_Chair_{i}")
+            place(K.chair, (cx + dx, MAIN[2] + PARTITION + 48.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_Chair_{i}")
         # The secondary room is an airlock that has lost pressure: repressurise before it opens.
         outer = spawn_door(bulkhead_class, sx, SECOND[3], z, 0.0, f"Airlock_{code}", seal=True)
         station = spawn_station(unreal.AirlockRepressurizationStation, sx - 250.0, SECOND[3] - 90.0, z, 0.0, "AirlockRepressurize", target=outer, display="Repressurise airlock")
@@ -1262,11 +1266,11 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         place(K.circular, (cx - 380.0, back_y - 60.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_TacticalTable")
         place(K.control_panel, (cx - 320.0, back_y - 60.0, z + 90.0), (0, 0, 180.0), (0.8, 0.8, 0.8), f"D{deck:02d}_TacticalPlot", collide=False)
         for i, dx in enumerate((-500.0, 500.0)):
-            place(K.computer, (cx + dx, cy - 200.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CICDesk_{i}")
+            place(K.computer, (cx + dx, MAIN[2] + PARTITION + 55.0, z + 80.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_CICDesk_{i}")
         place(K.wall_display, (cx, MAIN[3] - WALL_D, z), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_CICDisplay", collide=False)
         spawn_beacon("QD_ReachCIC", "CIC TACTICAL CONSOLE", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "tactical":
-        place(K.circular, (cx - 75.0, cy, z), (0, 0, 0), (1.2, 1.2, 1.0), f"D{deck:02d}_PlottingTable")
+        place(K.circular, (cx - 75.0, MAIN[3] - WALL_D - 108.0, z), (0, 0, 0), (1.2, 1.2, 1.0), f"D{deck:02d}_PlottingTable")
         for i, dx in enumerate((-450.0, 450.0)):
             # SM_ControlPanel01 stands on its origin; SM_COMPUTER_02 reaches 41 below it.
             place(K.control_panel or K.computer2, (cx + dx, MAIN[3] - WALL_D - 40.0, z + (0.0 if K.control_panel else 41.0)), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_Plotter_{i}")
@@ -1281,12 +1285,12 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
                 for slot in range(pane.static_mesh_component.get_num_materials()):
                     pane.static_mesh_component.set_material(slot, clear)
         for i, dx in enumerate((-300.0, 300.0)):
-            place(K.chair, (cx + dx, cy, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_ObsChair_{i}")
+            place(K.chair, (cx + dx, MAIN[3] - WALL_D - 110.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_ObsChair_{i}")
         side_station(unreal.DecontaminationStation, deck, code, z, "ObsDecon", "Run decontamination cycle", port=True, dy=-200.0)
     elif kind == "sensors":
         for i, dx in enumerate((-500.0, -167.0, 167.0, 500.0)):
             place(K.ice_computer, (cx + dx, back_y, z + 78.0), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_SensorRack_{i}")
-        place(K.computer2, (cx, cy - 150.0, z + 41.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
+        place(K.computer2, (cx + 320.0, MAIN[2] + PARTITION + 48.0, z + 41.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SensorDesk")
         side_station(unreal.SensorCalibrationStation, deck, code, z, "SensorCalibration", "Calibrate sensor suite", dy=200.0)
 
     # Supplies. Two spots inside every main room's aft corners, clear of the door, the side
@@ -1311,7 +1315,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         else:
             supply(item, x, y + 40.0, z, code)
     if a:
-        shelved_supply(a, MAIN[0] + 420.0 if kind != "cryo" else MAIN[0] + 400.0, "A")
+        shelved_supply(a, MAIN[0] + 420.0 if kind != "cryo" else MAIN[0] + 200.0, "A")
     if b:
         shelved_supply(b, MAIN[1] - 90.0 if kind == "cryo" else MAIN[1] - 330.0, "B")
     if kind in ("marine", "breach", "observation"):
