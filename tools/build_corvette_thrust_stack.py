@@ -597,10 +597,10 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     service = spawn_room(f"{code}-S", SERVICE_NAMES[deck], "service", SERVICE, z)
     state["rooms"][code] = main
 
-    # Doors.
+    # Doors. A locked door starts sealed: an open leaf with a lock on it reads as nothing at all.
     main_door_class = unreal.WeldableBulkheadDoor if kind == "breach" else bulkhead_class
     main_door = spawn_door(main_door_class, MAIN_DOOR_X, CORRIDOR[3], z, 0.0, f"Door_{code}",
-                           seal=(kind == "cic"), tags=(["QuickDemoCICDoor"] if kind == "cic" else (["CorvetteWeldedDoor"] if kind == "breach" else [])))
+                           seal=(kind in ("cic", "cryo", "breach")), tags=(["QuickDemoCICDoor"] if kind == "cic" else (["CorvetteWeldedDoor"] if kind == "breach" else [])))
     if kind == "breach":
         # Comms was welded shut from the corridor when it lost pressure: the crew cut their way in.
         main_door.set_editor_property("welded_shut", True)
@@ -888,6 +888,29 @@ def kit_light(x, y, z_ceiling_under, code, i, colour=None, intensity=90.0):
         place(K.rc_light_bar, (x, y, z_ceiling_under - 2.0), (0, 0, 0), (2.4, 2.4, 1.0), f"D{code}_Fixture_{i}", collide=False)
 
 
+def atmosphere(deck, kind, z, seed):
+    """Smoke hanging in the rooms that still hold air: a dead ship's atmosphere is not clean. The
+    hanging smoke from the city pack, low over the deck in the main and second rooms. Nothing in
+    the breach deck (vacuum), nothing in the corridor beyond the casualty station (vacuum)."""
+    if kind == "breach":
+        return
+    smoke = unreal.load_asset("/Game/Sci_Fi_city/FX/NS_Hanging_smoke_floor")
+    if not smoke:
+        print("CORVETTE no hanging smoke asset; rooms stay clear")
+        return
+    rng = random.Random(seed * 131 + deck)
+    name = f"D{deck:02d}"
+    rooms = [((MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5, "Main"), ((SECOND[0] + SECOND[1]) * 0.5, (SECOND[2] + SECOND[3]) * 0.5, "Second")]
+    for x, y, label_name in rooms:
+        for i in range(2):
+            fx = actors.spawn_actor_from_class(unreal.NiagaraActor, unreal.Vector(x + rng.uniform(-220.0, 220.0), y + rng.uniform(-160.0, 160.0), z + 30.0 + i * 60.0), unreal.Rotator(yaw=rng.uniform(0.0, 360.0)))
+            comp = fx.get_editor_property("niagara_component")
+            comp.set_asset(smoke)
+            fx.set_actor_scale3d(unreal.Vector(1.6, 1.6, 1.0))
+            label(fx, f"{name}_Smoke_{label_name}_{i}")
+            fx.set_editor_property("tags", [unreal.Name("CorvetteAtmosphere"), unreal.Name(f"D{deck:02d}")])
+
+
 def furnish(deck, kind, z, seed):
     """Furniture by what the deck is for, from the Rooms and Corridors kit: bunks in the marine
     ready room, a mess in the commons, plotting tables in tactical, lockers and shelving in the
@@ -951,7 +974,19 @@ def damage(deck, kind, z, seed):
         # Impact.
         place(K.barrel, (sx + 150.0, sy + 60.0, z + 11.0), (88.0, 0, rng.uniform(0, 360)), (1, 1, 1), f"{name}_DamageBarrel")
         place(K.duct_run, (sx - 60.0, sy + 200.0, z + 10.0), (0, 0, rng.uniform(-30, 30)), (0.5, 1.0, 1.0), f"{name}_DamageDuct", collide=False)
-    # else: untouched, so not every room is wrecked.
+    else:
+        # Collapse: the second room's doorway half-blocked by a fallen duct section the crew cut
+        # through or squeeze past, and a spill of crates behind it. The room stays reachable.
+        spawn_barrier(SECOND[0] + 40.0, HATCH_Y, z, 90.0, f"{name}_RoomCollapse", "Collapsed duct section", True, 6.0, 4.0, squeeze_entrapment=0.15,
+                      visual=K.duct_run, visual_offset=(0.0, 60.0, -120.0), visual_rotation=(0.0, 20.0, 80.0), visual_scale=(0.6, 1.0, 1.0))
+        for i in range(2):
+            place(K.crate, (SECOND[0] + 260.0 + i * 130.0, HATCH_Y + rng.uniform(-90.0, 90.0), z), (0, 0, rng.uniform(0, 360)), (0.8, 0.8, 0.8), f"{name}_CollapseCrate_{i}")
+    # Every deck off the chain: one more thing in the corridor to work round, seeded so the
+    # walk differs run to run: a fallen cable tray across the corridor (squeeze or cut).
+    if kind in ("security", "marine", "commons", "tactical", "observation", "sensors") and rng.random() < 0.6:
+        bx = rng.choice((700.0, 1100.0, 1900.0))
+        spawn_barrier(bx, (CORRIDOR[2] + CORRIDOR[3]) * 0.5, z, 0.0, f"{name}_CorridorTray", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
+                      visual=K.duct_run, visual_offset=(0.0, 0.0, -110.0), visual_rotation=(0.0, 12.0, 90.0), visual_scale=(0.7, 1.0, 1.0))
 
 
 def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhead_class, state):
@@ -1158,6 +1193,7 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         oxygen_canister(300.0, 800.0, z, code)
     furnish(deck, kind, z, BUILD_SEED)
     damage(deck, kind, z, BUILD_SEED)
+    atmosphere(deck, kind, z, BUILD_SEED)
     # The ship's sound: a hum in every main room, the corridor drone along the corridor, and a
     # deeper machine note where the machinery is.
     cx_, cy_ = (MAIN[0] + MAIN[1]) * 0.5, (MAIN[2] + MAIN[3]) * 0.5

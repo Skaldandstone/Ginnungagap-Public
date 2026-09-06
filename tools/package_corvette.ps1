@@ -74,4 +74,10 @@ if ($StageOnly -or $Code -ne 0) {
     $Code = Invoke-BuildCookRun @("-skipbuild", "-skipcook") "PackageCorvette_Stage.txt"
 }
 if ($Code -ne 0) { throw "BuildCookRun failed with exit code $Code" }
+# UAT's -archive has been seen to leave the previous paks in place after a successful stage;
+# mirror the staging directory over the archive so what is there is what was just built. A game
+# still running from the archive holds its paks open: stop it first.
+Get-Process Ginnungagap -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$ArchiveDirectory*" } | Stop-Process -Force
+Start-Sleep -Seconds 2
+robocopy $StagingDirectory $ArchiveDirectory /MIR /XD Saved /NFL /NDL /NJH /R:3 /W:3 | Select-Object -Last 6 | ForEach-Object { Write-Host $_ }
 Write-Host "Packaged to $ArchiveDirectory"

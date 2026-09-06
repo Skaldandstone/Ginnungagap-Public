@@ -19,6 +19,8 @@
 #include "UnrealClient.h"
 
 #include "CoopSurvivalCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/SurvivalPlayerController.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
@@ -288,6 +290,52 @@ bool FCaptureSuitedThirdPerson::Update()
 }
 
 /**
+ * The crew walking, in third person, a metre and a half into a walk: proof the locomotion plays
+ * (legs mid-stride, not a figure sliding on its boots). Movement mode, speed and the animation
+ * instance are logged with it.
+ */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FCaptureWalking, FAutomationTestBase*, Test);
+
+bool FCaptureWalking::Update()
+{
+	static int32 Phase = 0;
+	static double PhaseAt = -1.0;
+	UWorld* World = OpeningLook::FindPieWorld();
+	ACoopSurvivalCharacter* Character = World ? Cast<ACoopSurvivalCharacter>(UGameplayStatics::GetPlayerPawn(World, 0)) : nullptr;
+	APlayerController* PC = World ? UGameplayStatics::GetPlayerController(World, 0) : nullptr;
+	if (!Character || !PC)
+	{
+		Phase = 0; PhaseAt = -1.0;
+		return true;
+	}
+	const double Now = World->GetTimeSeconds();
+	if (Phase == 0)
+	{
+		Character->SetFirstPersonView(false);
+		if (!Character->AreMagneticBootsEnabled()) { Character->SetMagneticBootsEnabled(true); }
+		Phase = 1; PhaseAt = Now;
+		return false;
+	}
+	if (Phase == 1)
+	{
+		Character->AddMovementInput(Character->GetActorForwardVector(), 1.0f);
+		if (Now - PhaseAt < 1.4) { return false; }
+		UAnimInstance* Anim = Character->GetMesh() ? Character->GetMesh()->GetAnimInstance() : nullptr;
+		UE_LOG(LogTemp, Display, TEXT("WALKLOOK mode %d speed %.0f anim %s montage %s boots %d"),
+			Character->GetCharacterMovement() ? static_cast<int32>(Character->GetCharacterMovement()->MovementMode.GetValue()) : -1,
+			Character->GetVelocity().Size(), Anim ? *Anim->GetClass()->GetName() : TEXT("none"),
+			Anim && Anim->GetCurrentActiveMontage() ? *Anim->GetCurrentActiveMontage()->GetName() : TEXT("-"), Character->AreMagneticBootsEnabled() ? 1 : 0);
+		FScreenshotRequest::RequestScreenshot(TEXT("Opening_10_walking"), false, false, false, FIntRect(), true);
+		Phase = 2; PhaseAt = Now;
+		return false;
+	}
+	Character->AddMovementInput(Character->GetActorForwardVector(), 1.0f);
+	if (Now - PhaseAt < 0.3) { return false; }
+	Phase = 0; PhaseAt = -1.0;
+	return true;
+}
+
+/**
  * The suit rack in the cryo bay, from two and a half metres in front: the Space Marshal hanging
  * from its rail beside the locker, before anyone has taken it. One still, then the view returns.
  */
@@ -431,6 +479,7 @@ bool FGinnungagapOpeningShotLookTest::RunTest(const FString& Parameters)
 	ADD_LATENT_AUTOMATION_COMMAND(FSweepHoldPose(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureSuitedThirdPerson(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FCaptureSuitRack(this));
+	ADD_LATENT_AUTOMATION_COMMAND(FCaptureWalking(this));
 	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;

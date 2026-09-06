@@ -20,7 +20,9 @@ namespace
         Part->SetupAttachment(Parent);
         Part->SetCollisionProfileName(bBlocks ? TEXT("BlockAll") : TEXT("NoCollision"));
         Part->SetCollisionEnabled(bBlocks ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-        Part->SetCanEverAffectNavigation(bBlocks);
+        // Nothing on a door cuts the navmesh: a sealed leaf is opened by whoever walks up to it,
+        // so paths run through doorways and the walkers (and the route tests) deal with the leaf.
+        Part->SetCanEverAffectNavigation(false);
         return Part;
     }
 }

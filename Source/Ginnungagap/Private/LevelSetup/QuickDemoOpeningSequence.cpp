@@ -17,6 +17,7 @@
 #include "Player/SurvivalPlayerController.h"
 #include "Shakes/PerlinNoiseCameraShakePattern.h"
 #include "Ship/CryoPodSystem.h"
+#include "Ship/BulkheadDoor.h"
 #include "Ship/ModularShipRoom.h"
 #include "Sound/SoundBase.h"
 #include "UI/SurvivalHUDWidget.h"
@@ -208,10 +209,24 @@ void AQuickDemoOpeningSequence::ServerAdmitCrew()
             continue;
         }
 
-        // Where they end up: where they spawned, facing back at the pod. Where they start: inside it.
+        // Where they end up: where they spawned, facing the bay's bulkhead door (the way out, and
+        // the first thing to read). Where they start: inside the pod.
         const FVector PodLocation = Chosen->GetActorLocation();
         const FVector Out = (Wake.StandLocation - PodLocation).GetSafeNormal2D();
         Wake.StandRotation = (-Out).Rotation();
+        {
+            ABulkheadDoor* NearestDoor = nullptr;
+            float NearestDistance = TNumericLimits<float>::Max();
+            for (TActorIterator<ABulkheadDoor> DoorIt(World); DoorIt; ++DoorIt)
+            {
+                const float Distance = FVector::Dist2D(DoorIt->GetActorLocation(), Wake.StandLocation);
+                if (Distance < NearestDistance) { NearestDistance = Distance; NearestDoor = *DoorIt; }
+            }
+            if (NearestDoor)
+            {
+                Wake.StandRotation = FRotator(0.0f, (NearestDoor->GetActorLocation() - Wake.StandLocation).GetSafeNormal2D().Rotation().Yaw, 0.0f);
+            }
+        }
         const bool bVertical = Chosen->UsesVerticalPod();
         if (bVertical)
         {
