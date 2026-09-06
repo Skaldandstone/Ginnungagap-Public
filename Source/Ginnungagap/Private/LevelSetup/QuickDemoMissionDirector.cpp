@@ -119,6 +119,21 @@ void AQuickDemoMissionDirector::BeginPlay()
 {
     Super::BeginPlay();
 
+    // Arcing damage sparks from the start: every point light tagged Arcing gets a hard flicker.
+    for (TActorIterator<APointLight> It(GetWorld()); It; ++It)
+    {
+        if (!It->ActorHasTag(TEXT("Arcing"))) continue;
+        if (UPointLightComponent* Light = It->GetComponentByClass<UPointLightComponent>())
+        {
+            ArcLights.Add(Light);
+            ArcBaseIntensity.Add(Light->Intensity);
+        }
+    }
+    if (ArcLights.Num() > 0)
+    {
+        GetWorldTimerManager().SetTimer(ArcFlickerTimer, this, &AQuickDemoMissionDirector::TickArcFlicker, 0.06f, true);
+    }
+
     if (!GetGameInstance())
     {
         return;
@@ -407,6 +422,19 @@ void AQuickDemoMissionDirector::TickEmergencyFlicker()
     }
 }
 
+void AQuickDemoMissionDirector::TickArcFlicker()
+{
+    for (int32 i = 0; i < ArcLights.Num(); ++i)
+    {
+        UPointLightComponent* Light = ArcLights[i];
+        if (!Light) continue;
+        // Mostly dark with bursts: a spark is a flash, not a lamp.
+        const float Roll = FMath::FRand();
+        const float Level = Roll < 0.55f ? 0.03f : (Roll < 0.85f ? FMath::FRandRange(0.4f, 1.0f) : FMath::FRandRange(1.4f, 2.6f));
+        Light->SetIntensity(ArcBaseIntensity[i] * Level);
+    }
+}
+
 void AQuickDemoMissionDirector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -541,7 +569,7 @@ AQuickDemoSuitStation::AQuickDemoSuitStation()
         TEXT("/Game/Characters/PlayerSuits/PrimaryOversuits/SpaceMarshalManny/SK_SpaceMarshal_Manny.SK_SpaceMarshal_Manny"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> RailMaterial(
-        TEXT("/Game/LevelPrototyping/Materials/MI_PrototypeGrid_TopDark.MI_PrototypeGrid_TopDark"));
+        TEXT("/Game/Modular_Scifi_Mechanic_Base/Material/MI/MI_Metal_03.MI_Metal_03"));
     RackRail = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RackRail"));
     RackRail->SetupAttachment(Mesh);
     if (CubeAsset.Succeeded()) RackRail->SetStaticMesh(CubeAsset.Object);

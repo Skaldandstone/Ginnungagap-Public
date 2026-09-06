@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Ship/CryoPodSystem.h"
+#include "Ship/BulkheadDoor.h"
+#include "Activities/WeldableBulkheadDoor.h"
 #include "EngineUtils.h"
 #include "SurvivalPlayerController.h"
 #include "Components/InputComponent.h"
@@ -240,6 +242,15 @@ void ASurvivalPlayerController::OnInteract()
                     Interaction->ServerTryInteract(*It);
                     return;
                 }
+            }
+            // A bulkhead is pushed at, not clicked: the body leans into it as the leaves cycle.
+            // Only a door that will cycle: a welded or locked one starts an activity (or refuses),
+            // and the push's root motion would carry the crew out of the activity's range.
+            ABulkheadDoor* Door = Cast<ABulkheadDoor>(Interaction->GetFocusedInteractable());
+            AWeldableBulkheadDoor* Welded = Cast<AWeldableBulkheadDoor>(Door);
+            if (Door && !(Welded && Welded->bWeldedShut) && !(Door->bLocked && Door->bIsSealed))
+            {
+                SurvivalCharacter->PlayGesture(TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Interaction/RT_A_Push.RT_A_Push"), 1.3f);
             }
             Interaction->TryInteract();
         }

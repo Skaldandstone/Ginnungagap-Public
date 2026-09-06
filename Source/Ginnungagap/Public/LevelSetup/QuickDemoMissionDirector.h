@@ -65,6 +65,12 @@ public:
 
 private:
     void TickEmergencyFlicker();
+    /** The arcing damage: a torn box sparking whatever the bus is doing. Harsh, fast, from the first frame. */
+    void TickArcFlicker();
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<class UPointLightComponent>> ArcLights;
+    TArray<float> ArcBaseIntensity;
+    FTimerHandle ArcFlickerTimer;
 
     UPROPERTY(Transient)
     TArray<TObjectPtr<class UPointLightComponent>> EmergencyLights;

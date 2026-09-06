@@ -160,6 +160,7 @@ class Kit:
         self.computer = load(f"{KIT}/PROP/COMPUTER/SM_COMPUTER_01")
         self.computer2 = load(f"{KIT}/PROP/COMPUTER/SM_COMPUTER_02")
         self.electric_box = load(f"{KIT}/PROP/MACHINE/SM_ELECTRIC_BOX_01_OPEN")
+        self.cable_mass = [load(f"{KIT}/CABLE_PIPE/SM_CABLE_MASS_0{i}") for i in (1, 2, 3, 4)]
         self.generator = load(f"{KIT}/PROP/MACHINE/SM_POWER_GENERATOR_01")
         self.barrel = load(f"{KIT}/PROP/BARREL/SM_BARREL_01")
         self.cable = load(f"{KIT}/CABLE_PIPE/SM_CABLE_MASS_04")
@@ -970,6 +971,14 @@ def damage(deck, kind, z, seed):
         lc.set_editor_property("intensity", 260.0); lc.set_editor_property("attenuation_radius", 500.0)
         lc.set_editor_property("light_color", unreal.Color(r=255, g=90, b=40))
         arc.set_editor_property("tags", [unreal.Name("CorvetteDamage"), unreal.Name("Arcing")])
+        # Torn cable masses hanging from the ceiling over the box, and one more down the corridor.
+        for i in range(2):
+            mass = rng.choice([m for m in K.cable_mass if m] or [None])
+            if mass:
+                place(mass, (sx - 240.0 + i * 160.0, SECOND[2] + PARTITION + 120.0 + i * 90.0, z + 292.0), (0, 180.0, rng.uniform(0, 360)), (1, 1, 1), f"{name}_DamageHang_{i}", collide=False)
+        mass = rng.choice([m for m in K.cable_mass if m] or [None])
+        if mass:
+            place(mass, (rng.choice((600.0, 1300.0, 2000.0)), CORRIDOR[3] - 60.0, z + 292.0), (0, 180.0, rng.uniform(0, 360)), (1, 1, 1), f"{name}_CorridorHang", collide=False)
     elif roll < 0.7:
         # Impact.
         place(K.barrel, (sx + 150.0, sy + 60.0, z + 11.0), (88.0, 0, rng.uniform(0, 360)), (1, 1, 1), f"{name}_DamageBarrel")

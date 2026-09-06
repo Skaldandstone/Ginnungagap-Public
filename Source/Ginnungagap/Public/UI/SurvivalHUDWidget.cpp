@@ -764,6 +764,14 @@ void USurvivalHUDWidget::RefreshAllStats()
         MagneticSuitText->SetText(FText::FromString(FString::Printf(TEXT("%s\nGRIP L %s  R %s  //  %s"), *Footing,
             OwningCharacter->IsLeftMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"),
             OwningCharacter->IsRightMagneticGloveActive() ? TEXT("GRIP") : TEXT("---"), Target)));
+        // The visor line tells the truth about the suit: none in the bodysuit, venting when torn.
+        if (VisorStatusText)
+        {
+            const TCHAR* Visor = !OwningCharacter->bPressureOversuitEquipped ? TEXT("CRYO BODYSUIT  //  NO VISOR")
+                : OwningCharacter->GetSuitIntegrity() < 0.6f ? TEXT("VISOR LINK  //  SUIT VENTING  //  PATCH IT")
+                : TEXT("VISOR LINK  //  PRESSURIZED");
+            VisorStatusText->SetText(FText::FromString(Visor));
+        }
     }
     if (SuppliesText)
     {

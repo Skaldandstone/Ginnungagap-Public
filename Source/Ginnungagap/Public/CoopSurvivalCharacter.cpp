@@ -285,10 +285,11 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
     WristLamp->SetVisibility(false);
     // The housing: a flat block strapped over the back of the forearm, with a lens on its end. It
     // is what the crew see of the lamp in first person, where the suit itself is not drawn.
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> HousingMaterial(TEXT("/Game/Modular_Scifi_Mechanic_Base/Material/MI/MI_Metal_05.MI_Metal_05"));
     WristLampHousing = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WristLampHousing"));
     WristLampHousing->SetupAttachment(GetMesh(), TEXT("hand_l"));
     if (CubeMesh.Succeeded()) WristLampHousing->SetStaticMesh(CubeMesh.Object);
-    if (ArmorMaterial.Succeeded()) WristLampHousing->SetMaterial(0, ArmorMaterial.Object);
+    if (HousingMaterial.Succeeded()) WristLampHousing->SetMaterial(0, HousingMaterial.Object);
     WristLampHousing->SetRelativeLocation(FVector(-14.0f, 0.0f, 4.5f));
     WristLampHousing->SetRelativeScale3D(FVector(0.14f, 0.05f, 0.035f));
     WristLampHousing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -457,7 +458,7 @@ void ACoopSurvivalCharacter::HandleMountedWeaponChanged(AShipboardWeapon* Weapon
             WeaponMountComponent->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
             // The mount is the tool's nose; turned to point down the view its body runs back toward
             // the eye, so the nose sits well forward and the body fills the lower right.
-            WeaponMountComponent->SetRelativeLocation(FVector(92.0f, 27.0f, -31.0f));
+            WeaponMountComponent->SetRelativeLocation(FVector(90.0f, 21.0f, -26.0f));
             WeaponMountComponent->SetRelativeRotation(FRotator(-6.0f, 180.0f, 0.0f));
         }
         else
@@ -1306,6 +1307,21 @@ void ACoopSurvivalCharacter::UpdateFloatPose()
         bFloatPosePlaying = false;
         // The tool's hold pose was on the same slot; put it back if a tool is in hand.
         if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon()) { HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon()); }
+    }
+}
+
+void ACoopSurvivalCharacter::PlayGesture(const TCHAR* ClipPath, float Rate)
+{
+    UAnimInstance* Anim = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+    UAnimSequenceBase* Clip = ClipPath ? LoadObject<UAnimSequenceBase>(nullptr, ClipPath) : nullptr;
+    if (!Anim || !Clip || (PlayerActivityComponent && PlayerActivityComponent->IsActivityActive())) return;
+    Anim->PlaySlotAnimationAsDynamicMontage(Clip, TEXT("DefaultSlot"), 0.2f, 0.25f, Rate, 1, -1.0f, 0.0f);
+    // The tool's hold rides the same slot; the gesture ends and the hold is put back.
+    if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon())
+    {
+        FTimerHandle Handle;
+        const float Seconds = Clip->GetPlayLength() / FMath::Max(Rate, 0.01f);
+        GetWorldTimerManager().SetTimer(Handle, [this]() { if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon()) HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon()); }, Seconds + 0.2f, false);
     }
 }
 

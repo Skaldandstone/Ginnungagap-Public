@@ -171,6 +171,9 @@ public:
     bool AreMagneticBootsEnabled() const { return bMagneticBootsEnabled; }
 
     /** The lamp built into the pressure suit's left wrist: the crew's own light on a dead ship. Suit only. */
+    /** A one-shot body gesture (a door pushed, a panel pressed): a clip on the default slot, over whatever the body is doing. */
+    void PlayGesture(const TCHAR* ClipPath, float Rate = 1.0f);
+
     void ToggleWristLamp();
     void SetWristLampOn(bool bOn);
     bool IsWristLampOn() const { return bWristLampOn; }

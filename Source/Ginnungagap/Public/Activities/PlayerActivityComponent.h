@@ -83,6 +83,9 @@ private:
     UPROPERTY()
     TObjectPtr<class UAnimSequenceBase> CrawlLoop;
     bool bCrawlPosePlaying = false;
+    /** The crawl goes down through Stand_To_Prone and comes up through Prone_To_Stand; the loop runs between. */
+    FTimerHandle CrawlTransitionTimer;
+    bool bCrawlTransitionPending = false;
 
     FPlayerActivityDefinition ActiveDefinition;
     uint8 PreviousMovementMode = 0;

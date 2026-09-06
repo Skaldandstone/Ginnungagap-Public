@@ -2,6 +2,7 @@
 #include "Animation/AnimSequenceBase.h"
 #include "Animation/AnimInstance.h"
 #include "Activities/PlayerActivityComponent.h"
+#include "TimerManager.h"
 #include "Activities/PlayerActivitySource.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -157,13 +158,42 @@ void UPlayerActivityComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
             if (Loaded)
             {
                 CrawlLoop = Loaded;
-                Anim->PlaySlotAnimationAsDynamicMontage(Loaded, TEXT("DefaultSlot"), 0.25f, 0.25f, Rate, 0, -1.0f, 0.0f);
+                UAnimSequenceBase* Down = Snapshot.bThirdPersonView && Name.Contains(TEXT("rawl"))
+                    ? LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Prone/RT_anim_Stand_To_Prone.RT_anim_Stand_To_Prone")) : nullptr;
+                if (Down)
+                {
+                    // Down on the belly first, then the crawl loop takes over when the drop is done.
+                    Anim->PlaySlotAnimationAsDynamicMontage(Down, TEXT("DefaultSlot"), 0.2f, 0.1f, 1.3f, 1, -1.0f, 0.0f);
+                    const float Seconds = Down->GetPlayLength() / 1.3f - 0.1f;
+                    TWeakObjectPtr<UPlayerActivityComponent> Self(this);
+                    TWeakObjectPtr<UAnimInstance> AnimRef(Anim);
+                    const float LoopRate = Rate;
+                    GetWorld()->GetTimerManager().SetTimer(CrawlTransitionTimer, [Self, AnimRef, LoopRate]()
+                    {
+                        if (Self.IsValid() && AnimRef.IsValid() && Self->bCrawlPosePlaying && Self->CrawlLoop)
+                        {
+                            AnimRef->PlaySlotAnimationAsDynamicMontage(Self->CrawlLoop, TEXT("DefaultSlot"), 0.1f, 0.25f, LoopRate, 10000, -1.0f, 0.0f);
+                        }
+                    }, FMath::Max(Seconds, 0.05f), false);
+                }
+                else
+                {
+                    Anim->PlaySlotAnimationAsDynamicMontage(Loaded, TEXT("DefaultSlot"), 0.25f, 0.25f, Rate, 10000, -1.0f, 0.0f);
+                }
                 bCrawlPosePlaying = true;
             }
         }
         else if (!bWantPose && bCrawlPosePlaying)
         {
-            if (Anim) Anim->StopSlotAnimation(0.25f, TEXT("DefaultSlot"));
+            GetWorld()->GetTimerManager().ClearTimer(CrawlTransitionTimer);
+            UAnimSequenceBase* Up = CrawlLoop && CrawlLoop->GetName().Contains(TEXT("Prone"))
+                ? LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Retargeted/Prone/RT_anim_Prone_To_Stand.RT_anim_Prone_To_Stand")) : nullptr;
+            if (Anim && Up)
+            {
+                // Up off the belly: the clip plays once and the slot lets go by itself.
+                Anim->PlaySlotAnimationAsDynamicMontage(Up, TEXT("DefaultSlot"), 0.1f, 0.3f, 1.3f, 1, -1.0f, 0.0f);
+            }
+            else if (Anim) Anim->StopSlotAnimation(0.25f, TEXT("DefaultSlot"));
             bCrawlPosePlaying = false;
         }
     }
