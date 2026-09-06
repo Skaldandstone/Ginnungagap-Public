@@ -577,6 +577,14 @@ AQuickDemoSuitStation::AQuickDemoSuitStation()
     RackRail->SetRelativeLocation(FVector(55.0f, 0.0f, 110.0f));
     RackRail->SetRelativeScale3D(FVector(0.05f, 1.1f, 0.05f));
     RackRail->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BackingAsset(TEXT("/Game/Assets/Gameplay/SalvageBatch03/Meshes/SM_SalvageToolRack.SM_SalvageToolRack"));
+    RackBacking = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RackBacking"));
+    RackBacking->SetupAttachment(Mesh);
+    if (BackingAsset.Succeeded()) RackBacking->SetStaticMesh(BackingAsset.Object);
+    // The rack stands 70 to 218 above its origin on the floor; the station's origin is a metre up.
+    RackBacking->SetRelativeLocation(FVector(22.0f, 0.0f, -100.0f));
+    RackBacking->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
+    RackBacking->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     RackSuit = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RackSuit"));
     RackSuit->SetupAttachment(Mesh);
     if (SuitAsset.Succeeded()) RackSuit->SetSkeletalMesh(SuitAsset.Object);

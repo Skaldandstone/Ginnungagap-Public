@@ -160,6 +160,7 @@ class Kit:
         self.computer = load(f"{KIT}/PROP/COMPUTER/SM_COMPUTER_01")
         self.computer2 = load(f"{KIT}/PROP/COMPUTER/SM_COMPUTER_02")
         self.electric_box = load(f"{KIT}/PROP/MACHINE/SM_ELECTRIC_BOX_01_OPEN")
+        self.crew_locker = load("/Game/Assets/Ships/Production/Meshes/SM_Prop_Locker")   # 90 x 55 x 220, back along -Y
         self.cable_mass = [load(f"{KIT}/CABLE_PIPE/SM_CABLE_MASS_0{i}") for i in (1, 2, 3, 4)]
         self.generator = load(f"{KIT}/PROP/MACHINE/SM_POWER_GENERATOR_01")
         self.barrel = load(f"{KIT}/PROP/BARREL/SM_BARREL_01")
@@ -947,7 +948,7 @@ def furnish(deck, kind, z, seed):
     # The second room, by deck: what is kept there.
     if kind == "marine" and K.rc_bed:
         for i in range(3):
-            place(K.rc_bed, (SECOND[0] + 120.0 + i * 260.0, SECOND[3] - WALL_D - 8.0, z), (0, 0, -90.0), (1, 1, 1), f"{name}_Bunk_{i}")
+            place(K.rc_bed, (SECOND[0] + 120.0 + i * 260.0, SECOND[3] - WALL_D - 58.0, z), (0, 0, -90.0), (1, 1, 1), f"{name}_Bunk_{i}")
         for i in range(2):
             place(K.rc_locker, (SECOND[0] + 180.0 + i * 300.0, SECOND[2] + PARTITION + 30.0, z), (0, 0, 0), (1, 1, 1), f"{name}_KitLocker_{i}")
     elif kind == "commons" and K.rc_table:
@@ -956,7 +957,7 @@ def furnish(deck, kind, z, seed):
             for j, (dx, dy) in enumerate(((-110.0, 0.0), (110.0, 0.0))):
                 place(K.rc_chair, (tx + dx, ty + dy, z), (0, 0, 90.0 if dx < 0 else -90.0), (1, 1, 1), f"{name}_MessChair_{i}_{j}")
         for i in range(3):
-            place(K.rc_bin, (SECOND[0] + 100.0 + i * 120.0, SECOND[2] + PARTITION + 30.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_{i}")
+            place(K.rc_bin, (SECOND[0] + 100.0 + i * 120.0, SECOND[2] + PARTITION + 16.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_{i}")
     elif kind in ("tactical", "cic") and K.rc_table:
         place(K.rc_table, (sx, sy, z), (0, 0, 0), (1.3, 1.3, 1.0), f"{name}_PlotTable")
         for j, (dx, dy) in enumerate(((-140.0, 0.0), (140.0, 0.0), (0.0, -90.0))):
@@ -964,10 +965,12 @@ def furnish(deck, kind, z, seed):
     elif kind in ("workshop", "power", "sensors") and K.rc_shelf:
         for i in range(2):
             place(K.rc_shelf, (SECOND[0] + 60.0 + i * 420.0, SECOND[3] - WALL_D - 90.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Shelving_{i}")
-        place(K.rc_bin, (SECOND[1] - 120.0, SECOND[2] + PARTITION + 40.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_0")
-    elif kind in ("cryo", "security", "observation") and K.rc_locker:
-        for i in range(3):
-            place(K.rc_locker, (SECOND[0] + 120.0 + i * 200.0, SECOND[3] - WALL_D - 30.0, z), (0, 0, 180.0), (1, 1, 1), f"{name}_Locker_{i}")
+        place(K.rc_bin, (SECOND[1] - WALL_D - 40.0, SECOND[2] + PARTITION + 40.0, z), (0, 0, 0), (1, 1, 1), f"{name}_Bin_0")
+    elif kind in ("cryo", "security", "observation") and (K.crew_locker or K.rc_locker):
+        # A bank of crew lockers, backs to the aft wall, doors to the room.
+        locker = K.crew_locker or K.rc_locker
+        for i in range(5 if K.crew_locker else 3):
+            place(locker, (SECOND[0] + 110.0 + i * 96.0, SECOND[3] - WALL_D - 34.0, z), (0, 0, 0.0), (1, 1, 1), f"{name}_Locker_{i}")
     # Pillars at the partition ends, so the rooms read as framed structure rather than boxes.
     if K.rc_pillar:
         for i, py in enumerate((MAIN[2] + PARTITION + 30.0, MAIN[3] - WALL_D - 80.0)):
@@ -1045,8 +1048,10 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     place(K.cable, (vx, SERVICE[2] + 70.0, z + 300.0), (0, 0, 0), (1.5, 1, 1), f"D{deck:02d}_ServiceCable", collide=False)
     place(K.duct, (vx + 450.0, vy, z + 330.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceDuct", collide=False)
     # Every secondary room: storage.
-    for i, dx in enumerate((-250.0, 0.0, 250.0)):
-        place(K.crate, (sx + dx, SECOND[3] - 150.0, z), (0, 0, 15.0 * i), (1.5, 1.5, 1.5) if i == 1 else (1, 1, 1), f"D{deck:02d}_SecondCrate_{i}")
+    # Along the starboard hull, backs to the wall: the aft wall is the furniture's (bunks,
+    # lockers, shelving), and crates in front of it sat inside them.
+    for i, dy in enumerate((0.0, 190.0, 380.0)):
+        place(K.crate, (SECOND[1] - WALL_D - 62.0, SECOND[2] + PARTITION + 150.0 + dy, z), (0, 0, 90.0), (1.5, 1.5, 1.5) if i == 1 else (1, 1, 1), f"D{deck:02d}_SecondCrate_{i}")
 
     if kind == "power":
         for i, dx in enumerate((-400.0, 0.0, 400.0)):
@@ -1134,7 +1139,8 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
     elif kind == "commons":
         for i, dx in enumerate((-400.0, 0.0, 400.0)):
             place(K.crate, (cx + dx, back_y - 20.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_GearCrate_{i}")
-        place(K.table, (cx, cy - 150.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_MessTable")
+        if not K.rc_table:
+            place(K.table, (cx, cy - 150.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_MessTable")
         for i, dx in enumerate((-160.0, 160.0)):
             place(K.chair, (cx + dx, cy - 150.0, z), (0, 0, 90.0 if dx < 0 else -90.0), (1, 1, 1), f"D{deck:02d}_Chair_{i}")
         # The secondary room is an airlock that has lost pressure: repressurise before it opens.

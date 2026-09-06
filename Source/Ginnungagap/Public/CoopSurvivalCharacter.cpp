@@ -277,10 +277,11 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
     WristLamp->SetRelativeLocation(FVector(-6.0f, 0.0f, 2.0f));
     WristLamp->SetRelativeRotation(FRotator::ZeroRotator);
     WristLamp->SetLightColor(FLinearColor(0.92f, 0.95f, 1.0f));
-    WristLamp->SetIntensity(6500.0f);
-    WristLamp->SetAttenuationRadius(3200.0f);
-    WristLamp->SetInnerConeAngle(18.0f);
-    WristLamp->SetOuterConeAngle(34.0f);
+    // A hand lamp, not a searchlight: enough to read a corridor, not to bleach it.
+    WristLamp->SetIntensity(1800.0f);
+    WristLamp->SetAttenuationRadius(2600.0f);
+    WristLamp->SetInnerConeAngle(16.0f);
+    WristLamp->SetOuterConeAngle(30.0f);
     WristLamp->SetCastShadows(true);
     WristLamp->SetVisibility(false);
     // The housing: a flat block strapped over the back of the forearm, with a lens on its end. It

@@ -190,6 +190,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quick Demo|Rack")
     TObjectPtr<class UStaticMeshComponent> RackRail;
 
+    /** The wall harness the suit hangs in: the salvage tool rack, bolted to the locker front behind the suit. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quick Demo|Rack")
+    TObjectPtr<class UStaticMeshComponent> RackBacking;
+
     UPROPERTY(ReplicatedUsing = OnRep_SuitTaken, BlueprintReadOnly, Category = "Quick Demo|Rack")
     bool bSuitTaken = false;
 
