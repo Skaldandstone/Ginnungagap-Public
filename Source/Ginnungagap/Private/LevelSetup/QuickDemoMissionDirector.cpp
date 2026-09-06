@@ -297,6 +297,13 @@ void AQuickDemoMissionDirector::ApplyRestoredWorldState(const TArray<FName>& Com
             {
                 Equipment->EquipItem(QuickDemoObjectives::MakeStarterSuit());
             }
+            // The slot alone is not the suit: the character must know it is sealed, or the boots,
+            // the lamp and every vacuum door refuse a crew who plainly suited up last session.
+            if (ACoopSurvivalCharacter* Character = Cast<ACoopSurvivalCharacter>(PlayerPawn))
+            {
+                Character->SetPressureOversuitEquipped(true);
+                Character->SetWristLampOn(true);
+            }
         }
     }
 
@@ -582,10 +589,13 @@ void AQuickDemoSuitStation::OnActivityCompleted_Implementation(APawn* Player)
         return;
     }
 
+    // The suit goes into the chest slot; a slot that already holds one (a resumed run, a second
+    // visit to reseal) is not a reason to leave the crew unsealed.
     if (UEquipmentComponent* Equipment = Player->FindComponentByClass<UEquipmentComponent>())
     {
-        if (!Equipment->EquipItem(StarterSuit))
+        if (!Equipment->EquipItem(StarterSuit) && !Equipment->IsSlotEquipped(EEquipmentSlot::Chest))
         {
+            UE_LOG(LogTemp, Warning, TEXT("Suit station %s: %s could not take the suit (chest slot refused it)."), *GetName(), *Player->GetName());
             return;
         }
     }
@@ -598,6 +608,10 @@ void AQuickDemoSuitStation::OnActivityCompleted_Implementation(APawn* Player)
     {
         Character->SetPressureSuitRole(SuitRole);
         Character->SetPressureOversuitEquipped(true);
+        // The wrist lamp comes on with the suit: the bay is the last lit room they will see.
+        Character->SetWristLampOn(true);
+        UE_LOG(LogTemp, Display, TEXT("Suit station %s: %s sealed in the %s suit (oversuit=%d, lamp=%d)."), *GetName(), *Player->GetName(),
+            *UEnum::GetValueAsString(SuitRole), Character->bPressureOversuitEquipped ? 1 : 0, Character->IsWristLampOn() ? 1 : 0);
     }
     if (!bSuitTaken)
     {

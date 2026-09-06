@@ -159,9 +159,9 @@ ACryoPodSystem::ACryoPodSystem()
     // the far bulkheads and the rack.
     Glow->SetLightColor(FLinearColor(0.30f, 0.58f, 1.0f));
     Glow->bUseInverseSquaredFalloff = false;
-    Glow->LightFalloffExponent = 1.6f;
-    Glow->SetIntensity(28.0f);
-    Glow->SetAttenuationRadius(1600.0f);
+    Glow->LightFalloffExponent = 2.2f;
+    Glow->SetIntensity(GlowIntensity);
+    Glow->SetAttenuationRadius(1500.0f);
     Glow->SetSourceRadius(45.0f);
     Glow->SetCastShadows(true);
 
@@ -263,6 +263,22 @@ void ACryoPodSystem::OnConstruction(const FTransform& Transform)
 void ACryoPodSystem::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // The glow runs off a bus with problems: a slow breathe, a fast shimmer, and now and then a
+    // brownout of a fraction of a second. Cosmetic, so every machine runs its own.
+    if (Glow)
+    {
+        GlowClock += DeltaSeconds;
+        float Level = 0.86f + 0.09f * FMath::Sin(GlowClock * 1.7f) + 0.05f * FMath::Sin(GlowClock * 23.0f + 1.3f);
+        if (GlowBrownoutUntil > GlowClock)
+        {
+            Level = 0.22f;
+        }
+        else if (FMath::FRand() < 0.35f * DeltaSeconds)
+        {
+            GlowBrownoutUntil = GlowClock + FMath::FRandRange(0.08f, 0.45f);
+        }
+        Glow->SetIntensity(GlowIntensity * Level);
+    }
     const float TargetAlpha = bLidOpen ? 1.0f : 0.0f;
     const float AnimationRate = 1.0f / FMath::Max(LidAnimationDuration, KINDA_SMALL_NUMBER);
     LidAnimationAlpha = FMath::FInterpConstantTo(

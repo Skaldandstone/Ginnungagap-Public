@@ -109,6 +109,13 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cryo Pod|Tube")
     TObjectPtr<class UPointLightComponent> Glow;
 
+    /** The glow's steady level; what the flicker in Tick works from. */
+    UPROPERTY(EditAnywhere, Category = "Cryo Pod|Tube")
+    float GlowIntensity = 11.0f;
+
+    float GlowClock = 0.0f;
+    float GlowBrownoutUntil = -1.0f;
+
     UFUNCTION(BlueprintPure, Category = "Cryo Pod|Visual")
     bool UsesVerticalPod() const;
 

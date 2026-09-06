@@ -623,6 +623,12 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
     TObjectPtr<class USpotLightComponent> WristLamp;
 
+    /** The lamp housing on the forearm and its lens, so the light has a source the crew can see, in first person too. */
+    UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
+    TObjectPtr<UStaticMeshComponent> WristLampHousing;
+    UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
+    TObjectPtr<UStaticMeshComponent> WristLampLens;
+
     UPROPERTY(ReplicatedUsing=OnRep_WristLamp, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category="Appearance|Pressure Suit")
     bool bWristLampOn = false;
 

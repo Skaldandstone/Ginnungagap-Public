@@ -20,7 +20,7 @@ toward the engines.
 | --- | --- |
 | W A S D, mouse | Move, look |
 | E | Interact: stations, doors, pickups, the pod |
-| L | Wrist lamp on the suit's left forearm (suit only) |
+| L | Wrist lamp on the suit's left forearm (comes on with the suit; suit only) |
 | F | Cycle the approach at an obstruction (cut or squeeze) |
 | Tab (right stick click) | First or third person |
 | H (D-pad down) | Use a carried supply: the first one that would do anything (oxygen when low, a kit when hurt) |

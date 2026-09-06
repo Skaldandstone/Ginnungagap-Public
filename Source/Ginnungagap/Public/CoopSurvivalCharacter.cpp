@@ -272,6 +272,27 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
     WristLamp->SetOuterConeAngle(34.0f);
     WristLamp->SetCastShadows(true);
     WristLamp->SetVisibility(false);
+    // The housing: a flat block strapped over the back of the forearm, with a lens on its end. It
+    // is what the crew see of the lamp in first person, where the suit itself is not drawn.
+    WristLampHousing = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WristLampHousing"));
+    WristLampHousing->SetupAttachment(GetMesh(), TEXT("hand_l"));
+    if (CubeMesh.Succeeded()) WristLampHousing->SetStaticMesh(CubeMesh.Object);
+    if (ArmorMaterial.Succeeded()) WristLampHousing->SetMaterial(0, ArmorMaterial.Object);
+    WristLampHousing->SetRelativeLocation(FVector(-14.0f, 0.0f, 4.5f));
+    WristLampHousing->SetRelativeScale3D(FVector(0.14f, 0.05f, 0.035f));
+    WristLampHousing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WristLampHousing->SetCastShadow(false);
+    WristLampHousing->SetVisibility(false);
+    WristLampLens = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WristLampLens"));
+    WristLampLens->SetupAttachment(WristLampHousing);
+    if (CylinderMesh.Succeeded()) WristLampLens->SetStaticMesh(CylinderMesh.Object);
+    if (SuitMaterial.Succeeded()) WristLampLens->SetMaterial(0, SuitMaterial.Object);
+    WristLampLens->SetRelativeLocation(FVector(0.5f, 0.0f, 0.0f));
+    WristLampLens->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+    WristLampLens->SetRelativeScale3D(FVector(0.5f, 0.7f, 0.12f));
+    WristLampLens->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WristLampLens->SetCastShadow(false);
+    WristLampLens->SetVisibility(false);
 
     RightGloveMagnetLight = AddMagnetLight(TEXT("RightGloveMagnetLight"), TEXT("hand_r"), FVector::ZeroVector, FLinearColor(1.0f, 0.08f, 0.025f), 950.0f, 105.0f);
 
@@ -1260,10 +1281,11 @@ void ACoopSurvivalCharacter::OnRep_WristLamp()
 
 void ACoopSurvivalCharacter::UpdateWristLampVisuals()
 {
-    if (WristLamp)
-    {
-        WristLamp->SetVisibility(bWristLampOn && bPressureOversuitEquipped);
-    }
+    const bool bLit = bWristLampOn && bPressureOversuitEquipped;
+    if (WristLamp) WristLamp->SetVisibility(bLit);
+    // The housing shows whenever the suit is on; the lens only with the lamp lit.
+    if (WristLampHousing) WristLampHousing->SetVisibility(bPressureOversuitEquipped);
+    if (WristLampLens) WristLampLens->SetVisibility(bLit);
 }
 
 void ACoopSurvivalCharacter::ToggleMagneticBoots()
