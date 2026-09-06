@@ -81,6 +81,10 @@ SERVICE_LANDING = (300.0, 600.0)
 
 
 def door_plan(deck):
+    # The casualty station's door is centred on its wall: the crew wake facing it, the pods
+    # flank it, and an offset door read as a mistake from above.
+    if deck == 3:
+        return DOOR_PLANS[0]
     return DOOR_PLANS[(deck - 1) % len(DOOR_PLANS)]
 
 DECKS = [
@@ -1155,8 +1159,9 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         spawn_beacon("QD_ReachWorkshop", "ENGINEERING CONTROL", MAIN_DOOR_X, CORRIDOR[3] + 130.0, z, 90.0, code)
     elif kind == "cryo":
         pod_class = unreal.CryoPodSystem
-        for i, px in enumerate((cx - 250.0, cx + 250.0)):
-            pod = actors.spawn_actor_from_class(pod_class, unreal.Vector(px, back_y - 40.0, z), unreal.Rotator(pitch=0.0, yaw=-90.0, roll=0.0))
+        # Backs to the fore hull, flanking the room's centre line.
+        for i, px in enumerate((cx - 200.0, cx + 200.0)):
+            pod = actors.spawn_actor_from_class(pod_class, unreal.Vector(px, MAIN[3] - WALL_D - 74.0, z), unreal.Rotator(pitch=0.0, yaw=-90.0, roll=0.0))
             label(pod, f"CryoPod_{i + 1:02d}")
             state["pods"].append(pod)
         for i, (px, role) in enumerate(((MAIN[0] + 120.0, "MEDICAL"), (MAIN[0] + 120.0, "ENGINEERING"))):
@@ -1170,9 +1175,11 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         # four times life size with its pivot on top (bounds 856 x 322, 0 down to -600), so at
         # scale one it hung six metres through the deck below and sealed that deck's doorway with
         # its collision, and at quarter scale its floor trim sheet reads as a white slab.
-        place(K.table, (cx, cy - 150.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_TreatmentTable")
-        place(K.toolbox, (cx + 40.0, cy - 150.0, z + 92.0), (0, 0, -20.0), (0.9, 0.9, 0.9), f"D{deck:02d}_TraumaKit", collide=False)
-        place(K.lab_capsule, (MAIN[1] - 200.0, cy, z), (0, 0, 0), (0.6, 0.6, 0.6), f"D{deck:02d}_MedCapsule")
+        # The table against the corridor-side wall, clear of the door and the override panel; the
+        # capsule against the aft wall. Nothing stands in the middle of the bay but the crew.
+        place(K.table, (cx + 540.0, MAIN[2] + PARTITION + 70.0, z), (0, 0, 90.0), (1, 1, 1), f"D{deck:02d}_TreatmentTable")
+        place(K.toolbox, (cx + 580.0, MAIN[2] + PARTITION + 70.0, z + 92.0), (0, 0, -20.0), (0.9, 0.9, 0.9), f"D{deck:02d}_TraumaKit", collide=False)
+        place(K.lab_capsule, (MAIN[1] - PARTITION - 50.0, cy, z), (0, 0, 0), (0.6, 0.6, 0.6), f"D{deck:02d}_MedCapsule")
         start = actors.spawn_actor_from_class(unreal.PlayerStart, unreal.Vector(cx - 250.0, back_y - 300.0, z + 100.0), unreal.Rotator(pitch=0.0, yaw=90.0, roll=0.0))
         label(start, "PlayerStart_Casualty")
         start.set_editor_property("tags", [unreal.Name("CryoWakeStart"), unreal.Name("CorvetteShip")])
@@ -1293,10 +1300,20 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         "sensors": ("EmergencyOxygenCartridge", "FieldRepairKit"),
     }
     a, b = SUPPLIES.get(kind, (None, None))
+    # Supplies live on shelving against the corridor-side wall, not in the middle of the floor:
+    # a kit shelf unit under each, the pickup on its middle shelf.
+    def shelved_supply(item, x, tag):
+        y = MAIN[2] + PARTITION + 44.0
+        if K.rc_shelf:
+            # The shelf's origin is a corner (85 x 83 footprint): centre it on x, back to the wall.
+            place(K.rc_shelf, (x - 42.0, y - 41.0 + 41.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_SupplyShelf_{tag}")
+            supply(item, x, y + 12.0, z + 92.0, code)
+        else:
+            supply(item, x, y + 40.0, z, code)
     if a:
-        supply(a, MAIN[0] + 400.0, MAIN[2] + 300.0, z, code)
+        shelved_supply(a, MAIN[0] + 420.0 if kind != "cryo" else MAIN[0] + 400.0, "A")
     if b:
-        supply(b, MAIN[1] - 350.0, MAIN[2] + 300.0, z, code)
+        shelved_supply(b, MAIN[1] - 90.0 if kind == "cryo" else MAIN[1] - 330.0, "B")
     if kind in ("marine", "breach", "observation"):
         oxygen_canister(300.0, 800.0, z, code)
     furnish(deck, kind, z, BUILD_SEED)
