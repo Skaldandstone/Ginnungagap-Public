@@ -855,7 +855,15 @@ void ACoopSurvivalCharacter::UpdateSurvival(float DeltaTime, const FPhysicsEnvir
     const float IntegrityBonusFraction = FMath::Clamp(
         EquipmentBonuses.SuitIntegrityBonus / 100.0f + SkillSealBonus, 0.0f, 1.0f);
     const float EffectiveIntegrity = FMath::Clamp(InSuitIntegrity + IntegrityBonusFraction, 0.0f, 1.0f);
-    SuitIntegrity = FMath::Clamp(SuitIntegrity - HazardComponent->ComputePressureFailure(DeltaTime, EnvironmentState, EffectiveIntegrity), 0.0f, 1.0f);
+    // A sealed suit in vacuum is the point of the suit: a tear leaks slowly (one percent of the
+    // deficit a second, minutes to matter, patchable), and no suit at all means the bodysuit and
+    // the vacuum, which is what the locked doors are for. The raw model took the whole deficit
+    // every second and left a crew sealed at eighty percent suitless in five.
+    const float PressureFailure = HazardComponent->ComputePressureFailure(DeltaTime, EnvironmentState, EffectiveIntegrity);
+    if (bPressureOversuitEquipped)
+    {
+        SuitIntegrity = FMath::Clamp(SuitIntegrity - PressureFailure * 0.01f, 0.0f, 1.0f);
+    }
 
     // Training raises the stability the model sees rather than the displayed value, so a skilled
     // spacer resists tumbling without the HUD claiming they are steadier than they are.
@@ -864,12 +872,14 @@ void ACoopSurvivalCharacter::UpdateSurvival(float DeltaTime, const FPhysicsEnvir
     Stability = FMath::Clamp(Stability - HazardComponent->ComputeMicrogravityInstability(DeltaTime, EnvironmentState, EffectiveStability), 0.0f, 1.0f);
     if (StatusEffectComponent && HasAuthority())
     {
-        const float SuitProtection = FMath::Clamp(SuitIntegrity, 0.0f, 1.0f);
+        // Sealed and above half integrity, the suit keeps the atmosphere out entirely; below half
+        // the exposure climbs as the suit fails. Unsuited, everything gets in.
+        const float SuitExposure = !bPressureOversuitEquipped ? 1.0f
+            : FMath::Clamp((0.5f - FMath::Clamp(SuitIntegrity, 0.0f, 1.0f)) / 0.5f, 0.0f, 1.0f);
         const float SkillExposureMultiplier = SkillComponent
             ? SkillComponent->GetCostMultiplier(SkillEffects::ExposureResistance)
             : 1.0f;
-        StatusEffectComponent->ApplyEnvironmentalExposure(EnvironmentState,
-            FMath::Lerp(1.0f, 0.15f, SuitProtection) * SkillExposureMultiplier);
+        StatusEffectComponent->ApplyEnvironmentalExposure(EnvironmentState, SuitExposure * SkillExposureMultiplier);
     }
 
     if (SuitIntegrity <= 0.0f)
@@ -1353,7 +1363,25 @@ void ACoopSurvivalCharacter::OnRep_WristLamp()
 void ACoopSurvivalCharacter::UpdateWristLampVisuals()
 {
     const bool bLit = bWristLampOn && bPressureOversuitEquipped;
-    if (WristLamp) WristLamp->SetVisibility(bLit);
+    if (WristLamp)
+    {
+        // The beam goes where the crew look. In first person the arm hangs wherever the hold pose
+        // left it, so the lamp rides the camera (offset to the left wrist's side of the frame);
+        // in third person it sits on the wrist and throws the way the hand points.
+        if (bFirstPersonView && FirstPersonCamera && IsLocallyControlled())
+        {
+            WristLamp->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            WristLamp->SetRelativeLocation(FVector(18.0f, -16.0f, -14.0f));
+            WristLamp->SetRelativeRotation(FRotator::ZeroRotator);
+        }
+        else if (GetMesh())
+        {
+            WristLamp->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_l"));
+            WristLamp->SetRelativeLocation(FVector(-6.0f, 0.0f, 2.0f));
+            WristLamp->SetRelativeRotation(FRotator::ZeroRotator);
+        }
+        WristLamp->SetVisibility(bLit);
+    }
     // The housing shows whenever the suit is on; the lens only with the lamp lit.
     if (WristLampHousing) WristLampHousing->SetVisibility(bPressureOversuitEquipped);
     if (WristLampLens) WristLampLens->SetVisibility(bLit);
@@ -1783,7 +1811,8 @@ void ACoopSurvivalCharacter::SetFirstPersonView(bool bEnableFirstPerson)
     bFirstPersonView = bEnableFirstPerson;
     FirstPersonCamera->SetActive(bFirstPersonView);
     ThirdPersonCamera->SetActive(!bFirstPersonView);
-    // The tool's mount depends on the view: re-seat it.
+    // The tool's mount and the lamp depend on the view: re-seat them.
+    UpdateWristLampVisuals();
     if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon()) { HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon()); }
     GetMesh()->SetOwnerNoSee(false);
     UpdateFirstPersonHeadVisibility();
