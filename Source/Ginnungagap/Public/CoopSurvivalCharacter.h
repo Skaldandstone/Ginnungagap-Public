@@ -174,6 +174,11 @@ public:
     /** A one-shot body gesture (a door pushed, a panel pressed): a clip on the default slot, over whatever the body is doing. */
     void PlayGesture(const TCHAR* ClipPath, float Rate = 1.0f);
 
+    /** Inside a debris field (a count, fields can touch): boots off, push off, drift the gaps. */
+    void SetInDebrisField(bool bInside) { DebrisFieldsInside = FMath::Max(0, DebrisFieldsInside + (bInside ? 1 : -1)); }
+    bool IsInDebrisField() const { return DebrisFieldsInside > 0; }
+    int32 DebrisFieldsInside = 0;
+
     void ToggleWristLamp();
     void SetWristLampOn(bool bOn);
     bool IsWristLampOn() const { return bWristLampOn; }

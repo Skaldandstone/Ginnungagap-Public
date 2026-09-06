@@ -757,6 +757,13 @@ void USurvivalHUDWidget::RefreshAllStats()
         else
         {
             // Zero-g. The boots are the suit's: without it there is nothing to switch on.
+            if (OwningCharacter->IsInDebrisField() && OwningCharacter->bPressureOversuitEquipped)
+            {
+                Footing = OwningCharacter->AreMagneticBootsEnabled()
+                    ? TEXT("DEBRIS FIELD  //  NO FLOOR TO WALK: BOOTS OFF [M], PUSH OFF THE WALLS [SPACE]")
+                    : TEXT("DEBRIS FIELD  //  ADRIFT: PUSH OFF [SPACE], THREAD THE GAPS, BOOTS ON [M] BEYOND");
+            }
+            else
             Footing = !OwningCharacter->bPressureOversuitEquipped ? TEXT("ZERO-G  //  NO SUIT, NO BOOTS")
                 : FString::Printf(TEXT("ZERO-G  //  MAG BOOTS %s  [M]  //  LAMP %s  [L]"), OwningCharacter->AreMagneticBootsEnabled() ? TEXT("ON") : TEXT("OFF"),
                     OwningCharacter->IsWristLampOn() ? TEXT("ON") : TEXT("OFF"));

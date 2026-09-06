@@ -32,6 +32,8 @@
 #include "Activities/WeldableBulkheadDoor.h"
 #include "Activities/PlayerActivitySource.h"
 #include "CoopSurvivalCharacter.h"
+#include "Obstructions/DebrisField.h"
+#include "Components/BoxComponent.h"
 #include "Inventory/InventoryItemPickup.h"
 #include "LevelSetup/QuickDemoMissionDirector.h"
 #include "LevelSetup/QuickDemoOpeningSequence.h"
@@ -549,6 +551,27 @@ bool FSurveyWalk::Update()
 				if (bDoorOpened)
 				{
 					LastMoveCheckAt = Now; LastMoveCheckLocation = At;
+					UAIBlueprintHelperLibrary::SimpleMoveToLocation(PC, Goal);
+					return false;
+				}
+				// A debris field is meant to stop a walker: a player takes the boots off and floats
+				// it. The survey crosses to the far end and notes it, and it is not a snag.
+				bool bFloated = false;
+				for (TActorIterator<ADebrisField> It(World); It; ++It)
+				{
+					if (It->Volume && FVector::Dist(It->GetActorLocation(), At) < It->Volume->GetScaledBoxExtent().Size() + 220.0f)
+					{
+						const FVector Out = It->FarEnd(At);
+						Findings.Add(FString::Printf(TEXT("Debris field %s at %s (deck %d) on the way to %s: no cut, no bypass; boots off and float the gaps (the survey crossed to %s)."), *It->GetActorNameOrLabel(), *Compact(It->GetActorLocation()), DeckOf(At.Z), *Leg.Name, *Compact(Out)));
+						Pawn->SetBase(static_cast<UPrimitiveComponent*>(nullptr), NAME_None);
+						Pawn->SetActorLocation(Out + FVector(0.0f, 0.0f, 98.0f), false, nullptr, ETeleportType::TeleportPhysics);
+						bFloated = true;
+						break;
+					}
+				}
+				if (bFloated)
+				{
+					LastMoveCheckAt = Now; LastMoveCheckLocation = Pawn->GetActorLocation();
 					UAIBlueprintHelperLibrary::SimpleMoveToLocation(PC, Goal);
 					return false;
 				}

@@ -16,7 +16,7 @@ ROOMS = {"Main": (0.0, 1500.0, 1000.0, 1800.0), "Second": (1500.0, 2400.0, 1000.
          "Service": (1400.0, 2400.0, 0.0, 600.0), "Corridor": (0.0, 2400.0, 600.0, 1000.0), "Trunk": (0.0, 1400.0, 0.0, 600.0)}
 STRUCTURE = ("Wall", "Floor", "Ceiling", "Door", "Rail", "Pipe", "Ramp", "Light", "Practical", "Sign", "Fixture", "Lamp", "Beacon",
              "NavMesh", "Partition", "Plate", "Frame", "Hazard", "Smoke", "Exposure", "Sky", "Landing", "Grate", "Hull", "Deck", "Trim", "Lintel", "Hang", "Cable",
-             "Fore", "Aft", "Port", "Stbd", "Pillar", "Ceiling")
+             "Fore", "Aft", "Port", "Stbd", "Pillar", "Ceiling", "Lane", "Head", "Foot", "Airlock", "Crawl", "Collapse", "Supply_")
 
 unreal.EditorLoadingAndSavingUtils.load_map(MAP)
 props = []

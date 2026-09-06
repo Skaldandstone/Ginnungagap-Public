@@ -52,6 +52,14 @@ rides the camera in first. Below sixty percent suit integrity the chest seam ven
 the worse it gets, until it is patched. Half the seeded room collapses are crawled under, on hands
 and knees in third person; the rest are cut or squeezed.
 
+## Debris fields
+
+Three corridors (decks 2, 4 and 9) are choked with collapsed structure that cannot be cut or
+bypassed: three curtains of wreckage, each with one gap about 1.3 m across in a different corner,
+so the way through rises, drops and rises again. There is no floor to walk. Boots off (M), push
+off a wall (Space, after touching it) and drift the gaps, Newtonian: nothing slows you but the
+next wall. Boots back on beyond. The HUD says so while you are in one.
+
 ## The chain
 
 1. **Casualty station (deck 3).** The ship is dead: no drive, no gravity. You wake inside the

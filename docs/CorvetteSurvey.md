@@ -1,6 +1,6 @@
 # Corvette survey
 
-Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 11:40 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
+Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 13:30 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
 
 ## The walk
 
@@ -31,7 +31,7 @@ Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 11:40 from `/G
 
 - Blocked: locked door CVT_Door_CVT-D03 at (1050, 1000, 840) (deck 3) on the way to workshop bench (vacuum beyond: suit up, then override from the panel); the override panel releases it.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 3) on the way to workshop bench; cut through with the tool.
-- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Blocked: no complete path from (1239, 1472, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Snag: stuck at (799, 998, 2678) (deck 7) on the way to side: CVT_Door_CVT-D07, 1.3 m short, against nothing solid (a navmesh or path-following stall).
 
@@ -81,7 +81,6 @@ What each interactable is made of. A station with a static mesh and no skeletal 
 | CVT_Supply_EmergencyOxygenCartridge_D11 | InventoryItemPickup | 11 | (400, 1300, 4306) | static prop | SM_OxygenTank_B | pickup |
 | CVT_Supply_FieldRepairKit_D11 | InventoryItemPickup | 11 | (1150, 1300, 4306) | static prop | SM_Toolbox | pickup |
 | CVT_TrunkBarrier | ObstructionBarrier | 4 | (230, 345, 1450) | static prop | SM_Ceiling_HB_A | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
-| CVT_D04_CorridorTray | ObstructionBarrier | 4 | (700, 800, 1450) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
 | CVT_PlenumCrawl | ObstructionBarrier | 5 | (1550, 510, 1880) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
 | CVT_D06_RoomCollapse | ObstructionBarrier | 6 | (1540, 1240, 2310) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
 | CVT_D06_CorridorTray | ObstructionBarrier | 6 | (700, 800, 2310) | static prop | SM_AirDuct_Mid | obstruction: cut/squeeze verbs, no cut or crawl animation on the barrier |
@@ -110,22 +109,23 @@ Also aboard: 38 bulkhead doors (sliding leaves animate, sound on open/close), 2 
 
 | Floating prop | Class | Deck | Where | Mesh | Under it (cm) | Nearest wall (cm) |
 |---------------|-------|------|-------|------|---------------|-------------------|
-| (0 floating props in all) | | | | | | |
+| CVT_D09_Debris_0_3 | StaticMeshActor | 10 | (1700, 932, 3655) | Cube | 13 | 109 |
+| (1 floating props in all) | | | | | | |
 
-Figures at the end of the walk; the crew stands at (1174, 1503, 4398).
+Figures at the end of the walk; the crew stands at (1173, 1502, 4398).
 | Figure | Class | Deck | Where | Mesh | Attached to |
 |--------|-------|------|-------|------|-------------|
 | CVT_SuitStation_02 | QuickDemoSuitStation | 3 | (175, 1600, 864) | SK_SpaceMarshal_Manny | nothing |
-| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1174, 1503, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
-| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1174, 1503, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1173, 1502, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1173, 1502, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
 
 ## Next work drawn from this survey
 
-- 62 activity stations are static props with a text prompt: each wants a purpose-built asset with an animation for its activity (panel opening, lever, weld arc, console boot).
+- 61 activity stations are static props with a text prompt: each wants a purpose-built asset with an animation for its activity (panel opening, lever, weld arc, console boot).
 - 16 placed meshes render with the engine default material (grey, reads as collision).
-- Floating props: (0 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
+- Floating props: (1 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
 - Blocked: locked door CVT_Door_CVT-D03 at (1050, 1000, 840) (deck 3) on the way to workshop bench (vacuum beyond: suit up, then override from the panel); the override panel releases it.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 3) on the way to workshop bench; cut through with the tool.
-- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_TrunkBarrier (Buckled trunk frame, 14.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Blocked: no complete path from (1239, 1472, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Every snag, penetration and floor gap above is a place to stand in the editor and look.

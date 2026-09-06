@@ -250,6 +250,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGinnungagapCorvetteRoutesTest,
 bool FGinnungagapCorvetteRoutesTest::RunTest(const FString& Parameters)
 {
 	AutomationOpenMap(CorvetteRoute::MapPath());
+	// A checkpoint left by another test would resume the crew mid-ship; this starts from the pod.
+	UGameplayStatics::DeleteGameInSlot(TEXT("GinnungagapShipCheckpoint"), 0);
 	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
 	ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
 	ADD_LATENT_AUTOMATION_COMMAND(FAssertCorvetteRoutes(this));

@@ -132,7 +132,7 @@ def label(actor, text):
     return actor
 
 
-def place(mesh, location, rotation=(0.0, 0.0, 0.0), scale=(1.0, 1.0, 1.0), name="Kit", collide=True):
+def place(mesh, location, rotation=(0.0, 0.0, 0.0), scale=(1.0, 1.0, 1.0), name="Kit", collide=True, nav=True):
     """A static mesh actor from a Fab mesh, with the mesh's own collision (there is no greybox)."""
     if not mesh:
         return None
@@ -144,6 +144,8 @@ def place(mesh, location, rotation=(0.0, 0.0, 0.0), scale=(1.0, 1.0, 1.0), name=
     if not collide:
         comp.set_editor_property("use_default_collision", False)
         comp.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
+    if not nav:
+        comp.set_editor_property("can_ever_affect_navigation", False)
     actor.set_actor_scale3d(unreal.Vector(*scale))
     actor.set_editor_property("tags", [unreal.Name("CorvetteKit")])
     return label(actor, name)
@@ -662,6 +664,8 @@ def build_deck(deck, name, kind, bulkhead_class, state):
     spawn_room_light(f"{code}-T", 550.0, 450.0, z, cool, 0.0, radius=900.0)
     place(K.lamp, (cx, cy, ceiling_under - 8.0), (0, 0, 90.0), (0.8, 1.0, 1.0), f"D{deck:02d}_MainLamp", collide=False)
     service_runs(deck, z)
+    if deck in DEBRIS_FIELD_DECKS:
+        debris_field(deck, z, DEBRIS_FIELD_DECKS[deck], BUILD_SEED)
     kit_light(cx, cy, ceiling_under, f"{deck:02d}", 0)
     kit_light((SECOND[0] + SECOND[1]) * 0.5, cy, ceiling_under, f"{deck:02d}", 1)
     # Practicals: dim amber everywhere, the casualty station brighter and cooler (it is the bay
@@ -884,6 +888,63 @@ def spawn_ambient(cue_name, x, y, z, code, volume=0.35, radius=1400.0):
     return sound
 
 
+DEBRIS_FIELD_DECKS = {2: 1000.0, 4: 1100.0, 9: 1700.0}   # deck: corridor x where the wreckage starts
+
+
+def debris_field(deck, z, x0, seed):
+    """Wreckage the crew cannot cut or bypass: three curtains of collapsed structure across the
+    corridor, each leaving one gap of about 1.3 m in a different corner, so the way through winds
+    up, across and down. Nothing to walk on through it: boots off, push off the walls, drift the
+    gaps (God of War's wall squeezes, but in three dimensions). Blockers are engine cubes in kit
+    metal that leave the navmesh alone (the walkers in the tests cross by the field's volume);
+    kit ducts, pipes and cable masses dress them so it reads as a collapse, not a wall of boxes."""
+    rng = random.Random(seed * 48611 + deck * 7)
+    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
+    metal = unreal.load_asset("/Game/Modular_Scifi_Mechanic_Base/Material/MI/MI_Metal_09")
+    y0, y1 = CORRIDOR[2] + WALL_D, CORRIDOR[3] - WALL_D
+    h = 300.0
+    gap = 130.0
+    name = f"D{deck:02d}_Debris"
+    # The three gaps: right-high, left-low, middle-high (a rise, a drop, a rise), jittered.
+    gaps = [(y1 - gap * 0.5 - 30.0, z + h - gap * 0.5 - 20.0), (y0 + gap * 0.5 + 30.0, z + gap * 0.5 + 20.0), ((y0 + y1) * 0.5 + rng.uniform(-60, 60), z + h - gap * 0.5 - 40.0)]
+    for i, (gy, gz) in enumerate(gaps):
+        x = x0 + i * 150.0
+        depth = 40.0
+        def block(cy, cz, w, hh, j):
+            a = actors.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(x, cy, cz), unreal.Rotator(pitch=0.0, yaw=0.0, roll=rng.uniform(-6, 6)))
+            c = a.static_mesh_component
+            c.set_static_mesh(cube)
+            c.set_material(0, metal)
+            c.set_mobility(unreal.ComponentMobility.STATIC)
+            c.set_editor_property("can_ever_affect_navigation", False)
+            a.set_actor_scale3d(unreal.Vector(depth / 100.0, w / 100.0, hh / 100.0))
+            a.set_editor_property("tags", [unreal.Name("CorvetteDebris"), unreal.Name(f"D{deck:02d}")])
+            label(a, f"{name}_{i}_{j}")
+        # Below the gap, above it, and the two sides: the whole cross-section but the gap.
+        bottom_h = (gz - gap * 0.5) - z
+        if bottom_h > 8.0:
+            block((y0 + y1) * 0.5, z + bottom_h * 0.5, y1 - y0, bottom_h, 0)
+        top_h = (z + h) - (gz + gap * 0.5)
+        if top_h > 8.0:
+            block((y0 + y1) * 0.5, gz + gap * 0.5 + top_h * 0.5, y1 - y0, top_h, 1)
+        left_w = (gy - gap * 0.5) - y0
+        if left_w > 8.0:
+            block(y0 + left_w * 0.5, gz, left_w, gap, 2)
+        right_w = y1 - (gy + gap * 0.5)
+        if right_w > 8.0:
+            block(y1 - right_w * 0.5, gz, right_w, gap, 3)
+        # Dressing on the blockers, no collision: fallen ducts, pipes, cable masses at angles.
+        for k, mesh in enumerate([K.duct_run, K.pipe, rng.choice([m for m in K.cable_mass if m] or [None]), K.crate]):
+            if not mesh:
+                continue
+            place(mesh, (x + rng.uniform(-20, 20), rng.uniform(y0 + 60, y1 - 60), z + rng.uniform(20, h - 40)),
+                  (rng.uniform(-40, 40), rng.uniform(-30, 30), rng.uniform(0, 360)), (0.6, 0.6, 0.6) if mesh is K.duct_run else (0.8, 0.8, 0.8), f"{name}_{i}_Dress{k}", collide=False)
+    field = actors.spawn_actor_from_class(unreal.DebrisField, unreal.Vector(x0 + 150.0, (y0 + y1) * 0.5, z + h * 0.5), unreal.Rotator(pitch=0.0, yaw=0.0, roll=0.0))
+    field.get_editor_property("volume").set_box_extent(unreal.Vector(260.0, (y1 - y0) * 0.5, h * 0.5))
+    field.set_editor_property("tags", [unreal.Name("CorvetteDebrisField"), unreal.Name(f"D{deck:02d}")])
+    label(field, f"{name}_Field")
+
+
 def tile_run(mesh, x0, x1, y, z, name, yaw=0.0, scale=1.0):
     """A run of one mesh laid end to end along X from x0 to x1, by the mesh's own length."""
     if not mesh:
@@ -1025,7 +1086,7 @@ def damage(deck, kind, z, seed):
             place(K.crate, (SECOND[0] + 260.0 + i * 130.0, HATCH_Y + rng.uniform(-90.0, 90.0), z), (0, 0, rng.uniform(0, 360)), (0.8, 0.8, 0.8), f"{name}_CollapseCrate_{i}")
     # Every deck off the chain: one more thing in the corridor to work round, seeded so the
     # walk differs run to run: a fallen cable tray across the corridor (squeeze or cut).
-    if kind in ("security", "marine", "commons", "tactical", "observation", "sensors") and rng.random() < 0.6:
+    if kind in ("security", "marine", "commons", "tactical", "observation", "sensors") and deck not in DEBRIS_FIELD_DECKS and rng.random() < 0.6:
         bx = rng.choice((700.0, 1100.0, 1900.0))
         spawn_barrier(bx, (CORRIDOR[2] + CORRIDOR[3]) * 0.5, z, 0.0, f"{name}_CorridorTray", "Fallen cable tray", True, 6.0, 4.0, squeeze_entrapment=0.1,
                       visual=K.duct_run, visual_offset=(0.0, 0.0, -110.0), visual_rotation=(0.0, 12.0, 90.0), visual_scale=(0.7, 1.0, 1.0))
@@ -1043,7 +1104,9 @@ def dress_and_play(deck, kind, code, z, main, second, service, main_door, bulkhe
         place(K.generator, (SERVICE[0] + 160.0, SERVICE_LANDING[1] - 110.0, z), (0, 0, 0), (0.7, 0.7, 0.7), f"D{deck:02d}_ServiceGen")
         place(K.electric_box, (SERVICE[1] - 120.0, SERVICE_LANDING[1] - 90.0, z), (0, 0, 180.0), (1, 1, 1), f"D{deck:02d}_ServiceBox")
     else:
-        place(K.generator, (vx - 300.0, vy, z), (0, 0, 90.0), (0.8, 0.8, 0.8), f"D{deck:02d}_ServiceGen")
+        # Off the doorway line: the marine deck's plenum door is the crawl, and a generator in it
+        # was inside the collapsed duct.
+        place(K.generator, (vx - 120.0, SERVICE[2] + 160.0, z), (0, 0, 0.0), (0.8, 0.8, 0.8), f"D{deck:02d}_ServiceGen")
         place(K.electric_box, (vx + 250.0, SERVICE[2] + 90.0, z), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceBox")
     place(K.cable, (vx, SERVICE[2] + 70.0, z + 300.0), (0, 0, 0), (1.5, 1, 1), f"D{deck:02d}_ServiceCable", collide=False)
     place(K.duct, (vx + 450.0, vy, z + 330.0), (0, 0, 0), (1, 1, 1), f"D{deck:02d}_ServiceDuct", collide=False)
