@@ -492,6 +492,7 @@ void ACoopSurvivalCharacter::Tick(float DeltaTime)
     // velocity against the mounted weapon before the movement component advances this frame.
     UpdateWeaponTraversalCollision(DeltaTime);
     Super::Tick(DeltaTime);
+    UpdateFloatPose();
 
     if (bIsDead)
     {
@@ -1252,6 +1253,35 @@ bool ACoopSurvivalCharacter::FindMetalSurface(const FVector& Start, const FVecto
         return false;
     }
     return IsMetalSurface(OutHit);
+}
+
+void ACoopSurvivalCharacter::UpdateFloatPose()
+{
+    // Adrift: flying with no boots on the deck and no activity in hand. Lyra's fall loop at a
+    // third speed reads as a body hanging in the air; it stops the moment the boots take hold.
+    UAnimInstance* Anim = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+    const UCharacterMovementComponent* Movement = GetCharacterMovement();
+    const bool bAdrift = Anim && Movement && Movement->MovementMode == MOVE_Flying && !bMagneticBootsEnabled && !bIsDead
+        && !(PlayerActivityComponent && PlayerActivityComponent->IsActivityActive());
+    if (bAdrift && !bFloatPosePlaying)
+    {
+        if (!FloatLoop)
+        {
+            FloatLoop = LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Lyra/Jump/MM_Unarmed_Jump_Fall_Loop.MM_Unarmed_Jump_Fall_Loop"));
+        }
+        if (FloatLoop)
+        {
+            Anim->PlaySlotAnimationAsDynamicMontage(FloatLoop, TEXT("DefaultSlot"), 0.5f, 0.5f, 0.3f, 10000, -1.0f, 0.0f);
+            bFloatPosePlaying = true;
+        }
+    }
+    else if (!bAdrift && bFloatPosePlaying)
+    {
+        Anim->StopSlotAnimation(0.4f, TEXT("DefaultSlot"));
+        bFloatPosePlaying = false;
+        // The tool's hold pose was on the same slot; put it back if a tool is in hand.
+        if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon()) { HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon()); }
+    }
 }
 
 void ACoopSurvivalCharacter::ToggleWristLamp()

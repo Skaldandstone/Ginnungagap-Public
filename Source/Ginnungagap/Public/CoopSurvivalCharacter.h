@@ -601,6 +601,12 @@ private:
     UPROPERTY(ReplicatedUsing=OnRep_MagneticSuitState, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category="Zero G|Magnetic Suit")
     bool bMagneticBootsEnabled = false;
 
+    /** Adrift in zero-g the body hangs in a slow fall loop rather than standing on nothing. */
+    UPROPERTY(Transient)
+    TObjectPtr<class UAnimSequenceBase> FloatLoop;
+    bool bFloatPosePlaying = false;
+    void UpdateFloatPose();
+
     UPROPERTY(ReplicatedUsing=OnRep_MagneticSuitState, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category="Zero G|Magnetic Suit")
     bool bMagneticGlovesActive = false;
 

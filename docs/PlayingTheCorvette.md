@@ -53,6 +53,8 @@ power station and again on a checkpoint restore.
    the wrist lamp. The ship is dark: the pods' blue glow is the bay's only light until you carry
    your own, and nothing else aboard lights until the bus is back. The room's door is locked against the vacuum in the
    corridor beyond; the override panel by the door refuses anyone not sealed in a suit.
+   You come up facing that door, sealed; once the panel has released it, E opens it. Smoke hangs
+   in every room that still holds air.
 2. **Engineering control (deck 2).** Down the trunk (floating, or on the boots). The room's door
    lost its bus with the main power: the override panel in the corridor winds it open. The
    workshop bench hands over the tool.
