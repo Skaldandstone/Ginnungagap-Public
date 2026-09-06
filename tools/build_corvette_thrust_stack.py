@@ -977,8 +977,14 @@ def damage(deck, kind, z, seed):
     else:
         # Collapse: the second room's doorway half-blocked by a fallen duct section the crew cut
         # through or squeeze past, and a spill of crates behind it. The room stays reachable.
-        spawn_barrier(SECOND[0] + 40.0, HATCH_Y, z, 90.0, f"{name}_RoomCollapse", "Collapsed duct section", True, 6.0, 4.0, squeeze_entrapment=0.15,
-                      visual=K.duct_run, visual_offset=(0.0, 60.0, -120.0), visual_rotation=(0.0, 20.0, 80.0), visual_scale=(0.6, 1.0, 1.0))
+        # Half the collapses are crawled under, on hands and knees in third person; the rest are
+        # cut through or squeezed past.
+        if rng.random() < 0.5:
+            spawn_barrier(SECOND[0] + 40.0, HATCH_Y, z, 90.0, f"{name}_RoomCollapse", "Collapsed duct: crawl under", True, 0.0, 8.0, squeeze_entrapment=0.2,
+                          visual=K.duct_run, visual_offset=(0.0, 60.0, -120.0), visual_rotation=(0.0, 20.0, 80.0), visual_scale=(0.6, 1.0, 1.0), allow_cut=False)
+        else:
+            spawn_barrier(SECOND[0] + 40.0, HATCH_Y, z, 90.0, f"{name}_RoomCollapse", "Collapsed duct section", True, 6.0, 4.0, squeeze_entrapment=0.15,
+                          visual=K.duct_run, visual_offset=(0.0, 60.0, -120.0), visual_rotation=(0.0, 20.0, 80.0), visual_scale=(0.6, 1.0, 1.0))
         for i in range(2):
             place(K.crate, (SECOND[0] + 260.0 + i * 130.0, HATCH_Y + rng.uniform(-90.0, 90.0), z), (0, 0, rng.uniform(0, 360)), (0.8, 0.8, 0.8), f"{name}_CollapseCrate_{i}")
     # Every deck off the chain: one more thing in the corridor to work round, seeded so the

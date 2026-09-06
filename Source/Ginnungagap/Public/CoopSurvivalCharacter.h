@@ -626,6 +626,11 @@ private:
     bool bHasValidMagneticTarget = false;
     bool bThrusterFuelLockedOut = false;
 
+    /** A torn suit vents: a thin jet of vapour from the chest seam while integrity is down, thicker the worse it gets. */
+    UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
+    TObjectPtr<class UNiagaraComponent> SuitLeak;
+    bool bSuitLeakVenting = false;
+
     UPROPERTY(VisibleAnywhere, Category="Appearance|Pressure Suit")
     TObjectPtr<class USpotLightComponent> WristLamp;
 

@@ -538,7 +538,12 @@ bool FSurveyWalk::Update()
 					else if (It->bLocked)
 					{
 						Findings.Add(FString::Printf(TEXT("Blocked: locked door %s at %s (deck %d) on the way to %s (%s); the override panel releases it."), *It->GetActorNameOrLabel(), *Compact(It->GetActorLocation()), DeckOf(At.Z), *Leg.Name, *It->LockedReason.ToString()));
-						It->SetLocked(false); bDoorOpened = true;
+						It->SetLocked(false); It->Unseal(); bDoorOpened = true;
+					}
+					else if (It->bIsSealed)
+					{
+						// A sealed bulkhead: a player presses E; the walker does the same.
+						It->Unseal(); bDoorOpened = true;
 					}
 				}
 				if (bDoorOpened)

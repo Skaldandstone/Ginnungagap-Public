@@ -32,6 +32,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequenceBase.h"
@@ -261,6 +263,15 @@ ACoopSurvivalCharacter::ACoopSurvivalCharacter()
     LeftGloveMagnetLight = AddMagnetLight(TEXT("LeftGloveMagnetLight"), TEXT("hand_l"), FVector::ZeroVector, FLinearColor(1.0f, 0.08f, 0.025f), 950.0f, 105.0f);
     // The wrist lamp: a spot on the left forearm, thrown the way the hand points (a bone's X
     // runs down its length), off until the crew are in the suit and switch it on.
+    // The leak: the hideout pack's smoke, tiny, at the chest seam, off until the suit is torn.
+    static ConstructorHelpers::FObjectFinder<UNiagaraSystem> LeakSystem(TEXT("/Game/Scifi_Hideout/FX/NS_smoke.NS_smoke"));
+    SuitLeak = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SuitLeak"));
+    SuitLeak->SetupAttachment(GetMesh(), TEXT("spine_03"));
+    if (LeakSystem.Succeeded()) SuitLeak->SetAsset(LeakSystem.Object);
+    SuitLeak->SetRelativeLocation(FVector(14.0f, 6.0f, 0.0f));
+    SuitLeak->SetRelativeRotation(FRotator(0.0f, 0.0f, -70.0f));
+    SuitLeak->SetRelativeScale3D(FVector(0.12f, 0.12f, 0.12f));
+    SuitLeak->SetAutoActivate(false);
     WristLamp = CreateDefaultSubobject<USpotLightComponent>(TEXT("WristLamp"));
     WristLamp->SetupAttachment(GetMesh(), TEXT("hand_l"));
     WristLamp->SetRelativeLocation(FVector(-6.0f, 0.0f, 2.0f));
@@ -438,9 +449,21 @@ void ACoopSurvivalCharacter::HandleMountedWeaponChanged(AShipboardWeapon* Weapon
     UAnimInstance* Anim = GetMesh()->GetAnimInstance();
     if (Weapon)
     {
-        WeaponMountComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
-        WeaponMountComponent->SetRelativeLocation(HandGripLocation);
-        WeaponMountComponent->SetRelativeRotation(HandGripRotation);
+        if (bFirstPersonView && FirstPersonCamera)
+        {
+            // In first person the body is not drawn and the arm's pose is nobody's business: the
+            // tool rides the camera, lower right, pointing down the view, the way the empty mount
+            // does. Third person hands it to the hand, where the hold pose carries it.
+            WeaponMountComponent->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            WeaponMountComponent->SetRelativeLocation(FVector(42.0f, 24.0f, -10.0f));
+            WeaponMountComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+        }
+        else
+        {
+            WeaponMountComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
+            WeaponMountComponent->SetRelativeLocation(HandGripLocation);
+            WeaponMountComponent->SetRelativeRotation(HandGripRotation);
+        }
         if (Anim && HoldAnimation)
         {
             // Held on the frame where the arm is out: a play rate of nearly nothing from that time.
@@ -1742,6 +1765,8 @@ void ACoopSurvivalCharacter::SetFirstPersonView(bool bEnableFirstPerson)
     bFirstPersonView = bEnableFirstPerson;
     FirstPersonCamera->SetActive(bFirstPersonView);
     ThirdPersonCamera->SetActive(!bFirstPersonView);
+    // The tool's mount depends on the view: re-seat it.
+    if (WeaponMountComponent && WeaponMountComponent->GetMountedWeapon()) { HandleMountedWeaponChanged(WeaponMountComponent->GetMountedWeapon()); }
     GetMesh()->SetOwnerNoSee(false);
     UpdateFirstPersonHeadVisibility();
 
@@ -2407,6 +2432,22 @@ USkeletalMesh* ACoopSurvivalCharacter::ResolvePrimaryOversuitMesh() const
 void ACoopSurvivalCharacter::UpdateSuitConditionVisuals()
 {
     const float DamageAmount = 1.0f - FMath::Clamp(SuitIntegrity, 0.0f, 1.0f);
+    // Venting below sixty percent, and visibly worse as it falls: the crew can see the leak they
+    // are losing air through, and where to patch.
+    if (SuitLeak)
+    {
+        const bool bVent = bPressureOversuitEquipped && !bIsDead && SuitIntegrity < 0.6f;
+        if (bVent != bSuitLeakVenting)
+        {
+            if (bVent) SuitLeak->Activate(true); else SuitLeak->Deactivate();
+            bSuitLeakVenting = bVent;
+        }
+        if (bVent)
+        {
+            const float Scale = FMath::Lerp(0.08f, 0.3f, FMath::Clamp((0.6f - SuitIntegrity) / 0.6f, 0.0f, 1.0f));
+            SuitLeak->SetRelativeScale3D(FVector(Scale));
+        }
+    }
     const float GrimeAmount = FMath::Clamp(DamageAmount * 0.65f + RadiationDoseSv * 0.025f, 0.0f, 1.0f);
     float BloomAmount = 0.0f;
     if (PathogenLoadComponent && PathogenLoadComponent->SubstrateQuality > 0.0f)
