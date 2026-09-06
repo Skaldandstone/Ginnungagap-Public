@@ -660,6 +660,7 @@ def build_deck(deck, name, kind, bulkhead_class, state):
         place(K.lamp, (lx, 800.0, ceiling_under - 8.0), (0, 0, 0), (0.6, 1.0, 1.0), f"D{deck:02d}_CorridorLamp_{i}", collide=False)
     spawn_room_light(f"{code}-T", 550.0, 450.0, z, cool, 0.0, radius=900.0)
     place(K.lamp, (cx, cy, ceiling_under - 8.0), (0, 0, 90.0), (0.8, 1.0, 1.0), f"D{deck:02d}_MainLamp", collide=False)
+    service_runs(deck, z)
     kit_light(cx, cy, ceiling_under, f"{deck:02d}", 0)
     kit_light((SECOND[0] + SECOND[1]) * 0.5, cy, ceiling_under, f"{deck:02d}", 1)
     # Practicals: dim amber everywhere, the casualty station brighter and cooler (it is the bay
@@ -880,6 +881,29 @@ def spawn_ambient(cue_name, x, y, z, code, volume=0.35, radius=1400.0):
     audio.set_editor_property("attenuation_overrides", att)
     sound.set_editor_property("tags", [unreal.Name("CorvetteAmbient"), unreal.Name(code)])
     return sound
+
+
+def tile_run(mesh, x0, x1, y, z, name, yaw=0.0, scale=1.0):
+    """A run of one mesh laid end to end along X from x0 to x1, by the mesh's own length."""
+    if not mesh:
+        return
+    b = mesh.get_bounding_box()
+    length = (b.max.x - b.min.x) * scale
+    if length <= 1.0:
+        return
+    n = max(1, int((x1 - x0) / length))
+    for i in range(n):
+        place(mesh, (x0 + i * length - b.min.x * scale, y, z), (0.0, 0.0, yaw), (scale, scale, scale), f"{name}_{i}", collide=False)
+
+
+def service_runs(deck, z):
+    """Pipe and cable runs under the corridor ceiling along its aft wall, and down the trunk's
+    hull wall: the ship's plumbing where a ship keeps it, so the corridors read as service
+    space and not as boxes with doors."""
+    name = f"D{deck:02d}"
+    tile_run(K.pipe, CORRIDOR[0] + 120.0, CORRIDOR[1] - 120.0, CORRIDOR[3] - 28.0, z + 262.0, f"{name}_CorridorPipe")
+    tile_run(K.pipe, CORRIDOR[0] + 120.0, CORRIDOR[1] - 120.0, CORRIDOR[3] - 28.0, z + 238.0, f"{name}_CorridorPipeB", scale=0.7)
+    tile_run(K.pipe, TRUNK[0] + 100.0, TRUNK[1] - 100.0, TRUNK[2] + 26.0, z + 262.0, f"{name}_TrunkPipe")
 
 
 def kit_light(x, y, z_ceiling_under, code, i, colour=None, intensity=90.0):

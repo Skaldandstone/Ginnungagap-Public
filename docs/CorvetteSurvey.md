@@ -1,6 +1,6 @@
 # Corvette survey
 
-Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 03:35 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
+Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 04:05 from `/Game/Assets/Maps/ShipProduction/L_Corvette_ThrustStack`. The character was driven on foot up the objective chain, back down it, and out to every side station; everything below was met on the way. Regenerate with the test, do not edit by hand.
 
 ## The walk
 
@@ -17,7 +17,7 @@ Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 03:35 from `/G
 | 9 | back to the workshop bench | 2 | (1300, 1400, 522) | 34.2 | 16 | 0 | arrived |
 | 10 | back to the suit rack | 3 | (120, 1200, 960) | 44.0 | 14 | 0 | arrived |
 | 11 | side: CVT_BatteryRecovery | 1 | (1410, 1200, 41) | 58.9 | 15 | 0 | arrived |
-| 12 | side: CVT_ArmoryOverride | 4 | (93, 1600, 1331) | 75.6 | 19 | 0 | arrived |
+| 12 | side: CVT_ArmoryOverride | 4 | (93, 1600, 1331) | 75.5 | 19 | 0 | arrived |
 | 13 | side: CVT_SuitPatching | 5 | (93, 1250, 1761) | 34.4 | 18 | 0 | arrived |
 | 14 | side: CVT_TurretService | 5 | (1410, 1200, 1761) | 9.3 | 1 | 0 | arrived |
 | 15 | side: CVT_ScrubberService | 6 | (1410, 1600, 2191) | 43.2 | 13 | 0 | arrived |
@@ -31,9 +31,9 @@ Written by `Ginnungagap.Survey.CorvetteWalkthrough` on 2026-09-06 03:35 from `/G
 
 - Blocked: locked door CVT_Door_CVT-D03 at (1050, 1000, 840) (deck 3) on the way to workshop bench (vacuum beyond: suit up, then override from the panel); the override panel releases it.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 3) on the way to workshop bench; cut through with the tool.
-- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
-- Timeout: breach patch not reached in 75 s; the character was at (517, 247, 2127) (deck 6), 13.1 m short.
-- Blocked: no complete path from (1239, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Timeout: breach patch not reached in 75 s; the character was at (503, 247, 2136) (deck 6), 13.1 m short.
+- Blocked: no complete path from (1240, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Snag: stuck at (797, 1002, 2678) (deck 7) on the way to side: CVT_Door_CVT-D07, 1.3 m short, against nothing solid (a navmesh or path-following stall).
 
 ## Asset audit
@@ -98,12 +98,12 @@ Also aboard: 38 bulkhead doors (sliding leaves animate, sound on open/close), 2 
 |---------------|-------|------|-------|------|---------------|-------------------|
 | (0 floating props in all) | | | | | | |
 
-Figures at the end of the walk; the crew stands at (1180, 1495, 4398).
+Figures at the end of the walk; the crew stands at (1180, 1494, 4398).
 | Figure | Class | Deck | Where | Mesh | Attached to |
 |--------|-------|------|-------|------|-------------|
 | CVT_SuitStation_02 | QuickDemoSuitStation | 3 | (175, 1600, 864) | SK_SpaceMarshal_Manny | nothing |
-| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1180, 1495, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
-| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1180, 1495, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace010 | BP_PlayerFace01_C | 11 | (1180, 1494, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
+| BP_PlayerFace011 | BP_PlayerFace01_C | 11 | (1180, 1494, 4308) | SKM_MHC_Face01_Ada_FaceMesh | BP_Player_Suit_Crew0 |
 
 ## Next work drawn from this survey
 
@@ -112,6 +112,6 @@ Figures at the end of the walk; the crew stands at (1180, 1495, 4398).
 - Floating props: (0 floating props in all): each wants a stand, a bracket or a move to the wall or deck.
 - Blocked: locked door CVT_Door_CVT-D03 at (1050, 1000, 840) (deck 3) on the way to workshop bench (vacuum beyond: suit up, then override from the panel); the override panel releases it.
 - Blocked: welded door CVT_Door_CVT-D07 at (750, 1000, 2560) (deck 3) on the way to workshop bench; cut through with the tool.
-- Blocked: no complete path from (1001, 1329, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
-- Blocked: no complete path from (1239, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1002, 1330, 528) to breach patch; nearest obstacle CVT_D04_CorridorTray (Fallen cable tray, 10.0 m from the path's end). A player cuts, squeezes or overrides here.
+- Blocked: no complete path from (1240, 1474, 2248) to side: CVT_Door_CVT-D07; nearest obstacle door CVT_Door_CVT-D07 (1.0 m from the path's end). A player cuts, squeezes or overrides here.
 - Every snag, penetration and floor gap above is a place to stand in the editor and look.
