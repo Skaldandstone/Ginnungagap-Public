@@ -14,7 +14,7 @@ You are the Engineer aboard a damaged interstellar ship. Power is unstable. The 
 
 Reach the machinery. Diagnose the fault. Finish the repair while listening for movement beyond the door. The quieter route may cost you more oxygen. The tool that fixes the problem may give you away.
 
-[Explore the pitch](documents/Ginnungagap-Public-Pitch.pdf) · [Read the project overview](documents/Ginnungagap-Project-Overview.pdf) · [Open the concept gallery](GALLERY.md)
+[Explore the pitch](documents/Ginnungagap-Public-Pitch.pdf) · [Read the project overview](documents/Ginnungagap-Project-Overview.pdf) · [Open the concept gallery](GALLERY.md) · [Demo video status](Demo%20video/README.md)
 
 ## Every repair exposes you.
 
